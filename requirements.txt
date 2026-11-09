@@ -1,5 +1,9 @@
-fastapi>=0.115,<1.0
-uvicorn[standard]>=0.30,<1.0
-sqlalchemy>=2.0,<3.0
-pydantic-settings>=2.0,<3.0
+fastapi>=0.115.0
+uvicorn[standard]>=0.30.0
+sqlalchemy>=2.0.0
+pydantic-settings>=2.0.0
 python-multipart>=0.0.9
+PyMuPDF>=1.24.0
+
+# Development / tests
+pytest>=8.0.0
