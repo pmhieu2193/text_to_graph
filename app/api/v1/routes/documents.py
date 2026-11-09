@@ -1,10 +1,27 @@
-from fastapi import APIRouter,Depends,HTTPException,Query
+from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
 from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.repositories.document_repository import DocumentRepository
 from app.schemas.document import DocumentListResponse,DocumentResponse,ChunkListResponse,ProcessResult
+from app.services.document_service import DocumentService
 from app.services.processing_service import DocumentProcessingService
+
+
 router=APIRouter(prefix='/documents',tags=['Documents'])
+
+@router.post(
+    "/upload",
+    response_model=DocumentResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Upload a PDF document",
+)
+async def upload_document(
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+):
+    service = DocumentService(db)
+    return await service.upload(file)
+
 @router.get('',response_model=DocumentListResponse)
 def list_documents(page:int=Query(1,ge=1),page_size:int=Query(20,ge=1,le=100),db:Session=Depends(get_db)):
     items,total=DocumentRepository(db).list(page,page_size);return dict(items=items,total=total,page=page,page_size=page_size)
