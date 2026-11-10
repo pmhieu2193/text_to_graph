@@ -1,16 +1,14 @@
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta, timezone
 
 from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
 
 from app.models.chunk import DocumentChunk
-
 from app.models.extraction import (
     ChunkExtractionRun,
     RawEntity,
     RawRelation,
 )
-
 from app.schemas.extraction import ExtractionPayload
 
 
@@ -20,29 +18,17 @@ class ExtractionRepository:
         self.db = db
 
     def list_chunks(self, document_id: str):
-
         stmt = (
             select(DocumentChunk)
-            .where(
-                DocumentChunk.document_id == document_id
-            )
-            .order_by(
-                DocumentChunk.chunk_index
-            )
+            .where(DocumentChunk.document_id == document_id)
+            .order_by(DocumentChunk.chunk_index)
         )
-
-        return list(
-            self.db.scalars(stmt).all()
-        )
+        return list(self.db.scalars(stmt).all())
 
     def get_run(self, chunk_id: str):
-
-        stmt = select(
-            ChunkExtractionRun
-        ).where(
+        stmt = select(ChunkExtractionRun).where(
             ChunkExtractionRun.chunk_id == chunk_id
         )
-
         return self.db.scalar(stmt)
 
     def mark_running(
@@ -52,18 +38,15 @@ class ExtractionRepository:
         provider: str,
         model: str,
     ):
-
         run = self.get_run(chunk_id)
 
         if run is None:
-
             run = ChunkExtractionRun(
                 document_id=document_id,
                 chunk_id=chunk_id,
                 provider=provider,
                 model_name=model,
             )
-
             self.db.add(run)
 
         run.provider = provider
@@ -76,7 +59,6 @@ class ExtractionRepository:
         run.completed_at = None
 
         self.db.commit()
-
         return run
 
     def mark_failed(
@@ -84,7 +66,6 @@ class ExtractionRepository:
         chunk_id: str,
         message: str,
     ):
-
         run = self.get_run(chunk_id)
 
         if run is None:
@@ -92,9 +73,7 @@ class ExtractionRepository:
 
         run.status = "FAILED"
         run.error_message = message[:2000]
-
         run.completed_at = datetime.now(timezone.utc)
-
         self.db.commit()
 
     def save_result(
@@ -105,87 +84,66 @@ class ExtractionRepository:
         model: str,
         payload: ExtractionPayload,
     ):
-
         try:
-
-            # Xóa kết quả cũ của chunk này.
-            # Chỉ thực hiện khi muốn ghi kết quả mới.
-
             self.db.execute(
-                delete(RawRelation).where(
-                    RawRelation.chunk_id == chunk_id
-                )
+                delete(RawRelation).where(RawRelation.chunk_id == chunk_id)
             )
 
             self.db.execute(
-                delete(RawEntity).where(
-                    RawEntity.chunk_id == chunk_id
-                )
+                delete(RawEntity).where(RawEntity.chunk_id == chunk_id)
             )
-
-            # Map local_id -> RawEntity ORM object.
 
             entity_map = {}
-
             entities = []
 
             for item in payload.entities:
+                aliases_list = (
+                    item.aliases
+                    if isinstance(item.aliases, list)
+                    else ([item.aliases] if item.aliases else [])
+                )
+                evidence_list = (
+                    item.evidence
+                    if isinstance(item.evidence, list)
+                    else ([item.evidence] if item.evidence else [])
+                )
 
                 entity = RawEntity(
                     document_id=document_id,
                     chunk_id=chunk_id,
-
                     local_id=item.local_id,
-
                     name=item.name,
+                    aliases=aliases_list,
                     entity_type=item.entity_type,
                     description=item.description,
-
-                    evidence=item.evidence,
+                    evidence=evidence_list,
                     confidence=item.confidence,
-
                     provider=provider,
                     model_name=model,
                 )
 
                 entities.append(entity)
-
                 entity_map[item.local_id] = entity
 
             self.db.add_all(entities)
-
-            # Flush để SQLAlchemy thực thi INSERT và sinh UUID.
-            # Chưa commit transaction.
-
             self.db.flush()
 
             relations = []
 
             for item in payload.relations:
-
-                subject = entity_map[
-                    item.subject_local_id
-                ]
-
-                obj = entity_map[
-                    item.object_local_id
-                ]
+                subject = entity_map[item.subject_local_id]
+                obj = entity_map[item.object_local_id]
 
                 relation = RawRelation(
                     document_id=document_id,
                     chunk_id=chunk_id,
-
                     local_id=item.local_id,
-
                     subject_entity_id=subject.id,
                     object_entity_id=obj.id,
-
                     relation_type=item.relation_type,
                     description=item.description,
-
-                    evidence=item.evidence,
+                    evidence=item.evidence if isinstance(item.evidence, str) else str(item.evidence),
                     confidence=item.confidence,
-
                     provider=provider,
                     model_name=model,
                 )
@@ -195,28 +153,21 @@ class ExtractionRepository:
             self.db.add_all(relations)
 
             run = self.get_run(chunk_id)
-
             run.status = "COMPLETED"
             run.error_message = None
             run.completed_at = datetime.now(timezone.utc)
 
-            # Commit toàn bộ kết quả của chunk trong một transaction.
-
             self.db.commit()
 
         except Exception:
-
             self.db.rollback()
             raise
 
     def get_document_result(self, document_id: str):
-
         entities = list(
             self.db.scalars(
                 select(RawEntity)
-                .where(
-                    RawEntity.document_id == document_id
-                )
+                .where(RawEntity.document_id == document_id)
                 .order_by(
                     RawEntity.chunk_id,
                     RawEntity.name,
@@ -227,9 +178,7 @@ class ExtractionRepository:
         relations = list(
             self.db.scalars(
                 select(RawRelation)
-                .where(
-                    RawRelation.document_id == document_id
-                )
+                .where(RawRelation.document_id == document_id)
                 .order_by(
                     RawRelation.chunk_id,
                     RawRelation.relation_type,
@@ -240,12 +189,8 @@ class ExtractionRepository:
         runs = list(
             self.db.scalars(
                 select(ChunkExtractionRun)
-                .where(
-                    ChunkExtractionRun.document_id == document_id
-                )
-                .order_by(
-                    ChunkExtractionRun.started_at
-                )
+                .where(ChunkExtractionRun.document_id == document_id)
+                .order_by(ChunkExtractionRun.started_at)
             ).all()
         )
 
@@ -253,7 +198,6 @@ class ExtractionRepository:
 
     @staticmethod
     def is_stale_running(run, stale_minutes: int = 30) -> bool:
-
         if run is None or run.status != "RUNNING":
             return False
 
@@ -262,11 +206,8 @@ class ExtractionRepository:
 
         started_at = run.started_at
 
-        # SQLite có thể trả datetime không có timezone.
         if started_at.tzinfo is None:
-            started_at = started_at.replace(
-                tzinfo=timezone.utc
-            )
+            started_at = started_at.replace(tzinfo=timezone.utc)
 
         deadline = datetime.now(timezone.utc) - timedelta(
             minutes=stale_minutes

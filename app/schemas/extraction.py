@@ -1,119 +1,84 @@
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field
 
 
-class ExtractedEntity(BaseModel):
-    model_config = ConfigDict(
-        extra="forbid",
-        str_strip_whitespace=True,
+# ==========================================
+# 1. SCHEMAS DÙNG CHO LLM EXTRACTION PAYLOAD
+# ==========================================
+
+class EntityItem(BaseModel):
+    local_id: str
+    name: str
+    aliases: list[str] = Field(
+        default_factory=list,
+        description="Danh sách các bí danh, tên viết tắt hoặc danh xưng khác của thực thể."
     )
-
-    local_id: str = Field(min_length=1, max_length=80)
-    name: str = Field(min_length=1, max_length=500)
-    entity_type: str = Field(min_length=1, max_length=100)
-
-    description: str | None = Field(
-        default=None,
-        max_length=2000,
+    entity_type: str
+    description: str | None = None
+    evidence: list[str] = Field(
+        default_factory=list,
+        description="Danh sách các câu/đoạn trích nguyên văn từ nguồn liên quan đến thực thể."
     )
-
-    evidence: str = Field(
-        min_length=1,
-        max_length=3000,
-    )
-
-    confidence: float = Field(
-        default=0.8,
-        ge=0.0,
-        le=1.0,
-    )
+    confidence: float = 1.0
 
 
-class ExtractedRelation(BaseModel):
-    model_config = ConfigDict(
-        extra="forbid",
-        str_strip_whitespace=True,
-    )
-
-    local_id: str = Field(min_length=1, max_length=80)
-
-    subject_local_id: str = Field(
-        min_length=1,
-        max_length=80,
-    )
-
-    object_local_id: str = Field(
-        min_length=1,
-        max_length=80,
-    )
-
-    relation_type: str = Field(
-        min_length=1,
-        max_length=120,
-    )
-
-    description: str | None = Field(
-        default=None,
-        max_length=2000,
-    )
-
-    evidence: str = Field(
-        min_length=1,
-        max_length=3000,
-    )
-
-    confidence: float = Field(
-        default=0.8,
-        ge=0.0,
-        le=1.0,
-    )
+class RelationItem(BaseModel):
+    local_id: str
+    subject_local_id: str
+    object_local_id: str
+    relation_type: str
+    description: str | None = None
+    evidence: str
+    confidence: float = 1.0
 
 
 class ExtractionPayload(BaseModel):
-    model_config = ConfigDict(extra="forbid")
+    entities: list[EntityItem] = Field(default_factory=list)
+    relations: list[RelationItem] = Field(default_factory=list)
 
-    entities: list[ExtractedEntity] = Field(
-        default_factory=list,
-        max_length=300,
-    )
 
-    relations: list[ExtractedRelation] = Field(
-        default_factory=list,
-        max_length=600,
-    )
+# ==========================================
+# 2. SCHEMAS DÙNG CHO API RESPONSE (FASTAPI)
+# ==========================================
 
-    @model_validator(mode="after")
-    def validate_local_references(self):
-        entity_ids = [
-            entity.local_id
-            for entity in self.entities
-        ]
+class RawEntityResponse(BaseModel):
+    id: str
+    document_id: str
+    chunk_id: str
+    local_id: str
+    name: str
+    aliases: list[str] = Field(default_factory=list)
+    entity_type: str
+    description: str | None = None
+    evidence: list[str] = Field(default_factory=list)
+    confidence: float
+    provider: str
+    model_name: str
 
-        relation_ids = [
-            relation.local_id
-            for relation in self.relations
-        ]
+    model_config = ConfigDict(from_attributes=True)
 
-        if len(entity_ids) != len(set(entity_ids)):
-            raise ValueError(
-                "Entity local_id must be unique within a chunk."
-            )
 
-        if len(relation_ids) != len(set(relation_ids)):
-            raise ValueError(
-                "Relation local_id must be unique within a chunk."
-            )
+class RawRelationResponse(BaseModel):
+    id: str
+    document_id: str
+    chunk_id: str
+    local_id: str
+    subject_entity_id: str
+    object_entity_id: str
+    relation_type: str
+    description: str | None = None
+    evidence: str
+    confidence: float
+    provider: str
+    model_name: str
 
-        known_entity_ids = set(entity_ids)
+    model_config = ConfigDict(from_attributes=True)
 
-        for relation in self.relations:
-            if relation.subject_local_id not in known_entity_ids:
-                raise ValueError(
-                    f"Unknown subject: {relation.subject_local_id}"
-                )
 
-            if relation.object_local_id not in known_entity_ids:
-                raise ValueError(
-                    f"Unknown object: {relation.object_local_id}"
-                )
+class DocumentExtractionResultResponse(BaseModel):
+    document_id: str
+    entity_count: int
+    relation_count: int
+    entities: list[RawEntityResponse] = Field(default_factory=list)
+    relations: list[RawRelationResponse] = Field(default_factory=list)
 
-        return self
+    model_config = ConfigDict(from_attributes=True)

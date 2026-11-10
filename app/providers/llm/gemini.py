@@ -9,9 +9,9 @@ from app.core.config import settings
 from app.providers.llm.base import (
     LLMConfigurationError,
     LLMOutputError,
-    LLMQuotaError,
     LLMPermanentError,
     LLMProvider,
+    LLMQuotaError,
     LLMTemporaryError,
 )
 from app.schemas.extraction import ExtractionPayload
@@ -201,13 +201,13 @@ Bạn là hệ thống trích xuất đồ thị tri thức từ văn bản ti�
 
 NHIỆM VỤ:
 
-1. Trích xuất các thực thể thực sự có ý nghĩa và quan trọng trong văn bản.
+1. Chỉ trích xuất các thực thể danh từ riêng, đối tượng cụ thể và có ý nghĩa phù hợp. 
 2. Trích xuất các mối quan hệ được đề cập rõ ràng.
-3. Hãy gom cụm thực thể trùng lặp và quan hệ của chúng nếu có thể (ví dụ: cụm "Hà Nội", "Thủ đô Hà Nội" và "TP Hà Nội" hoặc cụm "Bác Hồ" và "Hồ Chí Minh" thì mỗi cụm có thể được gom thành một thực thể đại diện duy nhất kế thừa các quan hệ trỏ đến hoặc đi).
+3. Hãy gom cụm và chuẩn hoá thực thể. Nếu văn bản có nhiều cách gọi cho cùng một đối tượng cụ thể (ví dụ: "Hà Nội", "Thủ đô Hà Nội" có thể gom thành 1 đại diện duy nhất nếu chỉ cùng 1 địa điểm; Tương tự với tên, viết tắt, biệt danh nếu văn bản xác nhận. Sau khi gom cụm thì thực thể đại diện sẽ kế thừa các quan hệ trỏ đến hoặc đi, các tên trùng lặp khác đưa vào danh sách aliases. Lưu ý trong aliases thông thêm vào các đại từ, mốc thời gian tương đối, danh từ chung không kèm tên riêng ["công ty", "vị tướng", "Địa điểm đó"], cụm tham chiếu, vai trò, mô tả.).
 4. Không tự suy diễn thông tin hay tạo quan hệ hoặc thực thể không xuất hiện trong văn bản chỉ vì chúng có vẻ hợp lý.
 5. Tên thực thể phải giữ nguyên ý nghĩa và tên gọi trong nguồn.
 6. Loại thực thể nên ngắn gọn, nhất quán theo tiêu chuẩn Schema.org (Ví dụ: Person, Organization, Place, Event, Product,...), loại quan hệ định dạng UPPER_SNAKE_CASE tiếng Việt có dấu.
-7. Evidence phải là đoạn trích nguyên văn từ văn bản nguồn, nếu là enity được gộp thì nội dung Evidence sẽ phân chia bằng dấu ;.
+7. Evidence của thực thể là danh sách các đoạn trích nguyên văn của từ đó đến từ văn bản nguồn.
 8. Confidence nằm trong khoảng từ 0 đến 1.
 QUY TẮC RELATION:
 

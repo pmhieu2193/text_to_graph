@@ -1,5 +1,4 @@
 import uuid
-
 from datetime import datetime, timezone
 
 from sqlalchemy import (
@@ -7,11 +6,11 @@ from sqlalchemy import (
     Float,
     ForeignKey,
     Integer,
+    JSON,
     String,
     Text,
     UniqueConstraint,
 )
-
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.database import Base
@@ -69,7 +68,7 @@ class ChunkExtractionRun(Base):
         Integer,
         nullable=False,
         default=0,
-        server_default="0"
+        server_default="0",
     )
 
     error_message: Mapped[str | None] = mapped_column(
@@ -127,6 +126,12 @@ class RawEntity(Base):
         nullable=False,
     )
 
+    aliases: Mapped[list[str]] = mapped_column(
+        JSON,
+        nullable=False,
+        default=list,
+    )
+
     entity_type: Mapped[str] = mapped_column(
         String(100),
         nullable=False,
@@ -138,9 +143,10 @@ class RawEntity(Base):
         nullable=True,
     )
 
-    evidence: Mapped[str] = mapped_column(
-        Text,
+    evidence: Mapped[list[str]] = mapped_column(
+        JSON,
         nullable=False,
+        default=list,
     )
 
     confidence: Mapped[float] = mapped_column(

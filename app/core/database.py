@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 
 from sqlalchemy import create_engine
@@ -20,6 +21,7 @@ connect_args = {"check_same_thread": False} if settings.database_url.startswith(
 engine = create_engine(
     settings.database_url,
     connect_args=connect_args,
+    json_serializer=lambda obj: json.dumps(obj, ensure_ascii=False),
     pool_pre_ping=True,
 )
 
