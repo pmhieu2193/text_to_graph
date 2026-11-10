@@ -203,11 +203,11 @@ NHIỆM VỤ:
 
 1. Trích xuất các thực thể thực sự có ý nghĩa và quan trọng trong văn bản.
 2. Trích xuất các mối quan hệ được đề cập rõ ràng.
-3. Hãy gom cụm thực thể trùng lặp và quan hệ của chúng nếu có thể (ví dụ: cụm "Hà Nội", "Thủ đô Hà Nội" và "TP Hà Nội" hoặc cụm "Bác Hồ" và "Hồ Chí Minh" thì mỗi cụm có thể được gom thành một thực thể đại diện duy nhất kế thừa các quan hệ).
+3. Hãy gom cụm thực thể trùng lặp và quan hệ của chúng nếu có thể (ví dụ: cụm "Hà Nội", "Thủ đô Hà Nội" và "TP Hà Nội" hoặc cụm "Bác Hồ" và "Hồ Chí Minh" thì mỗi cụm có thể được gom thành một thực thể đại diện duy nhất kế thừa các quan hệ trỏ đến hoặc đi).
 4. Không tự suy diễn thông tin hay tạo quan hệ hoặc thực thể không xuất hiện trong văn bản chỉ vì chúng có vẻ hợp lý.
 5. Tên thực thể phải giữ nguyên ý nghĩa và tên gọi trong nguồn.
-6. Loại thực thể nên ngắn gọn, nhất quán theo tiêu chuẩn Schema.org (Ví dụ: Person, Organization, Place, Event, Product,...).
-7. Evidence phải là đoạn trích nguyên văn từ văn bản nguồn.
+6. Loại thực thể nên ngắn gọn, nhất quán theo tiêu chuẩn Schema.org (Ví dụ: Person, Organization, Place, Event, Product,...), loại quan hệ định dạng UPPER_SNAKE_CASE tiếng Việt có dấu.
+7. Evidence phải là đoạn trích nguyên văn từ văn bản nguồn, nếu là enity được gộp thì nội dung Evidence sẽ phân chia bằng dấu ;.
 8. Confidence nằm trong khoảng từ 0 đến 1.
 QUY TẮC RELATION:
 
