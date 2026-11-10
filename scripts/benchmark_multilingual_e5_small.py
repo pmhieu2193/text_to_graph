@@ -65,7 +65,8 @@ def build_embedding_text(entity: dict[str, Any]) -> str:
         f"Loại thực thể: {entity['entity_type']}. "
         f"Mô tả: {entity.get('description') or ''}"
     )
-    # E5 được huấn luyện với prefix; dùng cùng query: cho mọi thực thể vì đây là so sánh đối xứng.\n    text = "query: " + text
+    # E5 dùng prefix cho tác vụ embedding; giữ cùng prefix ở mọi thực thể để so sánh đối xứng.
+    text = "query: " + text
     return text
 
 
