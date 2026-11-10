@@ -3,7 +3,7 @@ import sys
 import google.generativeai as genai
 
 # Điền API Key của bạn vào đây (hoặc để biến môi trường GEMINI_API_KEY)
-API_KEY = os.getenv("GEMINI_API_KEY", "")
+API_KEY = os.getenv("GEMINI_API_KEY", "AIzaSyCXBY5oz-R0HQBC6pQqGVLdzbKnVD6hYQI")
 
 if API_KEY == "YOUR_GEMINI_API_KEY" or not API_KEY:
     print("❌ Lỗi: Bạn chưa nhập API Key!")

@@ -110,7 +110,7 @@ class GeminiProvider(LLMProvider):
                 api_key=self._active_key,
                 http_options=types.HttpOptions(
                     api_version="v1beta",
-                    timeout=60_000,
+                    timeout=120_000,
                     retry_options=types.HttpRetryOptions(
                         attempts=1,
                     ),
@@ -203,7 +203,7 @@ NHIỆM VỤ:
 
 1. Chỉ trích xuất các thực thể danh từ riêng, đối tượng cụ thể và có ý nghĩa phù hợp. 
 2. Trích xuất các mối quan hệ được đề cập rõ ràng.
-3. Hãy gom cụm và chuẩn hoá thực thể. Nếu văn bản có nhiều cách gọi cho cùng một đối tượng cụ thể (ví dụ: "Hà Nội", "Thủ đô Hà Nội" có thể gom thành 1 đại diện duy nhất nếu chỉ cùng 1 địa điểm; Tương tự với tên, viết tắt, biệt danh nếu văn bản xác nhận. Sau khi gom cụm thì thực thể đại diện sẽ kế thừa các quan hệ trỏ đến hoặc đi, các tên trùng lặp khác đưa vào danh sách aliases. Lưu ý trong aliases thông thêm vào các đại từ, mốc thời gian tương đối, danh từ chung không kèm tên riêng ["công ty", "vị tướng", "Địa điểm đó"], cụm tham chiếu, vai trò, mô tả.).
+3. Hãy gom cụm và chuẩn hoá thực thể. Nếu văn bản có nhiều cách gọi cho cùng một đối tượng cụ thể (ví dụ: "Hà Nội", "Thủ đô Hà Nội" có thể gom thành 1 đại diện duy nhất nếu chỉ cùng 1 địa điểm; Tương tự với tên, viết tắt, biệt danh nếu văn bản xác nhận. Sau khi gom cụm thì thực thể đại diện sẽ kế thừa các quan hệ trỏ đến hoặc đi, các tên trùng lặp khác đưa vào danh sách aliases (aliases chỉ chứa những tên gọi khác thực sự của cùng một thực thể. Không thêm: các đại từ xưng hô hoặc từ chỉ định như "ông ấy", "nó", "đó", "này", "kia", "ấy",...; mốc thời gian tương đối như "Lúc đó"; danh từ chung không kèm tên riêng ví dụ như "công ty", "vị tướng", "Địa điểm đó", "Nơi này"; cụm tham chiếu như "Khu du lịch này", "Thành phố đó" , "Dự án kia"...; vai trò; mô tả.).
 4. Không tự suy diễn thông tin hay tạo quan hệ hoặc thực thể không xuất hiện trong văn bản chỉ vì chúng có vẻ hợp lý.
 5. Tên thực thể phải giữ nguyên ý nghĩa và tên gọi trong nguồn.
 6. Loại thực thể nên ngắn gọn, nhất quán theo tiêu chuẩn Schema.org (Ví dụ: Person, Organization, Place, Event, Product,...), loại quan hệ định dạng UPPER_SNAKE_CASE tiếng Việt có dấu.
