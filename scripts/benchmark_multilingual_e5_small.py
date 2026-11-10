@@ -46,7 +46,7 @@ COSINE_WEIGHT = 0.65
 AUTO_MERGE_THRESHOLD = 0.82
 REVIEW_THRESHOLD = 0.74
 
-DATASET_PATH = Path(__file__).parent / "data" / "entity_resolution_samples.json"
+DATASET_PATH = Path(__file__).parent / "data" / "entity_resolution_2.json"
 
 
 # ============================ DATA / EMBEDDING ============================

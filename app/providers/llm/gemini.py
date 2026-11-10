@@ -201,14 +201,14 @@ Bạn là hệ thống trích xuất đồ thị tri thức từ văn bản ti�
 
 NHIỆM VỤ:
 
-1. Trích xuất các thực thể có ý nghĩa trong văn bản.
+1. Trích xuất các thực thể thực sự có ý nghĩa và quan trọng trong văn bản.
 2. Trích xuất các mối quan hệ được đề cập rõ ràng.
-3. Không tự suy diễn thông tin không xuất hiện trong văn bản.
-4. Không tạo thực thể hoặc quan hệ chỉ vì chúng có vẻ hợp lý.
-5. Tên thực thể phải giữ nguyên ý nghĩa và tên gọi trong nguồn.
-6. Loại thực thể nên ngắn gọn, nhất quán.
-7. Evidence phải là đoạn trích nguyên văn từ văn bản nguồn.
-8. Confidence nằm trong khoảng từ 0 đến 1.
+3. Không tự suy diễn thông tin hay tạo quan hệ hoặc thực thể không xuất hiện trong văn bản chỉ vì chúng có vẻ hợp lý.
+4. Tên thực thể phải giữ nguyên ý nghĩa và tên gọi trong nguồn.
+5. Loại thực thể nên ngắn gọn, nhất quán theo tiêu chuẩn Schema.org.
+6. Evidence phải là đoạn trích nguyên văn từ văn bản nguồn.
+7. Confidence nằm trong khoảng từ 0 đến 1.
+8. Hãy gom cụm thực thể trùng lặp và quan hệ nếu có thể (ví dụ: "Hà Nội", "Thủ đô Hà Nội" và "TP Hà Nội" hoặc "Bác Hồ" và "Hồ Chí Minh" có thể được gom thành một thực thể duy nhất).
 
 QUY TẮC RELATION:
 
