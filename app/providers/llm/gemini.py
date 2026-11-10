@@ -197,30 +197,26 @@ class GeminiProvider(LLMProvider):
     def build_prompt(text: str) -> str:
 
         return f"""
-Bạn là hệ thống trích xuất đồ thị tri thức từ văn bản tiếng Việt.
+Bạn là hệ thống trích xuất đồ thị tri thức (KG) từ văn bản tiếng Việt.
 
-NHIỆM VỤ:
+**NHIỆM VỤ:**
 
-1. Chỉ trích xuất các thực thể danh từ riêng, đối tượng cụ thể và có ý nghĩa phù hợp. 
-2. Trích xuất các mối quan hệ được đề cập rõ ràng.
-3. Hãy gom cụm và chuẩn hoá thực thể. Nếu văn bản có nhiều cách gọi cho cùng một đối tượng cụ thể (ví dụ: "Hà Nội", "Thủ đô Hà Nội" có thể gom thành 1 đại diện duy nhất nếu chỉ cùng 1 địa điểm; Tương tự với tên, viết tắt, biệt danh nếu văn bản xác nhận. Sau khi gom cụm thì thực thể đại diện sẽ kế thừa các quan hệ trỏ đến hoặc đi, các tên trùng lặp khác đưa vào danh sách aliases (aliases chỉ chứa những tên gọi khác thực sự của cùng một thực thể. Không thêm: các đại từ xưng hô hoặc từ chỉ định như "ông ấy", "nó", "đó", "này", "kia", "ấy",...; mốc thời gian tương đối như "Lúc đó"; danh từ chung không kèm tên riêng ví dụ như "công ty", "vị tướng", "Địa điểm đó", "Nơi này"; cụm tham chiếu như "Khu du lịch này", "Thành phố đó" , "Dự án kia"...; vai trò; mô tả.).
-4. Không tự suy diễn thông tin hay tạo quan hệ hoặc thực thể không xuất hiện trong văn bản chỉ vì chúng có vẻ hợp lý.
-5. Tên thực thể phải giữ nguyên ý nghĩa và tên gọi trong nguồn.
-6. Loại thực thể nên ngắn gọn, nhất quán theo tiêu chuẩn Schema.org (Ví dụ: Person, Organization, Place, Event, Product,...), loại quan hệ định dạng UPPER_SNAKE_CASE tiếng Việt có dấu.
-7. Evidence của thực thể là danh sách các đoạn trích nguyên văn của từ đó đến từ văn bản nguồn.
-8. Confidence nằm trong khoảng từ 0 đến 1.
-QUY TẮC RELATION:
+1. Chỉ trích xuất các thực thể là danh từ riêng hoặc đối tượng cụ thể, có ý nghĩa phù hợp để biểu diễn thành nút trong KG.
+2. Trích xuất các mối quan hệ được đề cập rõ ràng trong văn bản.
+3. Gom cụm và chuẩn hóa các thực thể cùng chỉ một đối tượng. Ví dụ: "Hà Nội" và "Thủ đô Hà Nội", hoặc các tên viết tắt, biệt danh nếu văn bản xác nhận chúng cùng một thực thể. Chọn một tên đại diện phù hợp và đưa các tên gọi thay thế thực sự vào danh sách `aliases`. Không đưa đại từ, từ chỉ định, mốc thời gian tương đối, danh từ chung, cụm tham chiếu như "dự án này", "thành phố đó", vai trò, chức danh hoặc mô tả vào `aliases`. Chỉ gộp khi có đủ căn cứ từ văn bản; nếu không chắc chắn, giữ riêng. Thực thể đại diện kế thừa toàn bộ quan hệ của các thực thể được gộp; sau khi gộp, cập nhật các tham chiếu và loại bỏ quan hệ trùng lặp.
+4. Không tự suy diễn hoặc tạo thực thể, quan hệ không có căn cứ trong văn bản.
+5. Giữ nguyên ý nghĩa và tên gọi thực thể theo nguồn; không tự ý thay đổi nội dung.
+6. Loại thực thể sử dụng tên ngắn gọn, nhất quán theo Schema.org (Person, Organization, Place, Event, Product,...). `relation_type` sử dụng định dạng UPPER_SNAKE_CASE, có dấu tiếng Việt.
+7. `evidence` của thực thể là danh sách các đoạn trích nguyên văn từ nguồn. `confidence` nằm trong khoảng 0–1.
 
-- subject_local_id phải trỏ đến một entity.
-- object_local_id phải trỏ đến một entity.
-- Không được tham chiếu entity không tồn tại.
-- Relation phải có hướng rõ ràng.
-- relation_type nên ngắn gọn và thể hiện bản chất quan hệ.
+**QUY TẮC RELATION:**
+- `subject_local_id` và `object_local_id` phải tham chiếu đến các `local_id` tồn tại trong danh sách entities.
+- Quan hệ phải có hướng rõ ràng, `relation_type` ngắn gọn và thể hiện đúng bản chất quan hệ.
+- Không tạo quan hệ có tham chiếu đến thực thể không tồn tại.
 
-Nếu văn bản không có thực thể hoặc quan hệ phù hợp,
-hãy trả về danh sách rỗng tương ứng.
+Nếu không có thực thể hoặc quan hệ phù hợp, trả về danh sách rỗng tương ứng.
 
-VĂN BẢN NGUỒN:
+**VĂN BẢN NGUỒN:**
 
 <source>
 {text}
