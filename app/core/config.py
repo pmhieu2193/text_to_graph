@@ -1,6 +1,5 @@
 from pathlib import Path
 
-
 from pydantic_settings import (
     BaseSettings,
     SettingsConfigDict,
@@ -26,10 +25,15 @@ class Settings(BaseSettings):
     # LLM
     llm_provider: str = "gemini"
     llm_model: str = "gemini-2.5-flash"
+
+    # Primary API key
     llm_api_key: str | None = None
 
-    # Retry
-    llm_max_retries: int = 3
+    # Fallback API key
+    llm_fallback_api_key: str | None = None
+
+    # Deferred retry
+    llm_max_retries: int = 1
     llm_base_delay: float = 2.0
     llm_max_delay: float = 20.0
 
@@ -42,7 +46,6 @@ class Settings(BaseSettings):
 
     @property
     def max_upload_size_bytes(self) -> int:
-
         return self.max_upload_size_mb * 1024 * 1024
 
 

@@ -5,4 +5,6 @@ __pycache__/
 data/
 storage/documents/*
 !storage/documents/.gitkeep
+storage/extracted/*
+!storage/extracted/.gitkeep
 .pytest_cache/

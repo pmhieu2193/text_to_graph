@@ -15,8 +15,16 @@ class LLMTemporaryError(LLMProviderError):
     """Temporary error that may succeed when retried."""
 
 
+class LLMQuotaError(LLMProviderError):
+    """API key quota or billing limit has been exceeded."""
+
+
+class LLMOutputError(LLMProviderError):
+    """LLM response is invalid or does not match the expected schema."""
+
+
 class LLMPermanentError(LLMProviderError):
-    """Permanent error that should not be retried."""
+    """Permanent provider error that should not be retried."""
 
 
 class LLMProvider(ABC):
@@ -26,12 +34,8 @@ class LLMProvider(ABC):
 
     @abstractmethod
     def validate_configuration(self) -> None:
-        """
-        Validate credentials and provider settings.
-        """
+        """Validate credentials and provider settings."""
 
     @abstractmethod
     def extract(self, text: str) -> ExtractionPayload:
-        """
-        Extract entities and relations from one text chunk.
-        """
+        """Extract entities and relations from one text chunk."""

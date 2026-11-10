@@ -1,4 +1,5 @@
 import json
+
 from google import genai
 from google.genai import types
 from google.genai.errors import APIError
@@ -7,6 +8,8 @@ from pydantic import ValidationError
 from app.core.config import settings
 from app.providers.llm.base import (
     LLMConfigurationError,
+    LLMOutputError,
+    LLMQuotaError,
     LLMPermanentError,
     LLMProvider,
     LLMTemporaryError,
@@ -16,26 +19,42 @@ from app.schemas.extraction import ExtractionPayload
 
 def clean_schema_for_gemini(data):
     """
-    Đệ quy loại bỏ các trường metadata và constraints gây quá tải 
-    trình biên dịch Schema (FSM State Limit) của Gemini API.
+    Loại bỏ metadata và constraints không cần thiết
+    khỏi JSON Schema trước khi gửi Gemini.
     """
     if isinstance(data, dict):
-        # Các key gây bùng nổ không gian trạng thái FSM trong Gemini API
         unsupported_keys = {
-            # Metadata
-            "title", "description", "examples", "default", "$schema", 
-            "additionalProperties", "additional_properties",
-            # Validation Constraints (Nguyên nhân chính gây quá tải state)
-            "minimum", "maximum", "minLength", "maxLength", 
-            "pattern", "format", "minItems", "maxItems", "uniqueItems", "multipleOf"
+            "title",
+            "description",
+            "examples",
+            "default",
+            "$schema",
+            "additionalProperties",
+            "additional_properties",
+            "minimum",
+            "maximum",
+            "minLength",
+            "maxLength",
+            "pattern",
+            "format",
+            "minItems",
+            "maxItems",
+            "uniqueItems",
+            "multipleOf",
         }
+
         return {
-            k: clean_schema_for_gemini(v)
-            for k, v in data.items()
-            if k not in unsupported_keys
+            key: clean_schema_for_gemini(value)
+            for key, value in data.items()
+            if key not in unsupported_keys
         }
-    elif isinstance(data, list):
-        return [clean_schema_for_gemini(item) for item in data]
+
+    if isinstance(data, list):
+        return [
+            clean_schema_for_gemini(item)
+            for item in data
+        ]
+
     return data
 
 
@@ -45,12 +64,20 @@ class GeminiProvider(LLMProvider):
 
     def __init__(self):
         self.model_name = settings.llm_model
+
+        self._primary_key = settings.llm_api_key
+        self._fallback_key = settings.llm_fallback_api_key
+
+        self._active_key = self._primary_key
+        self._using_fallback = False
+
         self._client = None
 
     def validate_configuration(self) -> None:
-        if not settings.llm_api_key:
+
+        if not self._primary_key:
             raise LLMConfigurationError(
-                "LLM_API_KEY chưa được cấu hình trong file .env."
+                "LLM_API_KEY chưa được cấu hình."
             )
 
         if not self.model_name:
@@ -59,12 +86,28 @@ class GeminiProvider(LLMProvider):
             )
 
     @property
+    def has_fallback_key(self) -> bool:
+        return bool(
+            self._fallback_key
+            and not self._using_fallback
+        )
+
+    @property
+    def using_fallback_key(self) -> bool:
+        return self._using_fallback
+
+    @property
     def client(self):
+
         if self._client is None:
-            self.validate_configuration()
+
+            if not self._active_key:
+                raise LLMConfigurationError(
+                    "Không có API key Gemini khả dụng."
+                )
 
             self._client = genai.Client(
-                api_key=settings.llm_api_key,
+                api_key=self._active_key,
                 http_options=types.HttpOptions(
                     api_version="v1beta",
                     timeout=60_000,
@@ -73,10 +116,86 @@ class GeminiProvider(LLMProvider):
                     ),
                 ),
             )
+
         return self._client
+
+    def switch_to_fallback_key(self) -> bool:
+        """
+        Chuyển sang fallback key đúng một lần.
+
+        Trả về False nếu không có key dự phòng
+        hoặc key dự phòng đã được sử dụng.
+        """
+
+        if not self.has_fallback_key:
+            return False
+
+        self._active_key = self._fallback_key
+        self._using_fallback = True
+
+        # Client cũ chứa primary key.
+        # Tạo client mới ở lần gọi tiếp theo.
+        self._client = None
+
+        return True
+
+    @staticmethod
+    def _is_quota_error(
+        status_code: int | None,
+        message: str,
+    ) -> bool:
+
+        message = message.lower()
+
+        quota_keywords = (
+            "quota exceeded",
+            "quota_exceeded",
+            "billing",
+            "billing not enabled",
+            "resource_exhausted",
+            "per day",
+            "daily limit",
+            "insufficient quota",
+            "limit: 0",
+        )
+
+        # 429 không đồng nghĩa với quota.
+        # Chỉ phân loại quota khi nội dung lỗi có dấu hiệu rõ.
+        return (
+            status_code in {403, 429}
+            and any(
+                keyword in message
+                for keyword in quota_keywords
+            )
+        )
+
+    @staticmethod
+    def _is_invalid_credential(
+        status_code: int | None,
+        message: str,
+    ) -> bool:
+
+        message = message.lower()
+
+        credential_keywords = (
+            "api key not valid",
+            "invalid api key",
+            "api_key_invalid",
+            "permission denied",
+            "api key expired",
+        )
+
+        return (
+            status_code in {400, 401, 403}
+            and any(
+                keyword in message
+                for keyword in credential_keywords
+            )
+        )
 
     @staticmethod
     def build_prompt(text: str) -> str:
+
         return f"""
 Bạn là hệ thống trích xuất đồ thị tri thức từ văn bản tiếng Việt.
 
@@ -117,9 +236,12 @@ VĂN BẢN NGUỒN:
             return ExtractionPayload()
 
         try:
-            # Sinh JSON schema nguyên bản từ Pydantic và lọc sạch triệt để
+
             raw_schema = ExtractionPayload.model_json_schema()
-            gemini_schema = clean_schema_for_gemini(raw_schema)
+
+            gemini_schema = clean_schema_for_gemini(
+                raw_schema
+            )
 
             response = self.client.models.generate_content(
                 model=self.model_name,
@@ -131,29 +253,62 @@ VĂN BẢN NGUỒN:
                 ),
             )
 
-            # Ưu tiên lấy dữ liệu đã parse
-            parsed = getattr(response, "parsed", None)
+            parsed = getattr(
+                response,
+                "parsed",
+                None,
+            )
 
             if isinstance(parsed, ExtractionPayload):
                 return parsed
 
             if parsed is not None:
-                return ExtractionPayload.model_validate(parsed)
+                try:
+                    return ExtractionPayload.model_validate(
+                        parsed
+                    )
+                except ValidationError as exc:
+                    raise LLMOutputError(
+                        f"Gemini output không đúng schema: {exc}"
+                    ) from exc
 
-            # Fallback parse từ string response.text
-            response_text = getattr(response, "text", None)
+            response_text = getattr(
+                response,
+                "text",
+                None,
+            )
 
             if not response_text:
-                raise LLMPermanentError(
+                raise LLMOutputError(
                     "Gemini trả về response rỗng."
                 )
 
-            return ExtractionPayload.model_validate_json(response_text)
+            try:
+                return ExtractionPayload.model_validate_json(
+                    response_text
+                )
 
-        except (LLMPermanentError, LLMTemporaryError):
+            except (
+                json.JSONDecodeError,
+                ValidationError,
+                TypeError,
+            ) as exc:
+
+                raise LLMOutputError(
+                    f"Không thể parse hoặc validate Gemini output: {exc}"
+                ) from exc
+
+        except (
+            LLMOutputError,
+            LLMConfigurationError,
+            LLMQuotaError,
+            LLMTemporaryError,
+            LLMPermanentError,
+        ):
             raise
 
         except APIError as exc:
+
             status_code = (
                 getattr(exc, "code", None)
                 or getattr(exc, "status_code", None)
@@ -164,27 +319,52 @@ VĂN BẢN NGUỒN:
             except (TypeError, ValueError):
                 status_code = None
 
-            if status_code in {408, 429, 500, 502, 503, 504}:
+            message = str(exc)
+
+            if self._is_invalid_credential(
+                status_code,
+                message,
+            ):
+                raise LLMConfigurationError(
+                    f"Gemini API key không hợp lệ: {message}"
+                ) from exc
+
+            if self._is_quota_error(
+                status_code,
+                message,
+            ):
+                raise LLMQuotaError(
+                    f"Gemini quota/billing error: {message}"
+                ) from exc
+
+            if status_code in {
+                408,
+                429,
+                500,
+                502,
+                503,
+                504,
+            }:
                 raise LLMTemporaryError(
                     f"Gemini API tạm thời không khả dụng "
-                    f"(HTTP {status_code}): {exc}"
+                    f"(HTTP {status_code}): {message}"
                 ) from exc
 
             raise LLMPermanentError(
-                f"Gemini API error (HTTP {status_code}): {exc}"
+                f"Gemini API error (HTTP {status_code}): {message}"
             ) from exc
 
-        except (json.JSONDecodeError, ValidationError, TypeError) as exc:
-            raise LLMPermanentError(
-                f"Không thể parse hoặc validate response: {exc}"
-            ) from exc
+        except (
+            TimeoutError,
+            ConnectionError,
+        ) as exc:
 
-        except (TimeoutError, ConnectionError) as exc:
             raise LLMTemporaryError(
                 f"Kết nối Gemini thất bại: {exc}"
             ) from exc
 
         except Exception as exc:
+
             raise LLMPermanentError(
                 f"Lỗi Gemini không phân loại: {exc}"
             ) from exc

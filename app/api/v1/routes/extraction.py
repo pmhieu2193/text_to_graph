@@ -1,32 +1,18 @@
-from fastapi import (
-    APIRouter,
-    Depends,
-    HTTPException,
-    Query,
-)
-
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
-
 from app.core.database import get_db
-
 from app.models.document import Document
-
+from app.providers.llm.base import LLMConfigurationError
+from app.repositories.extraction_repository import ExtractionRepository
+from app.services.extraction_service import DocumentExtractionService
 from app.providers.llm.base import (
     LLMConfigurationError,
+    LLMProviderError,
 )
-
-from app.repositories.extraction_repository import (
-    ExtractionRepository,
-)
-
-from app.services.extraction_service import (
-    DocumentExtractionService,
-)
-
 
 router = APIRouter()
 
-
+#Chưa tạo reponse model nên tạm thời trả về dict 
 @router.post("/{document_id}/extract")
 def extract_document(
 
@@ -68,6 +54,13 @@ def extract_document(
 
         raise HTTPException(
             status_code=409,
+            detail=str(exc),
+        ) from exc
+        
+    except LLMProviderError as exc:
+
+        raise HTTPException(
+            status_code=502,
             detail=str(exc),
         ) from exc
 
