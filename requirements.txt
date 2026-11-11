@@ -13,3 +13,10 @@ python-dotenv>=1.0.0
 pytest>=8.0.0
 pandas>=2.2.0
 rapidfuzz>=3.9.0
+
+# Optional dependencies for the BGE-M3
+sentence-transformers>=6.2.0
+
+# FAISS
+FlagEmbedding>=1.3.5
+faiss-cpu>=1.8.0
