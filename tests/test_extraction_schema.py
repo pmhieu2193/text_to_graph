@@ -51,7 +51,7 @@ def test_confidence_must_be_between_zero_and_one():
                     "local_id": "e1",
                     "name": "A",
                     "entity_type": "PERSON",
-                    "evidence": "A",
+                    "evidence": ["A"],
                     "confidence": 1.5,
                 }
             ],
@@ -69,13 +69,13 @@ def test_entity_local_id_must_be_unique():
                     "local_id": "e1",
                     "name": "Nguyễn Văn A",
                     "entity_type": "PERSON",
-                    "evidence": "Nguyễn Văn A",
+                    "evidence": ["Nguyễn Văn A"],
                 },
                 {
                     "local_id": "e1",
                     "name": "Trần Văn B",
                     "entity_type": "PERSON",
-                    "evidence": "Trần Văn B",
+                    "evidence": ["Trần Văn B"],
                 },
             ],
             "relations": [],
@@ -88,3 +88,39 @@ def test_empty_result_is_valid():
 
     assert payload.entities == []
     assert payload.relations == []
+
+
+def test_relation_local_id_must_be_unique():
+    with pytest.raises(ValidationError):
+        ExtractionPayload.model_validate({
+            "entities": [
+                {
+                    "local_id": "e1",
+                    "name": "A",
+                    "entity_type": "PERSON",
+                    "evidence": ["A"],
+                },
+                {
+                    "local_id": "e2",
+                    "name": "B",
+                    "entity_type": "PERSON",
+                    "evidence": ["B"],
+                },
+            ],
+            "relations": [
+                {
+                    "local_id": "r1",
+                    "subject_local_id": "e1",
+                    "object_local_id": "e2",
+                    "relation_type": "RELATED_TO",
+                    "evidence": "A liên quan B.",
+                },
+                {
+                    "local_id": "r1",
+                    "subject_local_id": "e2",
+                    "object_local_id": "e1",
+                    "relation_type": "RELATED_TO",
+                    "evidence": "B liên quan A.",
+                },
+            ],
+        })
