@@ -102,6 +102,7 @@ class CanonicalEntity(Base):
     )
     entity_type: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
     name: Mapped[str] = mapped_column(String(500), nullable=False)
+    aliases: Mapped[list[str]] = mapped_column(JSON, nullable=False, default=list)
     # Non-null means this canonical record has been superseded by another one.
     merged_into_id: Mapped[str | None] = mapped_column(
         ForeignKey("canonical_entities.id", ondelete="RESTRICT"),
