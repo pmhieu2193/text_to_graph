@@ -207,7 +207,7 @@ Bạn là hệ thống trích xuất đồ thị tri thức (KG) từ văn bản
 4. Không tự suy diễn hoặc tạo thực thể, quan hệ không có căn cứ trong văn bản.
 5. Giữ nguyên ý nghĩa và tên gọi thực thể theo nguồn; không tự ý thay đổi nội dung.
 6. Loại thực thể sử dụng tên ngắn gọn, nhất quán theo Schema.org (Person, Organization, Place, Event, Product,...). `relation_type` sử dụng định dạng UPPER_SNAKE_CASE, có dấu tiếng Việt.
-7. `evidence` của thực thể là danh sách các đoạn trích nguyên văn từ nguồn. `confidence` nằm trong khoảng 0–1.
+7. `evidence` của thực thể là danh sách các đoạn trích nguyên văn, nguyên câu chứa nó từ nguồn. `confidence` nằm trong khoảng 0–1.
 
 **QUY TẮC RELATION:**
 - `subject_local_id` và `object_local_id` phải tham chiếu đến các `local_id` tồn tại trong danh sách entities.

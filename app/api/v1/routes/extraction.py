@@ -82,24 +82,46 @@ def get_extraction_result(document_id: str, db: Session = Depends(get_db)):
         "relations": relations,
     }
 
+
 @router.post("/{document_id}/resolve/preview")
 def preview_entity_resolution(
     document_id: str,
     db: Session = Depends(get_db),
 ):
-    """Generate ER candidates in memory; does not write or merge graph data."""
+    """Generate ER candidates and save a report; does not merge entities."""
     from app.services.entity_resolution.service import EntityResolutionService
 
     try:
-        dataframe = EntityResolutionService(db).preview(document_id)
+        dataframe, report_path = EntityResolutionService(db).preview(
+            document_id
+        )
+
         return {
             "document_id": document_id,
             "candidate_count": len(dataframe),
+            "auto_merge_candidate_count": int(
+                (dataframe["decision"] == "AUTO_MERGE_CANDIDATE").sum()
+            ),
+            "review_count": int(
+                (dataframe["decision"] == "REVIEW").sum()
+            ),
+            "reject_count": int(
+                (dataframe["decision"] == "REJECT").sum()
+            ),
+            "report_path": report_path,
             "candidates": dataframe.astype(object).where(
                 dataframe.notna(), None
             ).to_dict(orient="records"),
         }
+
     except LookupError as exc:
-        raise HTTPException(status_code=404, detail=str(exc)) from exc
-    except RuntimeError as exc:
-        raise HTTPException(status_code=503, detail=str(exc)) from exc
+        raise HTTPException(
+            status_code=404,
+            detail=str(exc),
+        ) from exc
+
+    except (RuntimeError, ValueError) as exc:
+        raise HTTPException(
+            status_code=503,
+            detail=str(exc),
+        ) from exc
