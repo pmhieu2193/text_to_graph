@@ -1,7 +1,10 @@
 import logging
 import time
 import random
+from sqlalchemy import select
 from sqlalchemy.orm import Session
+
+from app.models.entity_resolution import EntityResolutionRun
 
 from app.models.document import Document
 
@@ -249,6 +252,18 @@ class DocumentExtractionService:
         if document is None:
             raise LookupError(
                 "Không tìm thấy tài liệu."
+            )
+
+        # RawEntity IDs are referenced by ER candidates and canonical membership.
+        # Never replace extraction rows while an ER run exists; reset ER first.
+        existing_er = self.db.scalar(
+            select(EntityResolutionRun.id)
+            .where(EntityResolutionRun.document_id == document_id)
+            .limit(1)
+        )
+        if existing_er is not None:
+            raise ValueError(
+                "Tài liệu đã có ER run. Hãy reset Entity Resolution trước khi trích xuất lại."
             )
 
         self.provider.validate_configuration()
