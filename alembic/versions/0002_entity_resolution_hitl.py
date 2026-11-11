@@ -57,6 +57,7 @@ def upgrade() -> None:
         sa.Column("fuzzy_score", sa.Float(), nullable=True),
         sa.Column("embedding_score", sa.Float(), nullable=True),
         sa.Column("final_score", sa.Float(), nullable=True),
+        sa.Column("match_method", sa.String(20), nullable=False, server_default="HYBRID"),
         sa.Column("fuzzy_exact", sa.Boolean(), nullable=False, server_default=sa.false()),
         sa.Column("fuzzy_match", sa.JSON(), nullable=True),
         sa.Column("embedding_match", sa.JSON(), nullable=True),
