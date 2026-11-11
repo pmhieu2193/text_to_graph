@@ -73,6 +73,7 @@ class EntityCandidate(Base):
     fuzzy_score: Mapped[float | None] = mapped_column(Float, nullable=True)
     embedding_score: Mapped[float | None] = mapped_column(Float, nullable=True)
     final_score: Mapped[float | None] = mapped_column(Float, nullable=True)
+    match_method: Mapped[str] = mapped_column(String(20), nullable=False)
     fuzzy_exact: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     fuzzy_match: Mapped[list | None] = mapped_column(JSON, nullable=True)
     embedding_match: Mapped[list | None] = mapped_column(JSON, nullable=True)
