@@ -10,5 +10,6 @@ google-genai>=1.0.0
 python-dotenv>=1.0.0
 
 # Development / tests
-pytest>=8.0.0pandas>=2.2.0
+pytest>=8.0.0
+pandas>=2.2.0
 rapidfuzz>=3.9.0
