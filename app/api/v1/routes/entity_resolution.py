@@ -109,6 +109,10 @@ def reset_er_document(document_id: str, db: Session = Depends(get_db)):
 def delete_document_neo4j_graph(document_id: str, db: Session = Depends(get_db)):
     try:
         return Neo4jGraphSyncService(db).delete_document_graph(document_id)
+    except LookupError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
     except RuntimeError as exc:
         raise HTTPException(status_code=502, detail=str(exc)) from exc
 
