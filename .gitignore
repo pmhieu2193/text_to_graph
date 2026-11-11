@@ -8,3 +8,7 @@ storage/documents/*
 storage/extracted/*
 !storage/extracted/.gitkeep
 .pytest_cache/
+storage/entity_resolution/indexes/*
+!storage/entity_resolution/indexes/.gitkeep
+storage/entity_resolution/reports/*
+!storage/entity_resolution/reports/.gitkeep
