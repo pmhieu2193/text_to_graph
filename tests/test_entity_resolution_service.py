@@ -166,7 +166,7 @@ def test_auto_merge_handles_transitive_a_b_c_and_preserves_raw_relations(tmp_pat
         assert all(candidate.review_status == "MERGED" for candidate in candidates)
 
 
-def test_auto_process_defaults_unresolved_review_to_keep_separate(tmp_path):
+def test_finalize_defaults_unresolved_review_to_skip_and_exports_workbook(tmp_path):
     engine = _build_db()
     with Session(engine, expire_on_commit=False) as db:
         document = Document(
@@ -218,11 +218,133 @@ def test_auto_process_defaults_unresolved_review_to_keep_separate(tmp_path):
             report_writer=FakeReportWriter(tmp_path / "review.xlsx"),
         )
         _dataframe, _path, run_id = service.preview("D2")
-        result = service.auto_process("D2", run_id)
+        result = service.finalize("D2", run_id)
 
-        assert result["defaulted_to_keep_separate"] == 1
+        assert result["defaulted_to_skip"] == 1
         candidate = db.scalar(
             select(EntityCandidate).where(EntityCandidate.run_id == run_id)
         )
-        assert candidate.decision == "KEEP_SEPARATE"
-        assert candidate.review_status == "KEPT_SEPARATE"
+        assert candidate.decision == "SKIP"
+        assert candidate.review_status == "SKIPPED"
+        assert result["canonical_entity_count"] == 2
+        assert Path(result["report_path"]).exists()
+        from openpyxl import load_workbook
+        workbook = load_workbook(result["report_path"], read_only=True)
+        assert set(workbook.sheetnames) == {
+            "Summary", "Candidates", "Canonical_Entities", "Canonical_Relations"
+        }
+        assert workbook["Summary"].max_row == 2
+        workbook.close()
+        try:
+            service.finalize("D2", run_id)
+            assert False, "finalize must be idempotency-protected"
+        except ValueError:
+            pass
+
+
+
+def test_finalize_merges_aliases_and_deduplicates_inherited_relations(tmp_path):
+    engine = _build_db()
+    with Session(engine, expire_on_commit=False) as db:
+        document = Document(
+            id="D3",
+            original_filename="aliases.pdf",
+            stored_filename="aliases.pdf",
+            file_path="storage/aliases.pdf",
+            content_type="application/pdf",
+            file_size=10,
+            sha256="2" * 64,
+            status=DocumentStatus.COMPLETED,
+        )
+        db.add(document)
+        db.flush()
+        chunks = {}
+        for entity_id in ("A", "B", "X"):
+            chunk = DocumentChunk(
+                document_id="D3", chunk_index=len(chunks) + 1,
+                content=entity_id, char_count=1,
+            )
+            db.add(chunk)
+            db.flush()
+            chunks[entity_id] = chunk.id
+
+        db.add_all([
+            RawEntity(
+                id="A", document_id="D3", chunk_id=chunks["A"], local_id="A",
+                name="Công viên Đầm Sen", aliases=["Đầm Sen", "CV Đầm Sen"],
+                entity_type="LOCATION", evidence=["A evidence"], confidence=0.9,
+                provider="test", model_name="fake",
+            ),
+            RawEntity(
+                id="B", document_id="D3", chunk_id=chunks["B"], local_id="B",
+                name="Công viên nước Đầm Sen", aliases=["Đầm Sen Water Park"],
+                entity_type="LOCATION", evidence=["B evidence"], confidence=0.9,
+                provider="test", model_name="fake",
+            ),
+            RawEntity(
+                id="X", document_id="D3", chunk_id=chunks["X"], local_id="X",
+                name="Quận 11", aliases=[], entity_type="LOCATION",
+                evidence=["X evidence"], confidence=0.9, provider="test",
+                model_name="fake",
+            ),
+        ])
+        db.flush()
+        db.add_all([
+            RawRelation(
+                document_id="D3", chunk_id=chunks["A"], local_id="R1",
+                subject_entity_id="A", object_entity_id="X",
+                relation_type="LOCATED_IN", description="A nằm ở quận 11",
+                evidence="A nằm ở quận 11", confidence=0.9,
+                provider="test", model_name="fake",
+            ),
+            RawRelation(
+                document_id="D3", chunk_id=chunks["B"], local_id="R2",
+                subject_entity_id="B", object_entity_id="X",
+                relation_type="located_in", description="B nằm ở quận 11",
+                evidence="B nằm ở quận 11", confidence=0.9,
+                provider="test", model_name="fake",
+            ),
+        ])
+        db.commit()
+
+        class AliasStringMatcher:
+            def generate(self, manager):
+                return {
+                    ("A", "B"): StringCandidate(
+                        "A", "B", 0.99, False,
+                        ("Công viên Đầm Sen", "Công viên nước Đầm Sen"),
+                    )
+                }
+
+        class AliasEmbeddingMatcher:
+            def generate(self, manager):
+                return {
+                    ("A", "B"): EmbeddingCandidate(
+                        "A", "B", 0.99,
+                        ("Công viên Đầm Sen", "Công viên nước Đầm Sen"),
+                    )
+                }
+
+        service = EntityResolutionService(
+            db,
+            embedding_matcher=AliasEmbeddingMatcher(),
+            string_matcher=AliasStringMatcher(),
+            report_writer=FakeReportWriter(tmp_path / "unused.xlsx"),
+        )
+        _dataframe, _preview_path, run_id = service.preview("D3")
+        result = service.finalize("D3", run_id)
+
+        assert result["merged_or_already_same_cluster"] == 1
+        assert result["canonical_entity_count"] == 2
+        assert result["canonical_relation_count"] == 1
+        assert result["deduplicated_relation_count"] == 1
+        canonical = next(
+            item for item in result["canonical_entities"]
+            if len(item["raw_entity_ids"]) == 2
+        )
+        assert "Công viên nước Đầm Sen" in canonical["aliases"]
+        assert "Đầm Sen" in canonical["aliases"]
+        relation = result["canonical_relations"][0]
+        assert relation["raw_relation_count"] == 2
+        assert len(relation["raw_relation_ids"]) == 2
+        assert Path(result["report_path"]).exists()
