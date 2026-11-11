@@ -1,108 +1,101 @@
-# Knowledge Graph - Document API (Day 1)
+# Vietnamese Knowledge Graph API
 
-FastAPI module for uploading PDF documents and listing their metadata.
-
-## Features
-
-- PDF extension and file-signature validation
-- Empty-file and maximum-size validation
-- UUID-based stored filenames
-- SHA-256 checksum
-- SQLite metadata persistence with SQLAlchemy 2.x
-- Document status and UTC upload timestamp
-- Paginated document listing
+FastAPI application for turning Vietnamese PDF documents into a Knowledge Graph.
 
 ## Setup
 
 ```bash
 python -m venv .venv
-# Windows:
-.venv\Scripts\activate
-# macOS/Linux:
-source .venv/bin/activate
-
+# Windows: .venv\\Scripts\\activate
+# Linux/macOS: source .venv/bin/activate
 pip install -r requirements.txt
 copy .env.example .env
+```
+
+## Database migrations (Alembic)
+
+The application no longer runs SQLAlchemy `create_all()` at startup. Schema changes must be managed with Alembic.
+
+For a new database:
+
+```bash
+alembic upgrade head
 uvicorn app.main:app --reload
 ```
 
-Open http://127.0.0.1:8000/docs
+For an existing database created by an earlier version of this project, back up `data/app.db` first, then run:
+
+```bash
+alembic upgrade head
+```
+
+The first revision is a non-destructive baseline: it creates missing legacy tables but does not drop or recreate existing tables. The next revision adds the ER tables and any missing document columns. It is designed to adopt the existing SQLite schema without deleting its rows.
+
+Create a migration after changing SQLAlchemy models:
+
+```bash
+alembic revision --autogenerate -m "describe schema change"
+```
+
+Review the generated migration before applying it:
+
+```bash
+alembic upgrade head
+alembic current
+alembic history
+```
+
+Do not edit an already-applied migration. Add a new revision instead. Always back up the database before applying migrations to a database containing data.
 
 ## API
 
-### Upload
+Swagger: `http://127.0.0.1:8000/docs`
 
-`POST /api/v1/documents/upload`
+### Entity Resolution workflow
 
-Use `multipart/form-data`, field name: `file`.
+1. Generate a persisted candidate run and XLSX report:
 
-### List
+   `POST /api/v1/documents/{document_id}/entity-resolution/preview`
 
-`GET /api/v1/documents?page=1&page_size=20`
+   The response contains `run_id`, candidate `pair_id`, both raw entity IDs, both evidence lists, match scores and classification. The XLSX Candidates sheet contains the same pair ID and evidence.
 
-### Detail
+2. Retrieve all candidates and their latest decisions:
 
-`GET /api/v1/documents/{document_id}`
+   `GET /api/v1/documents/{document_id}/entity-resolution/runs/{run_id}/candidates`
 
-### Health
+3. Decide one pair:
 
-`GET /health`
+   `POST /api/v1/documents/{document_id}/entity-resolution/candidates/{pair_id}/decision`
 
-## Storage
+   Body examples: `{"decision":"MERGE"}`, `{"decision":"KEEP_SEPARATE"}`, or `{"decision":"SKIP"}`.
 
-- PDF files: `storage/documents/<uuid>.pdf`
-- Metadata: `data/app.db`
+4. Merge every pending AUTO_MERGE candidate:
 
-The original filename is retained in SQLite. The physical filename is generated from a UUID to avoid collisions and path traversal.
+   `POST /api/v1/documents/{document_id}/entity-resolution/runs/{run_id}/auto-merge`
 
-## Initial status
+   Candidates are processed sequentially and each pair resolves its current canonical cluster at execution time. Thus A-B followed by B-C merges all three into one cluster without relying on a deleted/obsolete raw entity.
 
-Newly uploaded documents receive `UPLOADED`. Later pipeline stages can transition the status to `PENDING`, `PROCESSING`, `COMPLETED`, or `FAILED`.
+5. Delegate the run to the automatic policy:
+
+   `POST /api/v1/documents/{document_id}/entity-resolution/runs/{run_id}/auto-process`
+
+   This applies AUTO_MERGE candidates first. Any remaining PENDING pair (including REVIEW and REJECT) is recorded as KEEP_SEPARATE; it is never silently merged.
+
+6. Inspect canonical entities and relations:
+
+   - `GET /api/v1/documents/{document_id}/entity-resolution/canonical-entities`
+   - `GET /api/v1/documents/{document_id}/entity-resolution/canonical-relations`
+
+### Data integrity
+
+- `raw_entities` and `raw_relations` are retained as extraction provenance.
+- `entity_candidates` stores a stable UUID pair ID, run/document IDs, scores, evidence snapshots and decision status.
+- `canonical_entities` stores the current canonical representatives.
+- `canonical_entity_members` maps each raw entity to exactly one current canonical cluster.
+- Merging reassigns cluster membership and marks the losing canonical record with `merged_into_id`; raw entities and raw relations are not deleted.
+- Canonical relation queries join each raw relation's subject and object through the membership table. Therefore relations pointing to or from any merged raw entity remain queryable and resolve to the current canonical endpoints.
+- A previous KEEP_SEPARATE decision blocks a later merge that would combine those two clusters.
 
 ## Notes
 
-This is a small MVP implementation. The initial schema is created with SQLAlchemy `create_all`; introduce Alembic before making repeated schema changes or deploying persistent environments. For production, also add authentication, rate limits, malware scanning, retention rules, and stronger PDF parsing/validation.
-
-# Vietnamese Knowledge Graph API — Day 2
-
-Bổ sung trích xuất văn bản PDF và chunking vào project ngày 1.
-
-## Chạy
-```bash
-python -m venv .venv
-.venv\Scripts\activate
-pip install -r requirements.txt
-copy .env.example .env
-uvicorn app.main:app --reload
-```
-Swagger: http://127.0.0.1:8000/docs
-
-## Lưu ý nâng cấp DB ngày 1
-Ngày 2 thêm cột vào `documents`; `create_all()` không ALTER bảng cũ. Nếu DB ngày 1 chưa có dữ liệu cần giữ: dừng server, xóa `data/app.db`, chạy lại. Khi cần giữ dữ liệu, tạo Alembic migration thay vì xóa DB.
-
-## API
-- `POST /api/v1/documents/upload` — upload (ngày 1)
-- `GET /api/v1/documents` — danh sách
-- `GET /api/v1/documents/{id}` — chi tiết/trạng thái
-- `POST /api/v1/documents/{id}/process` — trích xuất và tạo chunks
-- `GET /api/v1/documents/{id}/chunks?page=1&page_size=20` — xem chunks
-
-## Quy trình thử
-1. Upload PDF lấy `id`.
-2. Gọi `POST /api/v1/documents/{id}/process`.
-3. Kiểm tra document status `COMPLETED` và `page_count`, `chunk_count`.
-4. Gọi endpoint `/chunks` và xem file text ở `storage/extracted/<id>.txt`.
-
-## Chunk mặc định
-`CHUNK_SIZE=1000`, `CHUNK_OVERLAP=150` (đơn vị ký tự, không phải token). Cần tinh chỉnh sau khi đánh giá chất lượng extraction và context window của LLM.
-
-## Giới hạn
-- PDF scan chưa OCR; không có text layer sẽ `FAILED`.
-- Chunk theo ký tự, chưa dùng tokenizer.
-- Xử lý đang đồng bộ trong HTTP request, phù hợp MVP local; chưa phù hợp file lớn/nhiều người dùng đồng thời.
-- Chưa gọi Gemini, embedding hoặc Neo4j.
-- `page_start/page_end` là phạm vi trang có nội dung giao với chunk, chưa lưu bounding boxes.
-
-## Ngày 3
-Thiết kế schema Entity/Relation, gọi Gemini trả JSON có cấu trúc, validate bằng Pydantic và lưu raw extraction kèm `chunk_id` để truy vết nguồn.
-
+The BGE-M3/FAISS embedding stage remains optional at runtime only if configured/injected accordingly; current default ER preview constructs the configured embedding matcher. The project is still an MVP and should be tested locally with a backed-up database before using it on valuable data.
