@@ -384,7 +384,40 @@ class EntityResolutionService:
             "defaulted_to_keep_separate": len(pending),
         }
 
+
+    def canonical_entities(self, document_id: str) -> list[dict]:
+        if self.db.get(Document, document_id) is None:
+            raise LookupError("Không tìm thấy tài liệu.")
+        self._ensure_canonical_members(document_id)
+        rows = self.db.execute(
+            select(CanonicalEntity, CanonicalEntityMember.raw_entity_id)
+            .outerjoin(
+                CanonicalEntityMember,
+                CanonicalEntityMember.canonical_entity_id == CanonicalEntity.id,
+            )
+            .where(
+                CanonicalEntity.document_id == document_id,
+                CanonicalEntity.merged_into_id.is_(None),
+            )
+            .order_by(CanonicalEntity.name, CanonicalEntity.id)
+        ).all()
+        self.db.commit()
+        grouped: dict[str, dict] = {}
+        for canonical, raw_id in rows:
+            item = grouped.setdefault(canonical.id, {
+                "canonical_entity_id": canonical.id,
+                "name": canonical.name,
+                "entity_type": canonical.entity_type,
+                "raw_entity_ids": [],
+            })
+            if raw_id:
+                item["raw_entity_ids"].append(raw_id)
+        return list(grouped.values())
+
     def canonical_relations(self, document_id: str) -> list[dict]:
+        if self.db.get(Document, document_id) is None:
+            raise LookupError("Không tìm thấy tài liệu.")
+        self._ensure_canonical_members(document_id)
         subject_member = aliased(CanonicalEntityMember)
         object_member = aliased(CanonicalEntityMember)
         subject_canonical = aliased(CanonicalEntity)
