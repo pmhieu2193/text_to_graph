@@ -77,16 +77,19 @@ def auto_merge_er_candidates(
 
 
 @router.post(
-    "/documents/{document_id}/entity-resolution/runs/{run_id}/auto-process"
+    "/documents/{document_id}/entity-resolution/runs/{run_id}/finalize"
 )
-def auto_process_er_run(
+def finalize_er_run(
     document_id: str, run_id: str, db: Session = Depends(get_db)
 ):
-    """Run AUTO merges; leave every unresolved pair as KEEP_SEPARATE."""
     try:
-        return EntityResolutionService(db).auto_process(document_id, run_id)
+        return EntityResolutionService(db).finalize(document_id, run_id)
     except LookupError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+    except RuntimeError as exc:
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
 
 
 @router.get("/documents/{document_id}/entity-resolution/canonical-relations")
