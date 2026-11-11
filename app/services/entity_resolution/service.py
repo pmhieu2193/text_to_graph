@@ -83,6 +83,8 @@ class EntityResolutionService:
             .join(CanonicalEntityMember, CanonicalEntityMember.canonical_entity_id == CanonicalEntity.id)
             .join(RawEntity, RawEntity.id == CanonicalEntityMember.raw_entity_id)
             .where(
+                CanonicalEntityMember.document_id == document_id,
+                RawEntity.document_id == document_id,
                 CanonicalEntity.document_id == document_id,
                 CanonicalEntity.merged_into_id.is_(None),
             )
@@ -359,7 +361,7 @@ class EntityResolutionService:
         if candidate is None or candidate.document_id != document_id:
             raise LookupError("Không tìm thấy cặp candidate thuộc tài liệu này.")
         run = self.db.get(EntityResolutionRun, candidate.run_id)
-        if run is None or run.status == "FINALIZED":
+        if run is None or run.document_id != document_id or run.status == "FINALIZED":
             raise ValueError("Lần chạy ER đã finalize hoặc không còn hợp lệ.")
         if candidate.review_status != "PENDING":
             raise ValueError(
@@ -445,6 +447,7 @@ class EntityResolutionService:
             )
             .where(
                 CanonicalEntity.document_id == document_id,
+                CanonicalEntityMember.document_id == document_id,
                 CanonicalEntity.merged_into_id.is_(None),
                 CanonicalEntityMember.raw_entity_id.is_not(None),
             )
