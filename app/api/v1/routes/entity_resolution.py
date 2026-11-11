@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.schemas.entity_resolution import CandidateDecisionRequest
 from app.services.entity_resolution.service import EntityResolutionService
+from app.services.entity_resolution.neo4j_sync import Neo4jGraphSyncService
 
 router = APIRouter()
 
@@ -92,6 +93,28 @@ def finalize_er_run(
         raise HTTPException(status_code=409, detail=str(exc)) from exc
     except RuntimeError as exc:
         raise HTTPException(status_code=500, detail=str(exc)) from exc
+
+
+@router.delete("/documents/{document_id}/entity-resolution/reset")
+def reset_er_document(document_id: str, db: Session = Depends(get_db)):
+    try:
+        return EntityResolutionService(db).reset(document_id)
+    except LookupError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+
+
+@router.post("/documents/{document_id}/entity-resolution/runs/{run_id}/sync-neo4j")
+def sync_er_run_to_neo4j(document_id: str, run_id: str, db: Session = Depends(get_db)):
+    try:
+        return Neo4jGraphSyncService(db).sync(document_id, run_id)
+    except LookupError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+    except RuntimeError as exc:
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
 
 
 @router.get("/documents/{document_id}/entity-resolution/canonical-relations")
