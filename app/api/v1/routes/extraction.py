@@ -81,3 +81,25 @@ def get_extraction_result(document_id: str, db: Session = Depends(get_db)):
         "entities": entities,
         "relations": relations,
     }
+
+@router.post("/{document_id}/resolve/preview")
+def preview_entity_resolution(
+    document_id: str,
+    db: Session = Depends(get_db),
+):
+    """Generate ER candidates in memory; does not write or merge graph data."""
+    from app.services.entity_resolution.service import EntityResolutionService
+
+    try:
+        dataframe = EntityResolutionService(db).preview(document_id)
+        return {
+            "document_id": document_id,
+            "candidate_count": len(dataframe),
+            "candidates": dataframe.astype(object).where(
+                dataframe.notna(), None
+            ).to_dict(orient="records"),
+        }
+    except LookupError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except RuntimeError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
