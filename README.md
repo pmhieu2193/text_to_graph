@@ -75,11 +75,11 @@ Swagger: `http://127.0.0.1:8000/docs`
 
    Candidates are processed sequentially and each pair resolves its current canonical cluster at execution time. Thus A-B followed by B-C merges all three into one cluster without relying on a deleted/obsolete raw entity.
 
-5. Delegate the run to the automatic policy:
+5. Finalize the run and export the final result:
 
-   `POST /api/v1/documents/{document_id}/entity-resolution/runs/{run_id}/auto-process`
+   `POST /api/v1/documents/{document_id}/entity-resolution/runs/{run_id}/finalize`
 
-   This applies AUTO_MERGE candidates first. Any remaining PENDING pair (including REVIEW and REJECT) is recorded as KEEP_SEPARATE; it is never silently merged.
+   Finalization applies AUTO_MERGE candidates that are still PENDING, preserves every decision already made by the reviewer, and changes unresolved PENDING pairs to SKIP (not KEEP_SEPARATE). It then rebuilds canonical aliases, maps raw relations to canonical endpoints, removes duplicate canonical edges and self-loops from the final graph view, and exports an XLSX workbook with Summary, Candidates, Canonical_Entities and Canonical_Relations sheets. A finalized run is immutable; calling finalize again returns a conflict.
 
 6. Inspect canonical entities and relations:
 
@@ -90,10 +90,10 @@ Swagger: `http://127.0.0.1:8000/docs`
 
 - `raw_entities` and `raw_relations` are retained as extraction provenance.
 - `entity_candidates` stores a stable UUID pair ID, run/document IDs, scores, evidence snapshots and decision status.
-- `canonical_entities` stores the current canonical representatives.
+- `canonical_entities` stores the current canonical representatives and the unique aliases aggregated from their raw members.
 - `canonical_entity_members` maps each raw entity to exactly one current canonical cluster.
 - Merging reassigns cluster membership and marks the losing canonical record with `merged_into_id`; raw entities and raw relations are not deleted.
-- Canonical relation queries join each raw relation's subject and object through the membership table. Therefore relations pointing to or from any merged raw entity remain queryable and resolve to the current canonical endpoints.
+- Canonical relation queries join each raw relation's subject and object through the membership table. The final view groups duplicate directed edges by canonical subject, canonical object and normalized relation type, retaining all contributing raw relation IDs and evidence. Self-loops created when both endpoints collapse into one entity are excluded from the final graph view, while raw relations remain intact.
 - A previous KEEP_SEPARATE decision blocks a later merge that would combine those two clusters.
 
 ## Notes
