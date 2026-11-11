@@ -95,3 +95,14 @@ def get_canonical_relations(document_id: str, db: Session = Depends(get_db)):
         "document_id": document_id,
         "items": EntityResolutionService(db).canonical_relations(document_id),
     }
+
+
+@router.get("/documents/{document_id}/entity-resolution/canonical-entities")
+def get_canonical_entities(document_id: str, db: Session = Depends(get_db)):
+    try:
+        return {
+            "document_id": document_id,
+            "items": EntityResolutionService(db).canonical_entities(document_id),
+        }
+    except LookupError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
