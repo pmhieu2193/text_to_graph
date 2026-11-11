@@ -19,11 +19,12 @@ class FakeEncoder:
         vectors = np.array(
             [
                 [1.0, 0.0],
-                [0.99, 0.01],
-                [0.0, 1.0],
+                [0.999, 0.001],
+                [0.998, 0.002],
             ],
             dtype=np.float32,
         )
+        assert len(texts) == len(vectors)
         return {"dense_vecs": vectors}
 
 
