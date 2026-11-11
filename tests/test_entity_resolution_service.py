@@ -7,7 +7,12 @@ from sqlalchemy.pool import StaticPool
 from app.core.database import Base
 from app.models.chunk import DocumentChunk
 from app.models.document import Document, DocumentStatus
-from app.models.entity_resolution import CanonicalEntityMember, EntityCandidate
+from app.models.entity_resolution import (
+    CanonicalEntity,
+    CanonicalEntityMember,
+    EntityCandidate,
+    EntityResolutionRun,
+)
 from app.models.extraction import RawEntity, RawRelation
 from app.services.entity_resolution.embedding_matcher import EmbeddingCandidate
 from app.services.entity_resolution.service import EntityResolutionService
@@ -365,3 +370,66 @@ def test_finalize_merges_aliases_and_deduplicates_inherited_relations(tmp_path):
         assert relation["raw_relation_count"] == 2
         assert len(relation["raw_relation_ids"]) == 2
         assert Path(result["report_path"]).exists()
+
+
+def test_reset_er_preserves_raw_data_and_allows_a_fresh_run(tmp_path):
+    engine = _build_db()
+    with Session(engine, expire_on_commit=False) as db:
+        document = Document(
+            id="D4",
+            original_filename="reset.pdf",
+            stored_filename="reset.pdf",
+            file_path="storage/reset.pdf",
+            content_type="application/pdf",
+            file_size=10,
+            sha256="4" * 64,
+            status=DocumentStatus.COMPLETED,
+        )
+        db.add(document)
+        db.flush()
+        chunk = DocumentChunk(
+            document_id="D4", chunk_index=1, content="raw entity", char_count=10
+        )
+        db.add(chunk)
+        db.flush()
+        raw = RawEntity(
+            id="RAW-D4", document_id="D4", chunk_id=chunk.id, local_id="E1",
+            name="Entity One", aliases=[], entity_type="ORGANIZATION",
+            evidence=["source"], confidence=0.9, provider="test", model_name="fake",
+        )
+        db.add(raw)
+        db.commit()
+
+        class NoCandidates:
+            def generate(self, manager):
+                return {}
+
+        service = EntityResolutionService(
+            db,
+            embedding_matcher=NoCandidates(),
+            string_matcher=NoCandidates(),
+            report_writer=FakeReportWriter(tmp_path / "reset.xlsx"),
+        )
+        _frame, _report, first_run_id = service.preview("D4")
+        assert db.get(CanonicalEntityMember, "RAW-D4") is not None
+
+        try:
+            service.preview("D4")
+            assert False, "A second run must require reset first"
+        except ValueError:
+            pass
+
+        reset_result = service.reset("D4")
+        assert reset_result["status"] == "RESET"
+        assert db.get(RawEntity, "RAW-D4") is not None
+        assert db.get(CanonicalEntityMember, "RAW-D4") is None
+        assert db.scalar(
+            select(EntityResolutionRun).where(EntityResolutionRun.id == first_run_id)
+        ) is None
+        assert db.scalars(
+            select(CanonicalEntity).where(CanonicalEntity.document_id == "D4")
+        ).all() == []
+
+        _frame, _report, second_run_id = service.preview("D4")
+        assert second_run_id != first_run_id
+        assert db.get(RawEntity, "RAW-D4") is not None
