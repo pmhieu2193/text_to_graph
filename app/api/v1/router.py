@@ -7,8 +7,4 @@ from app.api.v1.routes.entity_resolution import router as entity_resolution_rout
 api_router = APIRouter()
 api_router.include_router(documents_router, prefix="/documents", tags=["Documents"])
 api_router.include_router(extraction_router, prefix="/documents", tags=["Entity Extraction"])
-api_router.include_router(
-    entity_resolution_router,
-    prefix="/api",  # The routes below include /documents for clear resource paths.
-    tags=["Entity Resolution"],
-)
+api_router.include_router(entity_resolution_router, tags=["Entity Resolution"])
