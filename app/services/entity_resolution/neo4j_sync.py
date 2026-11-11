@@ -7,6 +7,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
+from app.models.document import Document
 from app.models.entity_resolution import EntityResolutionRun
 from app.models.extraction import RawEntity, RawRelation
 from app.services.entity_resolution.service import EntityResolutionService
@@ -25,6 +26,13 @@ class Neo4jGraphSyncService:
 
     def delete_document_graph(self, document_id: str) -> dict:
         """Delete only one document's Neo4j graph, then clear local sync markers."""
+        if self.db.get(Document, document_id) is None:
+            raise LookupError("Không tìm thấy tài liệu.")
+        runs = self.db.query(EntityResolutionRun).filter(
+            EntityResolutionRun.document_id == document_id
+        ).all()
+        if any(run.sync_status == "SYNCING" for run in runs):
+            raise ValueError("Document đang được đồng bộ Neo4j; không thể xóa graph lúc này.")
         if not settings.neo4j_uri or not settings.neo4j_username or not settings.neo4j_password:
             raise RuntimeError("Thiếu NEO4J_URI, NEO4J_USERNAME hoặc NEO4J_PASSWORD.")
         from neo4j import GraphDatabase
