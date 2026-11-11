@@ -80,7 +80,7 @@ class EmbeddingMatcher:
         encoded = encoder.encode(
             texts,
             batch_size=self.batch_size,
-            max_length=8192,
+            max_length=128,
             return_dense=True,
         )
         vectors = np.asarray(
