@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import hashlib
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -31,8 +31,13 @@ class Neo4jGraphSyncService:
         runs = self.db.query(EntityResolutionRun).filter(
             EntityResolutionRun.document_id == document_id
         ).all()
-        if any(run.sync_status == "SYNCING" for run in runs):
-            raise ValueError("Document đang được đồng bộ Neo4j; không thể xóa graph lúc này.")
+        now = datetime.now(timezone.utc)
+        for run in runs:
+            started = run.sync_started_at
+            if started is not None and started.tzinfo is None:
+                started = started.replace(tzinfo=timezone.utc)
+            if run.sync_status == "SYNCING" and started is not None and now - started < timedelta(minutes=10):
+                raise ValueError("Document đang được đồng bộ Neo4j; không thể xóa graph lúc này.")
         if not settings.neo4j_uri or not settings.neo4j_username or not settings.neo4j_password:
             raise RuntimeError("Thiếu NEO4J_URI, NEO4J_USERNAME hoặc NEO4J_PASSWORD.")
         from neo4j import GraphDatabase
@@ -57,6 +62,7 @@ class Neo4jGraphSyncService:
             ).all()
             for run in runs:
                 run.sync_status = "NOT_SYNCED"
+                run.sync_started_at = None
                 run.synced_at = None
                 run.sync_error = None
                 run.neo4j_node_count = 0
@@ -75,7 +81,11 @@ class Neo4jGraphSyncService:
             raise LookupError("Không tìm thấy ER run thuộc document này.")
         if run.status != "FINALIZED":
             raise ValueError("Chỉ được sync một ER run đã FINALIZED.")
-        if run.sync_status == "SYNCING":
+        now = datetime.now(timezone.utc)
+        started = run.sync_started_at
+        if started is not None and started.tzinfo is None:
+            started = started.replace(tzinfo=timezone.utc)
+        if run.sync_status == "SYNCING" and started is not None and now - started < timedelta(minutes=10):
             raise ValueError("Run đang được đồng bộ; không thể chạy sync song song.")
         if not settings.neo4j_uri or not settings.neo4j_username or not settings.neo4j_password:
             raise RuntimeError("Thiếu NEO4J_URI, NEO4J_USERNAME hoặc NEO4J_PASSWORD.")
@@ -145,6 +155,7 @@ class Neo4jGraphSyncService:
         ]
 
         run.sync_status = "SYNCING"
+        run.sync_started_at = now
         run.sync_error = None
         self.db.commit()
 
@@ -209,6 +220,7 @@ class Neo4jGraphSyncService:
 
             run = self.db.get(EntityResolutionRun, run_id)
             run.sync_status = "SYNCED"
+            run.sync_started_at = None
             run.synced_at = datetime.now(timezone.utc)
             run.sync_error = None
             run.neo4j_node_count = len(nodes)
@@ -227,6 +239,7 @@ class Neo4jGraphSyncService:
             failed_run = self.db.get(EntityResolutionRun, run_id)
             if failed_run is not None:
                 failed_run.sync_status = "SYNC_FAILED"
+                failed_run.sync_started_at = None
                 failed_run.sync_error = f"{type(exc).__name__}: {exc}"[:2000]
                 self.db.commit()
             raise RuntimeError(f"Neo4j sync thất bại: {exc}") from exc
