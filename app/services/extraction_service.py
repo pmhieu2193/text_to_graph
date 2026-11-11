@@ -4,7 +4,7 @@ import random
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.models.entity_resolution import EntityResolutionRun
+from app.models.entity_resolution import CanonicalEntity, EntityResolutionRun
 
 from app.models.document import Document
 
@@ -261,7 +261,12 @@ class DocumentExtractionService:
             .where(EntityResolutionRun.document_id == document_id)
             .limit(1)
         )
-        if existing_er is not None:
+        existing_canonical = self.db.scalar(
+            select(CanonicalEntity.id)
+            .where(CanonicalEntity.document_id == document_id)
+            .limit(1)
+        )
+        if existing_er is not None or existing_canonical is not None:
             raise ValueError(
                 "Tài liệu đã có ER run. Hãy reset Entity Resolution trước khi trích xuất lại."
             )
