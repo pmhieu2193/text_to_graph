@@ -128,7 +128,7 @@ class EntityResolutionService:
             records.append(self._candidate_record(candidate, entity_a, entity_b))
 
         columns = [
-            "pair_id", "entity_a_id", "entity_a", "evidence_a",
+            "pair_id", "run_id", "entity_a_id", "entity_a", "evidence_a",
             "entity_b_id", "entity_b", "evidence_b",
             "fuzzy_score", "embedding_score", "final_score", "match_method",
             "fuzzy_exact", "fuzzy_match", "embedding_match",
@@ -147,6 +147,7 @@ class EntityResolutionService:
     def _candidate_record(candidate, entity_a=None, entity_b=None) -> dict:
         return {
             "pair_id": candidate.id,
+            "run_id": candidate.run_id,
             "entity_a_id": candidate.entity_a_id,
             "entity_a": entity_a.name if entity_a else None,
             "evidence_a": candidate.evidence_a,
@@ -398,6 +399,7 @@ class EntityResolutionService:
             .where(
                 CanonicalEntity.document_id == document_id,
                 CanonicalEntity.merged_into_id.is_(None),
+                CanonicalEntityMember.raw_entity_id.is_not(None),
             )
             .order_by(CanonicalEntity.name, CanonicalEntity.id)
         ).all()
