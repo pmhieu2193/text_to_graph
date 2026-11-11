@@ -102,8 +102,13 @@ class EntityResolutionService:
         existing_run = self.db.scalar(
             select(EntityResolutionRun.id).where(EntityResolutionRun.document_id == document_id).limit(1)
         )
-        if existing_run is not None:
-            raise ValueError("Tài liệu đã có ER run. Hãy gọi API reset ER trước khi preview lại.")
+        existing_canonical = self.db.scalar(
+            select(CanonicalEntity.id)
+            .where(CanonicalEntity.document_id == document_id)
+            .limit(1)
+        )
+        if existing_run is not None or existing_canonical is not None:
+            raise ValueError("Tài liệu đã có dữ liệu ER. Hãy gọi API reset ER trước khi preview lại.")
 
         rows = list(self.db.scalars(
             select(RawEntity)
