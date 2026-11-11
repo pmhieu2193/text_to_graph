@@ -1,9 +1,6 @@
 from datetime import datetime, timezone
-from pathlib import Path
-from uuid import uuid4
-
 import pandas as pd
-from sqlalchemy import and_, or_, select, update
+from sqlalchemy import select, update
 from sqlalchemy.orm import Session, aliased
 
 from app.core.config import settings
@@ -290,6 +287,9 @@ class EntityResolutionService:
         candidate.error_message = None
         candidate.reviewed_at = datetime.now(timezone.utc)
         self.db.flush()
+        # Bulk reassignment changes the membership rows used by the next pair
+        # in an A-B-C chain; expire cached ORM objects before resolving again.
+        self.db.expire_all()
         return survivor.id
 
     def decide(self, document_id: str, pair_id: str, decision: str) -> dict:
@@ -454,6 +454,7 @@ class EntityResolutionService:
             .where(RawRelation.document_id == document_id)
             .order_by(RawRelation.id)
         ).all()
+        self.db.commit()
         return [
             {
                 "raw_relation_id": row[0],
