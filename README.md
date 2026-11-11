@@ -92,11 +92,17 @@ Swagger: `http://127.0.0.1:8000/docs`
 
    Only a FINALIZED run can be synchronized. The service validates every relation endpoint, replaces only nodes belonging to the selected document, and writes nodes and edges in one Neo4j transaction. The run records NOT_SYNCED / SYNCING / SYNCED / SYNC_FAILED and node/edge counts. A failed synchronization can be retried using the same run ID.
 
-8. Reset ER to run the process again during development:
+8. If the document already has a graph in Neo4j, remove only that document's graph first:
+
+   `DELETE /api/v1/documents/{document_id}/neo4j-graph`
+
+   This operation deletes nodes labeled `Entity` with the selected `document_id` and their relationships, then clears the local sync markers. It does not touch other documents.
+
+9. Reset ER to run the process again during development:
 
    `DELETE /api/v1/documents/{document_id}/entity-resolution/reset`
 
-   Reset removes only ER-dependent database rows (candidates, canonical memberships, canonical entities and ER runs). It preserves raw_entities, raw_relations, document chunks, extraction runs, FAISS `.index` / `.meta.json` files and report files. Reset is blocked once a Neo4j sync has been attempted; remove that document graph from Neo4j first. After reset, call preview again to create a fresh run.
+   Reset removes only ER-dependent database rows (candidates, canonical memberships, canonical entities and ER runs). It preserves raw_entities, raw_relations, document chunks, extraction runs, FAISS `.index` / `.meta.json` files and report files. Reset is blocked while a Neo4j sync has a non-NOT_SYNCED state; delete the document graph first. After reset, call preview again to create a fresh run.
 
 ### Data integrity
 
@@ -112,6 +118,6 @@ Swagger: `http://127.0.0.1:8000/docs`
 
 Set `NEO4J_URI`, `NEO4J_USERNAME`, `NEO4J_PASSWORD` and optionally `NEO4J_DATABASE` in `.env`. Apply migrations with `alembic upgrade head` after pulling the branch. The Neo4j Python driver is installed from `requirements.txt`.
 
-The BGE-M3/FAISS embedding stage is used by the current ER preview. The per-document FAISS index and metadata are cached and intentionally survive an ER reset because they are derived from raw entities, not ER decisions.
+The BGE-M3/FAISS embedding stage is used by the current ER preview. The per-document FAISS index and metadata are cached and intentionally survive an ER reset because they are derived from raw entities, not ER decisions. PDF re-processing and extraction overwrite are blocked while ER runs exist; call ER reset first to protect raw IDs referenced by candidates and canonical memberships.
 
 The project is still an MVP. Back up the SQLite database before migrations and run the test suite locally. Neo4j integration must be tested against a running Neo4j instance; a successful GitHub update does not mean an integration test has passed.
