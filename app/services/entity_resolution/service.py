@@ -480,7 +480,15 @@ class EntityResolutionService:
             .join(object_member, object_member.raw_entity_id == RawRelation.object_entity_id)
             .join(subject_canonical, subject_canonical.id == subject_member.canonical_entity_id)
             .join(object_canonical, object_canonical.id == object_member.canonical_entity_id)
-            .where(RawRelation.document_id == document_id)
+            .where(
+                RawRelation.document_id == document_id,
+                subject_member.document_id == document_id,
+                object_member.document_id == document_id,
+                subject_canonical.document_id == document_id,
+                object_canonical.document_id == document_id,
+                subject_canonical.merged_into_id.is_(None),
+                object_canonical.merged_into_id.is_(None),
+            )
             .order_by(RawRelation.id)
         ).all()
 
@@ -624,7 +632,7 @@ class EntityResolutionService:
         runs = list(self.db.scalars(
             select(EntityResolutionRun).where(EntityResolutionRun.document_id == document_id)
         ).all())
-        if any(run.sync_status == "SYNCED" for run in runs):
+        if any(run.sync_status != "NOT_SYNCED" for run in runs):
             raise ValueError(
                 "Tài liệu đã đồng bộ Neo4j. Hãy xóa graph của document khỏi Neo4j trước khi reset."
             )
