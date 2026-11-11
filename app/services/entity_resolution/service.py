@@ -91,10 +91,13 @@ class EntityResolutionService:
             )
             if fuzzy_score is not None and embedding_score is not None:
                 final_score = 0.45 * fuzzy_score + 0.55 * embedding_score
+                match_method = "HYBRID"
             elif fuzzy_score is not None:
-                final_score = fuzzy_score
+                final_score = None
+                match_method = "FUZZY_ONLY"
             else:
-                final_score = embedding_score
+                final_score = None
+                match_method = "EMBEDDING_ONLY"
 
             classification = self._classify(
                 string_candidate, fuzzy_score, embedding_score
@@ -109,6 +112,7 @@ class EntityResolutionService:
                 fuzzy_score=fuzzy_score,
                 embedding_score=embedding_score,
                 final_score=final_score,
+                match_method=match_method,
                 fuzzy_exact=bool(string_candidate and string_candidate.is_exact),
                 fuzzy_match=(
                     list(string_candidate.matched_variants) if string_candidate else None
@@ -129,7 +133,7 @@ class EntityResolutionService:
         columns = [
             "pair_id", "entity_a_id", "entity_a", "evidence_a",
             "entity_b_id", "entity_b", "evidence_b",
-            "fuzzy_score", "embedding_score", "final_score",
+            "fuzzy_score", "embedding_score", "final_score", "match_method",
             "fuzzy_exact", "fuzzy_match", "embedding_match",
             "classification", "decision", "review_status",
         ]
@@ -155,6 +159,7 @@ class EntityResolutionService:
             "fuzzy_score": candidate.fuzzy_score,
             "embedding_score": candidate.embedding_score,
             "final_score": candidate.final_score,
+            "match_method": candidate.match_method,
             "fuzzy_exact": candidate.fuzzy_exact,
             "fuzzy_match": candidate.fuzzy_match,
             "embedding_match": candidate.embedding_match,
@@ -272,7 +277,7 @@ class EntityResolutionService:
         # Stable survivor: canonical created first; ID breaks timestamp ties.
         survivor, loser = sorted(
             (canonical_a, canonical_b),
-            key=lambda item: (item.created_at or datetime.max.replace(tzinfo=timezone.utc), item.id),
+            key=lambda item: ((item.created_at.isoformat() if item.created_at else ""), item.id),
         )
         self.db.execute(
             update(CanonicalEntityMember)
@@ -299,6 +304,11 @@ class EntityResolutionService:
             raise ValueError("decision phải là MERGE, KEEP_SEPARATE hoặc SKIP.")
         try:
             canonical_id = None
+            if decision == "KEEP_SEPARATE":
+                canonical_a = self._canonical_for_raw(candidate.entity_a_id)
+                canonical_b = self._canonical_for_raw(candidate.entity_b_id)
+                if canonical_a.id == canonical_b.id:
+                    raise ValueError("Hai entity đã thuộc cùng canonical cluster; không thể đánh dấu KEEP_SEPARATE mà không tách cluster.")
             if decision == "MERGE":
                 canonical_id = self._merge_candidate(candidate)
                 if candidate.review_status == "BLOCKED_CONFLICT":
