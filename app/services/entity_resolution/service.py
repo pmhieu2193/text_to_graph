@@ -47,6 +47,7 @@ class EntityResolutionService:
                 document_id=document_id,
                 entity_type=entity.entity_type,
                 name=entity.name,
+                aliases=self._collect_aliases([entity]),
             )
             self.db.add(canonical)
             self.db.flush()
@@ -56,6 +57,42 @@ class EntityResolutionService:
                 document_id=document_id,
             ))
         self.db.flush()
+
+    @staticmethod
+    def _collect_aliases(entities: list[RawEntity], canonical_name: str | None = None) -> list[str]:
+        """Collect unique observed names and aliases while preserving order."""
+        values: list[str] = []
+        seen: set[str] = set()
+        for entity in entities:
+            for value in [entity.name, *(entity.aliases or [])]:
+                if not isinstance(value, str):
+                    continue
+                cleaned = " ".join(value.split()).strip()
+                key = cleaned.casefold()
+                if cleaned and key not in seen:
+                    seen.add(key)
+                    values.append(cleaned)
+        if canonical_name:
+            values = [value for value in values if value.casefold() != canonical_name.casefold()]
+        return values
+
+    def _refresh_canonical_aliases(self, document_id: str) -> None:
+        """Rebuild aliases from every raw member; raw extraction remains untouched."""
+        rows = self.db.execute(
+            select(CanonicalEntity, RawEntity)
+            .join(CanonicalEntityMember, CanonicalEntityMember.canonical_entity_id == CanonicalEntity.id)
+            .join(RawEntity, RawEntity.id == CanonicalEntityMember.raw_entity_id)
+            .where(
+                CanonicalEntity.document_id == document_id,
+                CanonicalEntity.merged_into_id.is_(None),
+            )
+            .order_by(CanonicalEntity.created_at, RawEntity.id)
+        ).all()
+        grouped: dict[str, tuple[CanonicalEntity, list[RawEntity]]] = {}
+        for canonical, raw in rows:
+            grouped.setdefault(canonical.id, (canonical, []))[1].append(raw)
+        for canonical, members in grouped.values():
+            canonical.aliases = self._collect_aliases(members, canonical.name)
 
     def preview(self, document_id: str) -> tuple[pd.DataFrame, str, str]:
         if self.db.get(Document, document_id) is None:
@@ -297,6 +334,9 @@ class EntityResolutionService:
         candidate = self.db.get(EntityCandidate, pair_id)
         if candidate is None or candidate.document_id != document_id:
             raise LookupError("Không tìm thấy cặp candidate thuộc tài liệu này.")
+        run = self.db.get(EntityResolutionRun, candidate.run_id)
+        if run is None or run.status == "FINALIZED":
+            raise ValueError("Lần chạy ER đã finalize hoặc không còn hợp lệ.")
         if candidate.review_status != "PENDING":
             raise ValueError(
                 f"Cặp này đã được xử lý (review_status={candidate.review_status})."
@@ -332,10 +372,7 @@ class EntityResolutionService:
             self.db.rollback()
             raise
 
-    def auto_merge(self, document_id: str, run_id: str) -> dict:
-        run = self.db.get(EntityResolutionRun, run_id)
-        if run is None or run.document_id != document_id:
-            raise LookupError("Không tìm thấy lần chạy ER thuộc tài liệu này.")
+    def _apply_auto_merge(self, document_id: str, run_id: str) -> dict:
         candidates = list(self.db.scalars(
             select(EntityCandidate)
             .where(
@@ -347,49 +384,35 @@ class EntityResolutionService:
             .order_by(EntityCandidate.final_score.desc().nullslast(), EntityCandidate.id)
         ).all())
         merged = blocked = 0
-        try:
-            for candidate in candidates:
-                result = self._merge_candidate(candidate)
-                if result is None:
-                    blocked += 1
-                else:
-                    merged += 1
-            self.db.commit()
-        except Exception:
-            self.db.rollback()
-            raise
+        for candidate in candidates:
+            result = self._merge_candidate(candidate)
+            if result is None:
+                blocked += 1
+            else:
+                merged += 1
         return {
-            "run_id": run_id,
             "auto_candidates": len(candidates),
             "merged_or_already_same_cluster": merged,
             "blocked_by_keep_separate": blocked,
         }
 
-    def auto_process(self, document_id: str, run_id: str) -> dict:
-        """Apply AUTO_MERGE candidates, then default all remaining PENDING pairs to no-merge."""
-        auto_result = self.auto_merge(document_id, run_id)
-        pending = list(self.db.scalars(
-            select(EntityCandidate).where(
-                EntityCandidate.document_id == document_id,
-                EntityCandidate.run_id == run_id,
-                EntityCandidate.review_status == "PENDING",
-            )
-        ).all())
-        for candidate in pending:
-            candidate.decision = "KEEP_SEPARATE"
-            candidate.review_status = "KEPT_SEPARATE"
-            candidate.reviewed_at = datetime.now(timezone.utc)
-        self.db.commit()
-        return {
-            **auto_result,
-            "defaulted_to_keep_separate": len(pending),
-        }
+    def auto_merge(self, document_id: str, run_id: str) -> dict:
+        """Apply only AUTO_MERGE candidates; this does not finalize the run."""
+        run = self.db.get(EntityResolutionRun, run_id)
+        if run is None or run.document_id != document_id:
+            raise LookupError("Không tìm thấy lần chạy ER thuộc tài liệu này.")
+        if run.status == "FINALIZED":
+            raise ValueError("Lần chạy ER đã finalize; không thể thay đổi kết quả.")
+        try:
+            result = self._apply_auto_merge(document_id, run_id)
+            self._refresh_canonical_aliases(document_id)
+            self.db.commit()
+            return {"run_id": run_id, **result}
+        except Exception:
+            self.db.rollback()
+            raise
 
-
-    def canonical_entities(self, document_id: str) -> list[dict]:
-        if self.db.get(Document, document_id) is None:
-            raise LookupError("Không tìm thấy tài liệu.")
-        self._ensure_canonical_members(document_id)
+    def _canonical_entities_payload(self, document_id: str) -> list[dict]:
         rows = self.db.execute(
             select(CanonicalEntity, CanonicalEntityMember.raw_entity_id)
             .outerjoin(
@@ -403,72 +426,177 @@ class EntityResolutionService:
             )
             .order_by(CanonicalEntity.name, CanonicalEntity.id)
         ).all()
-        self.db.commit()
         grouped: dict[str, dict] = {}
         for canonical, raw_id in rows:
             item = grouped.setdefault(canonical.id, {
                 "canonical_entity_id": canonical.id,
                 "name": canonical.name,
                 "entity_type": canonical.entity_type,
+                "aliases": list(canonical.aliases or []),
                 "raw_entity_ids": [],
             })
             if raw_id:
                 item["raw_entity_ids"].append(raw_id)
         return list(grouped.values())
 
-    def canonical_relations(self, document_id: str) -> list[dict]:
-        if self.db.get(Document, document_id) is None:
-            raise LookupError("Không tìm thấy tài liệu.")
-        self._ensure_canonical_members(document_id)
+    def _canonical_relations_payload(self, document_id: str) -> tuple[list[dict], int]:
+        """Map raw edges to canonical endpoints and collapse duplicate edges."""
         subject_member = aliased(CanonicalEntityMember)
         object_member = aliased(CanonicalEntityMember)
         subject_canonical = aliased(CanonicalEntity)
         object_canonical = aliased(CanonicalEntity)
         rows = self.db.execute(
             select(
-                RawRelation.id,
-                RawRelation.subject_entity_id,
-                RawRelation.object_entity_id,
-                RawRelation.relation_type,
-                RawRelation.description,
-                RawRelation.evidence,
-                subject_member.canonical_entity_id,
-                object_member.canonical_entity_id,
-                subject_canonical.name,
-                object_canonical.name,
+                RawRelation.id, RawRelation.subject_entity_id, RawRelation.object_entity_id,
+                RawRelation.relation_type, RawRelation.description, RawRelation.evidence,
+                subject_member.canonical_entity_id, object_member.canonical_entity_id,
+                subject_canonical.name, object_canonical.name,
             )
-            .join(
-                subject_member,
-                subject_member.raw_entity_id == RawRelation.subject_entity_id,
-            )
-            .join(
-                object_member,
-                object_member.raw_entity_id == RawRelation.object_entity_id,
-            )
-            .join(
-                subject_canonical,
-                subject_canonical.id == subject_member.canonical_entity_id,
-            )
-            .join(
-                object_canonical,
-                object_canonical.id == object_member.canonical_entity_id,
-            )
+            .join(subject_member, subject_member.raw_entity_id == RawRelation.subject_entity_id)
+            .join(object_member, object_member.raw_entity_id == RawRelation.object_entity_id)
+            .join(subject_canonical, subject_canonical.id == subject_member.canonical_entity_id)
+            .join(object_canonical, object_canonical.id == object_member.canonical_entity_id)
             .where(RawRelation.document_id == document_id)
             .order_by(RawRelation.id)
         ).all()
-        self.db.commit()
-        return [
-            {
-                "raw_relation_id": row[0],
-                "raw_subject_entity_id": row[1],
-                "raw_object_entity_id": row[2],
-                "relation_type": row[3],
-                "description": row[4],
-                "evidence": row[5],
-                "canonical_subject_id": row[6],
-                "canonical_object_id": row[7],
-                "canonical_subject_name": row[8],
-                "canonical_object_name": row[9],
+
+        grouped: dict[tuple[str, str, str], dict] = {}
+        self_loops = 0
+        for row in rows:
+            raw_id, raw_subject, raw_object, rel_type, description, evidence, c_subject, c_object, s_name, o_name = row
+            # A relation whose endpoints collapse to the same canonical node is
+            # not useful as an inter-entity edge. Keep the raw relation intact.
+            if c_subject == c_object:
+                self_loops += 1
+                continue
+            normalized_type = " ".join((rel_type or "").split()).casefold()
+            key = (c_subject, c_object, normalized_type)
+            item = grouped.setdefault(key, {
+                "canonical_subject_id": c_subject,
+                "canonical_subject_name": s_name,
+                "canonical_object_id": c_object,
+                "canonical_object_name": o_name,
+                "relation_type": rel_type,
+                "descriptions": [],
+                "evidence": [],
+                "raw_relation_ids": [],
+                "raw_relation_count": 0,
+            })
+            item["raw_relation_ids"].append(raw_id)
+            item["raw_relation_count"] += 1
+            if description and description not in item["descriptions"]:
+                item["descriptions"].append(description)
+            evidence_values = evidence if isinstance(evidence, list) else [evidence]
+            for value in evidence_values:
+                if value and value not in item["evidence"]:
+                    item["evidence"].append(value)
+
+        result = []
+        for item in grouped.values():
+            item["description"] = " | ".join(item.pop("descriptions"))
+            result.append(item)
+        result.sort(key=lambda item: (
+            item["canonical_subject_name"], item["relation_type"],
+            item["canonical_object_name"],
+        ))
+        return result, self_loops
+
+    def finalize(self, document_id: str, run_id: str) -> dict:
+        """Commit the final ER state and export an auditable workbook.
+
+        Explicit user decisions are preserved. Remaining AUTO_MERGE candidates
+        are merged; all other PENDING candidates become SKIP, never
+        KEEP_SEPARATE. SKIP is not a semantic assertion of distinct identity.
+        """
+        run = self.db.get(EntityResolutionRun, run_id)
+        if run is None or run.document_id != document_id:
+            raise LookupError("Không tìm thấy lần chạy ER thuộc tài liệu này.")
+        if run.status == "FINALIZED":
+            raise ValueError("Lần chạy ER này đã được finalize trước đó.")
+        report_path = None
+        try:
+            auto_result = self._apply_auto_merge(document_id, run_id)
+
+            pending = list(self.db.scalars(
+                select(EntityCandidate).where(
+                    EntityCandidate.document_id == document_id,
+                    EntityCandidate.run_id == run_id,
+                    EntityCandidate.review_status == "PENDING",
+                )
+            ).all())
+            for candidate in pending:
+                candidate.decision = "SKIP"
+                candidate.review_status = "SKIPPED"
+                candidate.reviewed_at = datetime.now(timezone.utc)
+
+            self._refresh_canonical_aliases(document_id)
+            entities = self._canonical_entities_payload(document_id)
+            relations, self_loop_count = self._canonical_relations_payload(document_id)
+            candidates = self.list_candidates(document_id, run_id)
+
+            counts = self.db.execute(
+                select(EntityCandidate.review_status, EntityCandidate.decision)
+                .where(
+                    EntityCandidate.document_id == document_id,
+                    EntityCandidate.run_id == run_id,
+                )
+            ).all()
+            summary = {
+                "candidate_count": len(counts),
+                "merged_count": sum(1 for status, decision in counts if status == "MERGED" or decision == "MERGE"),
+                "kept_separate_count": sum(1 for status, decision in counts if decision == "KEEP_SEPARATE"),
+                "skipped_count": sum(1 for status, decision in counts if status == "SKIPPED" or decision == "SKIP"),
+                "blocked_conflict_count": sum(1 for status, _ in counts if status == "BLOCKED_CONFLICT"),
+                "canonical_entity_count": len(entities),
+                "canonical_relation_count": len(relations),
+                "deduplicated_relation_count": sum(item["raw_relation_count"] - 1 for item in relations),
+                "removed_self_loop_count": self_loop_count,
             }
-            for row in rows
-        ]
+            report_path = self.report_writer.write_final(
+                document_id=document_id,
+                run_id=run_id,
+                candidates=candidates,
+                canonical_entities=entities,
+                canonical_relations=relations,
+                summary={**summary, **auto_result, "defaulted_to_skip": len(pending)},
+            )
+            run.report_path = str(report_path)
+            run.status = "FINALIZED"
+            run.completed_at = datetime.now(timezone.utc)
+            self.db.commit()
+            return {
+                "document_id": document_id,
+                "run_id": run_id,
+                "status": run.status,
+                **summary,
+                **auto_result,
+                "defaulted_to_skip": len(pending),
+                "report_path": str(report_path),
+                "canonical_entities": entities,
+                "canonical_relations": relations,
+            }
+        except Exception:
+            self.db.rollback()
+            if report_path:
+                try:
+                    report_path.unlink(missing_ok=True)
+                except OSError:
+                    pass
+            raise
+
+    def canonical_entities(self, document_id: str) -> list[dict]:
+        if self.db.get(Document, document_id) is None:
+            raise LookupError("Không tìm thấy tài liệu.")
+        self._ensure_canonical_members(document_id)
+        self._refresh_canonical_aliases(document_id)
+        result = self._canonical_entities_payload(document_id)
+        self.db.commit()
+        return result
+
+    def canonical_relations(self, document_id: str) -> list[dict]:
+        if self.db.get(Document, document_id) is None:
+            raise LookupError("Không tìm thấy tài liệu.")
+        self._ensure_canonical_members(document_id)
+        result, _self_loops = self._canonical_relations_payload(document_id)
+        self.db.commit()
+        return result
