@@ -79,7 +79,7 @@ class ManageRawEntity:
                 cleaned = clean_display_text(candidate)
                 if not cleaned:
                     continue
-                if index > 0 and not is_valid_alias(cleaned):
+                if not is_valid_alias(cleaned):
                     continue
 
                 key = normalize_text(cleaned)
