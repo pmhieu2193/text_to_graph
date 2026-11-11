@@ -37,6 +37,21 @@ class FakeReportWriter:
     def write(self, document_id, dataframe):
         return self.path
 
+    def write_final(
+        self, document_id, run_id, candidates, canonical_entities,
+        canonical_relations, summary,
+    ):
+        from app.services.entity_resolution.report_writer import EntityResolutionReportWriter
+        writer = EntityResolutionReportWriter(report_dir=self.path.parent)
+        return writer.write_final(
+            document_id=document_id,
+            run_id=run_id,
+            candidates=candidates,
+            canonical_entities=canonical_entities,
+            canonical_relations=canonical_relations,
+            summary=summary,
+        )
+
 
 def _build_db():
     engine = create_engine(
