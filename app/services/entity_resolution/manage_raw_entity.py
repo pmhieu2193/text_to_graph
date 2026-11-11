@@ -47,7 +47,7 @@ class RawEntityData:
     name: str
     aliases: list[str] = field(default_factory=list)
     valid_variants: list[str] = field(default_factory=list)
-
+    evidence: list[str] = field(default_factory=list)
 
 class ManageRawEntity:
     """Owns the in-memory snapshot of raw entities for one document ER run."""
@@ -65,6 +65,8 @@ class ManageRawEntity:
                 entity_type=row.entity_type,
                 name=clean_display_text(row.name),
                 aliases=list(row.aliases or []),
+                valid_variants=list(row.valid_variants or []),
+                evidence=list(row.evidence or []),
             )
             self.entities[entity.id] = entity
 

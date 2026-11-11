@@ -8,7 +8,9 @@ from app.services.entity_resolution.report_writer import (
     EntityResolutionReportWriter,
 )
 from app.services.entity_resolution.string_matcher import StringMatcher
-
+from sqlalchemy import select
+from app.models.document import Document
+from app.models.extraction import RawEntity
 
 class EntityResolutionService:
     """Document-scoped entity resolution preview."""
@@ -36,10 +38,6 @@ class EntityResolutionService:
         )
 
     def preview(self, document_id: str) -> tuple[pd.DataFrame, str]:
-        from sqlalchemy import select
-
-        from app.models.document import Document
-        from app.models.extraction import RawEntity
 
         document = self.db.get(Document, document_id)
 

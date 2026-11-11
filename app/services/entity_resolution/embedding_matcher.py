@@ -32,7 +32,7 @@ def _load_bge_model(model_name: str):
         from FlagEmbedding import BGEM3FlagModel
     except ImportError as exc:
         raise RuntimeError(
-            "Thiếu FlagEmbedding. Cài requirements-er.txt."
+            "Thiếu FlagEmbedding. Cài requirements.txt."
         ) from exc
 
     return BGEM3FlagModel(model_name, use_fp16=False)
