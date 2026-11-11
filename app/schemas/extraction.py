@@ -1,4 +1,4 @@
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
 # ==========================================
@@ -18,7 +18,7 @@ class EntityItem(BaseModel):
         default_factory=list,
         description="Danh sách các câu/đoạn trích nguyên văn từ nguồn liên quan đến thực thể."
     )
-    confidence: float = 1.0
+    confidence: float = Field(default=1.0, ge=0.0, le=1.0)
 
 
 class RelationItem(BaseModel):
@@ -28,12 +28,42 @@ class RelationItem(BaseModel):
     relation_type: str
     description: str | None = None
     evidence: str
-    confidence: float = 1.0
+    confidence: float = Field(default=1.0, ge=0.0, le=1.0)
 
 
 class ExtractionPayload(BaseModel):
     entities: list[EntityItem] = Field(default_factory=list)
     relations: list[RelationItem] = Field(default_factory=list)
+
+    @model_validator(mode="after")
+    def validate_relation_references(self):
+        entity_ids = [entity.local_id for entity in self.entities]
+        entity_id_set = set(entity_ids)
+
+        if len(entity_ids) != len(entity_id_set):
+            raise ValueError("Entity local_id phải duy nhất trong một payload.")
+
+        relation_ids = [relation.local_id for relation in self.relations]
+        if len(relation_ids) != len(set(relation_ids)):
+            raise ValueError("Relation local_id phải duy nhất trong một payload.")
+
+        for relation in self.relations:
+            missing = [
+                local_id
+                for local_id in (
+                    relation.subject_local_id,
+                    relation.object_local_id,
+                )
+                if local_id not in entity_id_set
+            ]
+            if missing:
+                missing_ids = ", ".join(sorted(set(missing)))
+                raise ValueError(
+                    f"Relation '{relation.local_id}' tham chiếu entity "
+                    f"không tồn tại: {missing_ids}."
+                )
+
+        return self
 
 
 # ==========================================
