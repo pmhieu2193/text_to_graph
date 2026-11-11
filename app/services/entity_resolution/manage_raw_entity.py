@@ -79,7 +79,9 @@ class ManageRawEntity:
                 cleaned = clean_display_text(candidate)
                 if not cleaned:
                     continue
-                if not is_valid_alias(cleaned):
+                # Primary names are authoritative; apply contextual filtering
+                # only to aliases returned by the LLM.
+                if index > 0 and not is_valid_alias(cleaned):
                     continue
 
                 key = normalize_text(cleaned)
