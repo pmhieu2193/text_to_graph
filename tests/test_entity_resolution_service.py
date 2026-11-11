@@ -357,7 +357,9 @@ def test_finalize_merges_aliases_and_deduplicates_inherited_relations(tmp_path):
             item for item in result["canonical_entities"]
             if len(item["raw_entity_ids"]) == 2
         )
-        assert "Công viên nước Đầm Sen" in canonical["aliases"]
+        all_names = {canonical["name"], *canonical["aliases"]}
+        assert "Công viên nước Đầm Sen" in all_names
+        assert "Công viên Đầm Sen" in all_names
         assert "Đầm Sen" in canonical["aliases"]
         relation = result["canonical_relations"][0]
         assert relation["raw_relation_count"] == 2
