@@ -46,13 +46,13 @@ class EntityResolutionReportWriter:
             })
         else:
             with path.open("w", encoding="utf-8") as file:
-                file.write(f"Document ID: {document_id}\\n")
-                file.write(f"Candidate count: {len(dataframe)}\\n\\n")
-                file.write("=== SUMMARY ===\\n")
+                file.write(f"Document ID: {document_id}\n")
+                file.write(f"Candidate count: {len(dataframe)}\n\n")
+                file.write("=== SUMMARY ===\n")
                 file.write(summary.to_string(index=False))
-                file.write("\\n\\n=== CANDIDATES ===\\n")
+                file.write("\n\n=== CANDIDATES ===\n")
                 file.write(dataframe.to_string(index=False))
-                file.write("\\n")
+                file.write("\n")
         return path
 
     def write_final(
