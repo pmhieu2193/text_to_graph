@@ -31,7 +31,9 @@ def create_er_preview(document_id: str, db: Session = Depends(get_db)):
         }
     except LookupError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
-    except (RuntimeError, ValueError) as exc:
+    except ValueError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+    except RuntimeError as exc:
         raise HTTPException(status_code=503, detail=str(exc)) from exc
 
 
