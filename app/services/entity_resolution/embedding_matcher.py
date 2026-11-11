@@ -54,7 +54,7 @@ class EmbeddingMatcher:
             import faiss
         except ImportError as exc:
             raise RuntimeError(
-                "Thiếu faiss-cpu. Cài dependencies trong requirements.txt."
+                "Thiếu faiss-cpu. Cài dependencies trong requirements-er.txt."
             ) from exc
 
         texts: list[str] = []
