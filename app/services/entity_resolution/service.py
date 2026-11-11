@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 import pandas as pd
-from sqlalchemy import select, update
+from sqlalchemy import delete, select, update
 from sqlalchemy.orm import Session, aliased
 
 from app.core.config import settings
@@ -97,6 +97,11 @@ class EntityResolutionService:
     def preview(self, document_id: str) -> tuple[pd.DataFrame, str, str]:
         if self.db.get(Document, document_id) is None:
             raise LookupError("Không tìm thấy tài liệu.")
+        existing_run = self.db.scalar(
+            select(EntityResolutionRun.id).where(EntityResolutionRun.document_id == document_id).limit(1)
+        )
+        if existing_run is not None:
+            raise ValueError("Tài liệu đã có ER run. Hãy gọi API reset ER trước khi preview lại.")
 
         rows = list(self.db.scalars(
             select(RawEntity)
@@ -262,13 +267,14 @@ class EntityResolutionService:
         return canonical
 
     def _has_separation_conflict(
-        self, document_id: str, raw_ids_a: set[str], raw_ids_b: set[str]
+        self, document_id: str, run_id: str, raw_ids_a: set[str], raw_ids_b: set[str]
     ) -> bool:
         if not raw_ids_a or not raw_ids_b:
             return False
         pairs = self.db.scalars(
             select(EntityCandidate).where(
                 EntityCandidate.document_id == document_id,
+                EntityCandidate.run_id == run_id,
                 EntityCandidate.decision == "KEEP_SEPARATE",
             )
         ).all()
@@ -319,7 +325,7 @@ class EntityResolutionService:
             )
         ).all())
         if self._has_separation_conflict(
-            candidate.document_id, members_a, members_b
+            candidate.document_id, candidate.run_id, members_a, members_b
         ):
             candidate.review_status = "BLOCKED_CONFLICT"
             candidate.error_message = (
@@ -498,9 +504,17 @@ class EntityResolutionService:
                 "descriptions": [],
                 "evidence": [],
                 "raw_relation_ids": [],
+                "raw_subject_entity_ids": [],
+                "raw_object_entity_ids": [],
+                "raw_subject_entity_id": raw_subject,
+                "raw_object_entity_id": raw_object,
                 "raw_relation_count": 0,
             })
             item["raw_relation_ids"].append(raw_id)
+            if raw_subject not in item["raw_subject_entity_ids"]:
+                item["raw_subject_entity_ids"].append(raw_subject)
+            if raw_object not in item["raw_object_entity_ids"]:
+                item["raw_object_entity_ids"].append(raw_object)
             item["raw_relation_count"] += 1
             if description and description not in item["descriptions"]:
                 item["descriptions"].append(description)
@@ -600,6 +614,54 @@ class EntityResolutionService:
                     report_path.unlink(missing_ok=True)
                 except OSError:
                     pass
+            raise
+
+    def reset(self, document_id: str) -> dict:
+        """Delete ER-dependent rows only. Raw extraction and FAISS cache are preserved."""
+        if self.db.get(Document, document_id) is None:
+            raise LookupError("Không tìm thấy tài liệu.")
+
+        runs = list(self.db.scalars(
+            select(EntityResolutionRun).where(EntityResolutionRun.document_id == document_id)
+        ).all())
+        if any(run.sync_status == "SYNCED" for run in runs):
+            raise ValueError(
+                "Tài liệu đã đồng bộ Neo4j. Hãy xóa graph của document khỏi Neo4j trước khi reset."
+            )
+        try:
+            # Break self-referencing RESTRICT edges before deleting canonical rows.
+            self.db.execute(
+                update(CanonicalEntity)
+                .where(CanonicalEntity.document_id == document_id)
+                .values(merged_into_id=None)
+            )
+            self.db.execute(
+                delete(CanonicalEntityMember).where(
+                    CanonicalEntityMember.document_id == document_id
+                )
+            )
+            self.db.execute(
+                delete(CanonicalEntity).where(CanonicalEntity.document_id == document_id)
+            )
+            self.db.execute(
+                delete(EntityCandidate).where(EntityCandidate.document_id == document_id)
+            )
+            self.db.execute(
+                delete(EntityResolutionRun).where(EntityResolutionRun.document_id == document_id)
+            )
+            self.db.commit()
+            return {
+                "document_id": document_id,
+                "status": "RESET",
+                "deleted_runs": len(runs),
+                "preserved": [
+                    "raw_entities", "raw_relations", "document_chunks",
+                    "chunk_extraction_runs", "FAISS .index", "FAISS .meta.json",
+                    "ER report files",
+                ],
+            }
+        except Exception:
+            self.db.rollback()
             raise
 
     def canonical_entities(self, document_id: str) -> list[dict]:
