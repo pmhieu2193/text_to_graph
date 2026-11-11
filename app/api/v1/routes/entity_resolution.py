@@ -91,10 +91,13 @@ def auto_process_er_run(
 
 @router.get("/documents/{document_id}/entity-resolution/canonical-relations")
 def get_canonical_relations(document_id: str, db: Session = Depends(get_db)):
-    return {
-        "document_id": document_id,
-        "items": EntityResolutionService(db).canonical_relations(document_id),
-    }
+    try:
+        return {
+            "document_id": document_id,
+            "items": EntityResolutionService(db).canonical_relations(document_id),
+        }
+    except LookupError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 
 @router.get("/documents/{document_id}/entity-resolution/canonical-entities")
