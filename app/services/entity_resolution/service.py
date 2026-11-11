@@ -678,16 +678,10 @@ class EntityResolutionService:
     def canonical_entities(self, document_id: str) -> list[dict]:
         if self.db.get(Document, document_id) is None:
             raise LookupError("Không tìm thấy tài liệu.")
-        self._ensure_canonical_members(document_id)
-        self._refresh_canonical_aliases(document_id)
-        result = self._canonical_entities_payload(document_id)
-        self.db.commit()
-        return result
+        return self._canonical_entities_payload(document_id)
 
     def canonical_relations(self, document_id: str) -> list[dict]:
         if self.db.get(Document, document_id) is None:
             raise LookupError("Không tìm thấy tài liệu.")
-        self._ensure_canonical_members(document_id)
         result, _self_loops = self._canonical_relations_payload(document_id)
-        self.db.commit()
         return result
