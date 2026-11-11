@@ -284,6 +284,24 @@ class EntityResolutionService:
     def _merge_candidate(self, candidate: EntityCandidate) -> str | None:
         canonical_a = self._canonical_for_raw(candidate.entity_a_id)
         canonical_b = self._canonical_for_raw(candidate.entity_b_id)
+        # Guard against corrupt/cross-document candidate rows and incompatible
+        # entity classes. Never silently merge unlike semantic node types.
+        if (
+            canonical_a.document_id != candidate.document_id
+            or canonical_b.document_id != candidate.document_id
+        ):
+            candidate.review_status = "BLOCKED_CONFLICT"
+            candidate.error_message = "Candidate chứa entity ngoài phạm vi tài liệu."
+            return None
+        if (canonical_a.entity_type or "").strip().casefold() != (
+            canonical_b.entity_type or ""
+        ).strip().casefold():
+            candidate.review_status = "BLOCKED_CONFLICT"
+            candidate.error_message = (
+                f"Không thể gộp khác entity_type: "
+                f"{canonical_a.entity_type} != {canonical_b.entity_type}."
+            )
+            return None
         if canonical_a.id == canonical_b.id:
             candidate.decision = "MERGE"
             candidate.review_status = "MERGED"
