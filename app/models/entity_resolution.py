@@ -45,6 +45,7 @@ class EntityResolutionRun(Base):
     sync_status: Mapped[str] = mapped_column(
         String(20), nullable=False, default="NOT_SYNCED", server_default="NOT_SYNCED"
     )
+    sync_started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     synced_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     sync_error: Mapped[str | None] = mapped_column(Text, nullable=True)
     neo4j_node_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
