@@ -34,6 +34,11 @@ class Settings(BaseSettings):
     er_auto_merge_exact: bool = False
     er_report_format: str = "xlsx"
 
+    neo4j_uri: str | None = None
+    neo4j_username: str | None = None
+    neo4j_password: str | None = None
+    neo4j_database: str = "neo4j"
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
