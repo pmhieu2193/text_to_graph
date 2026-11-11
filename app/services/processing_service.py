@@ -1,7 +1,7 @@
 from datetime import datetime,timezone
 from pathlib import Path
 from sqlalchemy import select
-from app.models.entity_resolution import EntityResolutionRun
+from app.models.entity_resolution import CanonicalEntity, EntityResolutionRun
 from app.core.config import settings
 from app.models.document import DocumentStatus
 from app.repositories.document_repository import DocumentRepository
@@ -17,7 +17,8 @@ class DocumentProcessingService:
         if doc is None: raise LookupError('Không tìm thấy tài liệu.')
         if doc.status==DocumentStatus.PROCESSING: raise RuntimeError('Tài liệu đang được xử lý.')
         existing_er=self.db.scalar(select(EntityResolutionRun.id).where(EntityResolutionRun.document_id==document_id).limit(1))
-        if existing_er is not None:
+        existing_canonical=self.db.scalar(select(CanonicalEntity.id).where(CanonicalEntity.document_id==document_id).limit(1))
+        if existing_er is not None or existing_canonical is not None:
             raise RuntimeError('Tài liệu đã có ER run. Hãy reset Entity Resolution trước khi xử lý lại PDF.')
         doc.status=DocumentStatus.PROCESSING;doc.error_message=None;self.repo.commit()
         try:
