@@ -39,7 +39,7 @@ class EmbeddingMatcher:
             from FlagEmbedding import BGEM3FlagModel
         except ImportError as exc:
             raise RuntimeError(
-                "Thiếu FlagEmbedding. Cài dependencies trong requirements.txt."
+                "Thiếu FlagEmbedding. Cài dependencies trong requirements-er.txt."
             ) from exc
 
         # Lazy-load: model chỉ được khởi tạo khi thực sự chạy ER.
