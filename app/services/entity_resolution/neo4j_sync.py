@@ -40,13 +40,14 @@ class Neo4jGraphSyncService:
                 raise ValueError("Document đang được đồng bộ Neo4j; không thể xóa graph lúc này.")
         if not settings.neo4j_uri or not settings.neo4j_username or not settings.neo4j_password:
             raise RuntimeError("Thiếu NEO4J_URI, NEO4J_USERNAME hoặc NEO4J_PASSWORD.")
-        from neo4j import GraphDatabase
-
-        driver = GraphDatabase.driver(
-            settings.neo4j_uri,
-            auth=(settings.neo4j_username, settings.neo4j_password),
-        )
+        driver = None
         try:
+            from neo4j import GraphDatabase
+
+            driver = GraphDatabase.driver(
+                settings.neo4j_uri,
+                auth=(settings.neo4j_username, settings.neo4j_password),
+            )
             driver.verify_connectivity()
             with driver.session(database=settings.neo4j_database) as session:
                 result = session.execute_write(
@@ -73,7 +74,8 @@ class Neo4jGraphSyncService:
             self.db.rollback()
             raise RuntimeError(f"Không thể xóa graph Neo4j: {exc}") from exc
         finally:
-            driver.close()
+            if driver is not None:
+                driver.close()
 
     def sync(self, document_id: str, run_id: str) -> dict:
         run = self.db.get(EntityResolutionRun, run_id)
