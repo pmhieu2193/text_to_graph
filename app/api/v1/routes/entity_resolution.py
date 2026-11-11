@@ -74,6 +74,8 @@ def auto_merge_er_candidates(
         return EntityResolutionService(db).auto_merge(document_id, run_id)
     except LookupError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
 
 
 @router.post(
