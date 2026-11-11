@@ -1,5 +1,7 @@
 from datetime import datetime,timezone
 from pathlib import Path
+from sqlalchemy import select
+from app.models.entity_resolution import EntityResolutionRun
 from app.core.config import settings
 from app.models.document import DocumentStatus
 from app.repositories.document_repository import DocumentRepository
@@ -7,12 +9,16 @@ from app.services.pdf_extractor import PDFExtractor
 from app.services.text_chunker import TextChunker
 class DocumentProcessingService:
     def __init__(self,db):
+        self.db=db
         self.repo=DocumentRepository(db);self.extractor=PDFExtractor()
         self.chunker=TextChunker(settings.chunk_size,settings.chunk_overlap)
     def process(self,document_id):
         doc=self.repo.get_by_id(document_id)
         if doc is None: raise LookupError('Không tìm thấy tài liệu.')
         if doc.status==DocumentStatus.PROCESSING: raise RuntimeError('Tài liệu đang được xử lý.')
+        existing_er=self.db.scalar(select(EntityResolutionRun.id).where(EntityResolutionRun.document_id==document_id).limit(1))
+        if existing_er is not None:
+            raise RuntimeError('Tài liệu đã có ER run. Hãy reset Entity Resolution trước khi xử lý lại PDF.')
         doc.status=DocumentStatus.PROCESSING;doc.error_message=None;self.repo.commit()
         try:
             extracted=self.extractor.extract(doc.file_path);chunks=self.chunker.split(extracted)
