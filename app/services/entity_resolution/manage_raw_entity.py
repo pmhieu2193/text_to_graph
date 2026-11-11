@@ -65,7 +65,8 @@ class ManageRawEntity:
                 entity_type=row.entity_type,
                 name=clean_display_text(row.name),
                 aliases=list(row.aliases or []),
-                valid_variants=list(row.valid_variants or []),
+                # valid_variants is derived in memory; it is not a DB column.
+                valid_variants=[],
                 evidence=list(row.evidence or []),
             )
             self.entities[entity.id] = entity
