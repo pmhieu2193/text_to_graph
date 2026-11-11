@@ -13,7 +13,7 @@ def test_valid_payload():
                 "local_id": "e1",
                 "name": "Hà Nội",
                 "entity_type": "LOCATION",
-                "evidence": "Hà Nội là thủ đô Việt Nam.",
+                "evidence": ["Hà Nội là thủ đô Việt Nam."],
             }
         ],
         "relations": [],
