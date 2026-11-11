@@ -38,12 +38,11 @@ class StringMatcher:
         best_pair = ("", "")
         exact = False
 
-        normalized_b = {normalize_text(value) for value in b.valid_variants}
         for value_a in a.valid_variants:
             normalized_a = normalize_text(value_a)
             for value_b in b.valid_variants:
                 normalized_value_b = normalize_text(value_b)
-                score = float(fuzz.WRatio(value_a, value_b))
+                score = float(fuzz.WRatio(normalized_a, normalized_value_b))
                 is_pair_exact = bool(normalized_a and normalized_a == normalized_value_b)
 
                 if score > best_score:
