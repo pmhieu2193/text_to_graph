@@ -33,7 +33,7 @@ class EntityResolutionRun(Base):
     document_id: Mapped[str] = mapped_column(
         ForeignKey("documents.id", ondelete="CASCADE"), nullable=False, index=True
     )
-    status: Mapped[str] = mapped_column(String(20), nullable=False, default="COMPLETED")
+    status: Mapped[str] = mapped_column(String(20), nullable=False, default="COMPLETED", server_default="COMPLETED")
     report_path: Mapped[str | None] = mapped_column(String(500), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, default=utc_now
@@ -73,8 +73,8 @@ class EntityCandidate(Base):
     fuzzy_score: Mapped[float | None] = mapped_column(Float, nullable=True)
     embedding_score: Mapped[float | None] = mapped_column(Float, nullable=True)
     final_score: Mapped[float | None] = mapped_column(Float, nullable=True)
-    match_method: Mapped[str] = mapped_column(String(20), nullable=False)
-    fuzzy_exact: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    match_method: Mapped[str] = mapped_column(String(20), nullable=False, default="HYBRID", server_default="HYBRID")
+    fuzzy_exact: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default="0")
     fuzzy_match: Mapped[list | None] = mapped_column(JSON, nullable=True)
     embedding_match: Mapped[list | None] = mapped_column(JSON, nullable=True)
 
@@ -85,7 +85,7 @@ class EntityCandidate(Base):
     classification: Mapped[str] = mapped_column(String(20), nullable=False)
     decision: Mapped[str | None] = mapped_column(String(20), nullable=True)
     review_status: Mapped[str] = mapped_column(
-        String(24), nullable=False, default="PENDING"
+        String(24), nullable=False, default="PENDING", server_default="PENDING"
     )
     error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
     reviewed_at: Mapped[datetime | None] = mapped_column(
