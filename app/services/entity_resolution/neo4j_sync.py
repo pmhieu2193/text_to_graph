@@ -3,10 +3,12 @@ from __future__ import annotations
 import hashlib
 from datetime import datetime, timezone
 
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.models.entity_resolution import EntityResolutionRun
+from app.models.extraction import RawEntity, RawRelation
 from app.services.entity_resolution.service import EntityResolutionService
 
 
@@ -75,11 +77,33 @@ class Neo4jGraphSyncService:
         relations, self_loop_count = er_service._canonical_relations_payload(document_id)
 
         node_ids = {item["canonical_entity_id"] for item in entities}
+        mapped_raw_ids = [
+            raw_id for item in entities for raw_id in item.get("raw_entity_ids", [])
+        ]
+        source_raw_ids = set(self.db.scalars(
+            select(RawEntity.id).where(RawEntity.document_id == document_id)
+        ).all())
+        if len(mapped_raw_ids) != len(set(mapped_raw_ids)) or set(mapped_raw_ids) != source_raw_ids:
+            raise ValueError(
+                "Canonical membership không bao phủ chính xác toàn bộ raw entities của document."
+            )
+
         for relation in relations:
             if relation["canonical_subject_id"] not in node_ids:
                 raise ValueError("Canonical relation có subject không tồn tại trong canonical entities.")
             if relation["canonical_object_id"] not in node_ids:
                 raise ValueError("Canonical relation có object không tồn tại trong canonical entities.")
+
+        source_relation_count = len(self.db.scalars(
+            select(RawRelation.id).where(RawRelation.document_id == document_id)
+        ).all())
+        represented_relation_count = sum(
+            item.get("raw_relation_count", 0) for item in relations
+        )
+        if represented_relation_count + self_loop_count != source_relation_count:
+            raise ValueError(
+                "Canonical relations không bảo toàn số lượng raw relations; từ chối sync để tránh mất cạnh."
+            )
 
         nodes = [
             {
