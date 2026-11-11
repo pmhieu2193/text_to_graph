@@ -105,6 +105,14 @@ def reset_er_document(document_id: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=409, detail=str(exc)) from exc
 
 
+@router.delete("/documents/{document_id}/neo4j-graph")
+def delete_document_neo4j_graph(document_id: str, db: Session = Depends(get_db)):
+    try:
+        return Neo4jGraphSyncService(db).delete_document_graph(document_id)
+    except RuntimeError as exc:
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
+
+
 @router.post("/documents/{document_id}/entity-resolution/runs/{run_id}/sync-neo4j")
 def sync_er_run_to_neo4j(document_id: str, run_id: str, db: Session = Depends(get_db)):
     try:
