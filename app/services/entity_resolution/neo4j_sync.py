@@ -78,10 +78,10 @@ class Neo4jGraphSyncService:
         run.sync_error = None
         self.db.commit()
 
-        from neo4j import GraphDatabase
-
         driver = None
         try:
+            from neo4j import GraphDatabase
+
             driver = GraphDatabase.driver(
                 settings.neo4j_uri,
                 auth=(settings.neo4j_username, settings.neo4j_password),
