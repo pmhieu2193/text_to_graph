@@ -21,6 +21,44 @@ class Neo4jGraphSyncService:
         raw = "\\0".join((subject_id, object_id, " ".join(relation_type.split()).casefold()))
         return hashlib.sha256(raw.encode("utf-8")).hexdigest()
 
+    def delete_document_graph(self, document_id: str) -> dict:
+        """Delete only one document's Neo4j graph, then clear local sync markers."""
+        if not settings.neo4j_uri or not settings.neo4j_username or not settings.neo4j_password:
+            raise RuntimeError("Thiếu NEO4J_URI, NEO4J_USERNAME hoặc NEO4J_PASSWORD.")
+        from neo4j import GraphDatabase
+
+        driver = GraphDatabase.driver(
+            settings.neo4j_uri,
+            auth=(settings.neo4j_username, settings.neo4j_password),
+        )
+        try:
+            driver.verify_connectivity()
+            with driver.session(database=settings.neo4j_database) as session:
+                result = session.execute_write(
+                    lambda tx: tx.run(
+                        "MATCH (n:Entity {document_id: $document_id}) "
+                        "DETACH DELETE n RETURN count(n) AS deleted",
+                        document_id=document_id,
+                    ).single()
+                )
+            deleted = result["deleted"] if result else 0
+            runs = self.db.query(EntityResolutionRun).filter(
+                EntityResolutionRun.document_id == document_id
+            ).all()
+            for run in runs:
+                run.sync_status = "NOT_SYNCED"
+                run.synced_at = None
+                run.sync_error = None
+                run.neo4j_node_count = 0
+                run.neo4j_relation_count = 0
+            self.db.commit()
+            return {"document_id": document_id, "deleted_nodes": deleted, "status": "GRAPH_DELETED"}
+        except Exception as exc:
+            self.db.rollback()
+            raise RuntimeError(f"Không thể xóa graph Neo4j: {exc}") from exc
+        finally:
+            driver.close()
+
     def sync(self, document_id: str, run_id: str) -> dict:
         run = self.db.get(EntityResolutionRun, run_id)
         if run is None or run.document_id != document_id:
