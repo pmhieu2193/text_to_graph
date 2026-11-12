@@ -38,7 +38,7 @@ def extract_document(
 
 
 @router.get(
-    "/documents/{document_id}/result",
+    "/{document_id}/result",
     response_model=DocumentExtractionResultResponse,
 )
 def get_extraction_result(document_id: str, db: Session = Depends(get_db)):
