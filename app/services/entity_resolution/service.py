@@ -567,7 +567,7 @@ class EntityResolutionService:
         ))
         return result, self_loops
 
-    def finalize(self, document_id: str) -> dict:
+    def finalize(self, document_id: str, apply_auto_merge: bool = True) -> dict:
         """Finalize the document's single current ER run and export an auditable workbook.
 
         Explicit user decisions are preserved. Remaining AUTO_MERGE candidates
@@ -580,7 +580,15 @@ class EntityResolutionService:
             raise ValueError("Lần chạy ER này đã được finalize trước đó.")
         report_path = None
         try:
-            auto_result = self._apply_auto_merge(document_id, run_id)
+            auto_result = (
+                self._apply_auto_merge(document_id, run_id)
+                if apply_auto_merge
+                else {
+                    "auto_candidates": 0,
+                    "merged_or_already_same_cluster": 0,
+                    "blocked_by_keep_separate": 0,
+                }
+            )
 
             pending = list(self.db.scalars(
                 select(EntityCandidate).where(
