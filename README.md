@@ -114,6 +114,8 @@ Người dùng có thể quyết định candidate:
 
 Auto merge chỉ xử lý candidate đang `PENDING` và được phân loại `AUTO_MERGE`. Candidate được xử lý tuần tự; mỗi lần merge sẽ tra canonical cluster hiện tại của raw IDs. Vì vậy chuỗi A-B, B-C có thể hợp nhất thành một cluster A-B-C.
 
+Trong giao diện Human Review, tùy chọn **Auto-merge before Finalize** được bật mặc định. Nhấn **Next: Finalize** sẽ chạy auto-merge trước rồi finalize ngay trong cùng thao tác; người dùng không phải duyệt hết candidate. Có thể bỏ chọn nếu muốn không chạy auto-merge. Các candidate vẫn `PENDING` sau đó sẽ được ghi nhận `SKIP/SKIPPED`, không bị hiểu là hai thực thể khác nhau. Các quyết định MERGE/KEEP_SEPARATE/SKIP người dùng đã thực hiện được giữ nguyên.
+
 Merge không xóa raw entities/relations. Membership của các raw entity được chuyển sang canonical survivor; canonical thua cuộc được đánh dấu bằng `merged_into_id`. Merge khác entity type hoặc vi phạm quyết định KEEP_SEPARATE sẽ bị chặn.
 
 ### 3.5 Finalize và canonical graph
@@ -198,7 +200,7 @@ Swagger UI: `http://127.0.0.1:8000/docs`
 | GET | `/documents/{document_id}/entity-resolution/candidates` | Lấy candidate của ER run hiện hành |
 | POST | `/documents/{document_id}/entity-resolution/candidates/{pair_id}/decision` | Quyết định một candidate |
 | POST | `/documents/{document_id}/entity-resolution/auto-merge` | Merge AUTO_MERGE candidates |
-| POST | `/documents/{document_id}/entity-resolution/finalize` | Finalize ER |
+| POST | `/documents/{document_id}/entity-resolution/finalize` | Finalize ER; query `auto_merge=true|false` (mặc định `true`) |
 | GET | `/documents/{document_id}/entity-resolution/canonical-entities` | Lấy canonical entities |
 | GET | `/documents/{document_id}/entity-resolution/canonical-relations` | Lấy canonical relations |
 | POST | `/documents/{document_id}/entity-resolution/sync-neo4j` | Sync canonical graph |
@@ -225,7 +227,7 @@ POST /documents/{id}/entity-resolution/preview
 GET  /documents/{id}/entity-resolution/candidates
 POST /documents/{id}/entity-resolution/candidates/{pair_id}/decision
 POST /documents/{id}/entity-resolution/auto-merge
-POST /documents/{id}/entity-resolution/finalize
+POST /documents/{id}/entity-resolution/finalize?auto_merge=true
 GET  /documents/{id}/entity-resolution/canonical-entities
 GET  /documents/{id}/entity-resolution/canonical-relations
 POST /documents/{id}/entity-resolution/sync-neo4j
