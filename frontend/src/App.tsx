@@ -153,14 +153,12 @@ function Workspace({ notify }: { notify:(kind:Toast['kind'],message:string)=>voi
   const activeIndex = steps.findIndex(s=>s.key===step);
   const currentIndex = Math.max(0,Math.min(5,rank));
   const erCompleted = Boolean(workflowQ.data?.entity_resolution?.completed);
-  const pendingReview = workflowQ.data?.entity_resolution?.pending_count;
-  const reviewCompleted = erCompleted && pendingReview === 0;
   const completedThrough = doc?.status === 'NEO4J_SYNCED' ? 5
     : currentIndex === 0 ? -1
     : currentIndex === 3 ? (reviewCompleted ? 3 : 2)
     : currentIndex - 1;
   const canVisit = (index:number) => index <= completedThrough || index === currentIndex
-    || (index === 3 && erCompleted) || (index === 4 && erCompleted) || (index === 5 && rank >= 5);
+    || (index === 3 && erCompleted) || (index === 4 && ['FINALIZED','NEO4J_SYNCED'].includes(doc?.status || '')) || (index === 5 && rank >= 5);
   const refresh = async () => { await Promise.all([qc.invalidateQueries({queryKey:['document',id]}),qc.invalidateQueries({queryKey:['workflow',id]}),qc.invalidateQueries({queryKey:['dashboard']}),qc.invalidateQueries({queryKey:['documents']})]); };
   if (docQ.isLoading) return <Loading/>;
   if (docQ.isError || !doc) return <ErrorPanel error={docQ.error} retry={()=>docQ.refetch()}/>;
