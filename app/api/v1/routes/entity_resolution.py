@@ -156,9 +156,15 @@ def auto_merge_er_candidates(document_id: str, db: Session = Depends(get_db)):
     "/documents/{document_id}/entity-resolution/finalize",
     response_model=FinalizeERResponse,
 )
-def finalize_er_run(document_id: str, db: Session = Depends(get_db)):
+def finalize_er_run(
+    document_id: str,
+    auto_merge: bool = Query(default=True),
+    db: Session = Depends(get_db),
+):
     try:
-        result = EntityResolutionService(db).finalize(document_id)
+        result = EntityResolutionService(db).finalize(
+            document_id, apply_auto_merge=auto_merge
+        )
         document = db.get(Document, document_id)
         if document is not None:
             document.status = DocumentStatus.FINALIZED
