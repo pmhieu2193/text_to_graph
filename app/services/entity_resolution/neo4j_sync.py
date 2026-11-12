@@ -280,29 +280,30 @@ class Neo4jGraphSyncService:
                             nodes=nodes,
                         ).consume()
                     if edges:
-                        tx.run(
-                            """
-                            UNWIND $edges AS row
-                            MATCH (s:Entity {document_id: $document_id, id: row.subject_id})
-                            MATCH (o:Entity {document_id: $document_id, id: row.object_id})
-                            CALL apoc.create.relationship(s, row.neo4j_type, {
-                                edge_key: row.edge_key,
-                                relation_type: row.relation_type,
-                                description: row.description,
-                                evidence: row.evidence,
-                                raw_relation_ids: row.raw_relation_ids,
-                                raw_relation_count: row.raw_relation_count,
-                                raw_subject_entity_ids: row.raw_subject_entity_ids,
-                                raw_object_entity_ids: row.raw_object_entity_ids
-                            }, o) YIELD rel
-                            RETURN count(rel) AS created
-                            """,
-                            edges=[
-                                {**edge, "neo4j_type": self._relationship_type(edge["relation_type"])}
-                                for edge in edges
-                            ],
-                            document_id=document_id,
-                        ).consume()
+                        edges_by_type: dict[str, list[dict]] = {}
+                        for edge in edges:
+                            edges_by_type.setdefault(
+                                self._relationship_type(edge["relation_type"]), []
+                            ).append(edge)
+                        for relationship_type, typed_edges in edges_by_type.items():
+                            # Relationship type is validated and normalized above;
+                            # values remain parameterized to avoid Cypher injection.
+                            query = (
+                                "UNWIND $edges AS row "
+                                "MATCH (s:Entity {document_id: $document_id, id: row.subject_id}) "
+                                "MATCH (o:Entity {document_id: $document_id, id: row.object_id}) "
+                                "CREATE (s)-[r:`" + relationship_type + "` {"
+                                "edge_key: row.edge_key, relation_type: row.relation_type, "
+                                "description: row.description, evidence: row.evidence, "
+                                "raw_relation_ids: row.raw_relation_ids, "
+                                "raw_relation_count: row.raw_relation_count, "
+                                "raw_subject_entity_ids: row.raw_subject_entity_ids, "
+                                "raw_object_entity_ids: row.raw_object_entity_ids"
+                                "}]->(o)"
+                            )
+                            tx.run(
+                                query, edges=typed_edges, document_id=document_id
+                            ).consume()
 
                 session.execute_write(replace_document_graph)
 
