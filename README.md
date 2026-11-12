@@ -231,7 +231,9 @@ GET  /documents/{id}/entity-resolution/canonical-relations
 POST /documents/{id}/entity-resolution/sync-neo4j
 ```
 
-Các API ER không nhận `run_id` trong URL. Response vẫn trả `run_id` để trace và hỗ trợ debug.\n\nCác endpoint document cũ có prefix lặp `/api/v1/documents/documents/...` vẫn được giữ dưới dạng alias tương thích ngược; nên dùng các đường dẫn chuẩn trong bảng trên cho client mới.
+Các API ER không nhận `run_id` trong URL. Response vẫn trả `run_id` để trace và hỗ trợ debug.
+
+Các endpoint document cũ có prefix lặp `/api/v1/documents/documents/...` vẫn được giữ dưới dạng alias tương thích ngược; nên dùng các đường dẫn chuẩn trong bảng trên cho client mới.
 
 ## 6. Cài đặt và chạy local
 
