@@ -245,13 +245,10 @@ class Neo4jGraphSyncService:
             for item in relations
         ]
 
-        # Validate relation types and stage the Cypher export before remote writes.
-        cypher_text = self._build_cypher_export(document_id, nodes, edges)
-        export_dir = Path(settings.er_report_dir)
-        export_dir.mkdir(parents=True, exist_ok=True)
-        cypher_path = export_dir / f"neo4j_sync_{document_id}.cypher.txt"
-        temp_path = cypher_path.with_suffix(cypher_path.suffix + ".tmp")
-        temp_path.write_text(cypher_text, encoding="utf-8")
+        # Validate relationship types before remote writes. Cypher export is
+        # generated only when the explicit reports endpoint is called.
+        for edge in edges:
+            self._relationship_type(edge["relation_type"])
 
         run.sync_status = "SYNCING"
         run.sync_started_at = now
@@ -330,7 +327,6 @@ class Neo4jGraphSyncService:
             run.neo4j_node_count = len(nodes)
             run.neo4j_relation_count = len(edges)
             self.db.commit()
-            temp_path.replace(cypher_path)
             return {
                 "document_id": document_id,
                 "run_id": run_id,
@@ -338,14 +334,10 @@ class Neo4jGraphSyncService:
                 "node_count": len(nodes),
                 "relation_count": len(edges),
                 "removed_self_loop_count": self_loop_count,
-                "cypher_path": str(cypher_path),
+                "cypher_path": None,
             }
         except Exception as exc:
             self.db.rollback()
-            try:
-                temp_path.unlink(missing_ok=True)
-            except (OSError, UnboundLocalError):
-                pass
             failed_run = self.db.get(EntityResolutionRun, run_id)
             if failed_run is not None:
                 failed_run.sync_status = "SYNC_FAILED"
