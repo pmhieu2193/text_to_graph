@@ -1,14 +1,71 @@
+# =========================
+# Python Backend
+# =========================
 .venv/
 __pycache__/
 *.py[cod]
 .env
+.env.*
+!.env.example
+.pytest_cache/
+.coverage
+htmlcov/
+
+# =========================
+# Backend Data
+# =========================
 data/
 storage/documents/*
 !storage/documents/.gitkeep
 storage/extracted/*
 !storage/extracted/.gitkeep
-.pytest_cache/
 storage/entity_resolution/indexes/*
 !storage/entity_resolution/indexes/.gitkeep
 storage/entity_resolution/reports/*
 !storage/entity_resolution/reports/.gitkeep
+
+# =========================
+# React Frontend
+# =========================
+
+# Dependencies
+frontend/node_modules/
+
+# Build output
+frontend/dist/
+frontend/build/
+
+# Cache
+frontend/.vite/
+frontend/.cache/
+frontend/.eslintcache/
+frontend/.parcel-cache/
+frontend/.turbo/
+
+# Logs
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/pnpm-debug.log*
+
+# Environment
+frontend/.env
+frontend/.env.*
+!frontend/.env.example
+
+# Test output
+frontend/coverage/
+frontend/test-results/
+frontend/playwright-report/
+
+# TypeScript generated files
+frontend/*.tsbuildinfo
+
+# =========================
+# IDE & OS
+# =========================
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
