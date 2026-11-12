@@ -211,3 +211,37 @@ def test_relationship_type_is_normalized(value, expected):
 def test_relationship_type_rejects_invalid_identifiers(value):
     with pytest.raises(ValueError):
         Neo4jGraphSyncService._relationship_type(value)
+
+def test_sync_failure_marks_run_failed_and_does_not_publish_export(tmp_path, monkeypatch):
+    engine = _database()
+
+    class UnavailableDriver(FakeDriver):
+        def verify_connectivity(self):
+            raise RuntimeError("Neo4j unavailable")
+
+    monkeypatch.setitem(
+        sys.modules,
+        "neo4j",
+        SimpleNamespace(GraphDatabase=SimpleNamespace(
+            driver=lambda *_args, **_kwargs: UnavailableDriver([])
+        )),
+    )
+    monkeypatch.setattr(settings, "neo4j_uri", "bolt://localhost:7687")
+    monkeypatch.setattr(settings, "neo4j_username", "neo4j")
+    monkeypatch.setattr(settings, "neo4j_password", "test")
+    monkeypatch.setattr(settings, "neo4j_database", "neo4j")
+    monkeypatch.setattr(settings, "er_report_dir", tmp_path)
+
+    with Session(engine, expire_on_commit=False) as db:
+        document_id = _seed_finalized_document(db)
+        with pytest.raises(RuntimeError, match="Neo4j sync thất bại"):
+            Neo4jGraphSyncService(db).sync(document_id)
+
+        run = db.get(__import__(
+            "app.models.entity_resolution", fromlist=["EntityResolutionRun"]
+        ).EntityResolutionRun, "RUN-NEO4J")
+        assert run.sync_status == "SYNC_FAILED"
+        assert run.sync_error is not None
+        assert not (tmp_path / f"neo4j_sync_{document_id}.cypher.txt").exists()
+        assert not (tmp_path / f"neo4j_sync_{document_id}.cypher.txt.tmp").exists()
+
