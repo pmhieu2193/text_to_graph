@@ -8,6 +8,7 @@ from app.schemas.extraction import (
     DocumentExtractionSummaryResponse,
 )
 from app.services.extraction_service import DocumentExtractionService
+from app.models.document import Document, DocumentStatus
 from app.providers.llm.base import LLMConfigurationError, LLMProviderError
 
 router = APIRouter()
@@ -23,10 +24,16 @@ def extract_document(
     db: Session = Depends(get_db),
 ):
     try:
-        return DocumentExtractionService(db).extract_document(
+        result = DocumentExtractionService(db).extract_document(
             document_id=document_id,
             force=force,
         )
+        document = db.get(Document, document_id)
+        if document is not None and result.get('failed_chunks', 0) == 0 and result.get('pending_chunks', 0) == 0:
+            document.status = DocumentStatus.EXTRACTED
+            document.error_message = None
+            db.commit()
+        return result
     except LookupError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
     except LLMConfigurationError as exc:
