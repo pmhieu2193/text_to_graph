@@ -442,6 +442,6 @@ tests/                      # Automated tests
 storage/                    # Local PDFs, FAISS indexes and reports
 ```
 
-## 12. License và dữ liệu
+## 12. Dữ liệu và bảo mật
 
 Chỉ sử dụng tài liệu mà bạn có quyền xử lý. API key, database credentials và dữ liệu PDF thực tế không nên đưa vào repository công khai. Kiểm tra `.gitignore` và nội dung commit trước khi push.
