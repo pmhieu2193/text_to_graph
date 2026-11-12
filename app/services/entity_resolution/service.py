@@ -96,7 +96,7 @@ class EntityResolutionService:
         for canonical, members in grouped.values():
             canonical.aliases = self._collect_aliases(members, canonical.name)
 
-    def preview(self, document_id: str) -> tuple[pd.DataFrame, str, str]:
+    def preview(self, document_id: str) -> tuple[pd.DataFrame, str | None, str]:
         if self.db.get(Document, document_id) is None:
             raise LookupError("Không tìm thấy tài liệu.")
         existing_run = self.db.scalar(
@@ -190,7 +190,7 @@ class EntityResolutionService:
         run.completed_at = datetime.now(timezone.utc)
         self._ensure_canonical_members(document_id)
         self.db.commit()
-        return dataframe, str(report_path), run.id
+        return dataframe, report_path, run.id
 
     @staticmethod
     def _candidate_record(candidate, entity_a=None, entity_b=None) -> dict:
