@@ -3,14 +3,14 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.repositories.extraction_repository import ExtractionRepository
-from app.schemas.extraction import DocumentExtractionResultResponse
+from app.schemas.extraction import (\n    DocumentExtractionResultResponse,\n    DocumentExtractionSummaryResponse,\n)
 from app.services.extraction_service import DocumentExtractionService
 from app.providers.llm.base import LLMConfigurationError, LLMProviderError
 
 router = APIRouter()
 
 
-@router.post("/{document_id}/extract")
+@router.post(\n    "/{document_id}/extract",\n    response_model=DocumentExtractionSummaryResponse,\n)
 def extract_document(
     document_id: str,
     force: bool = Query(False, description="Trích xuất lại cả chunk đã hoàn thành."),
