@@ -16,25 +16,15 @@ def get_dashboard(db: Session = Depends(get_db)):
     finalized = db.scalar(
         select(func.count()).select_from(Document).where(Document.status == DocumentStatus.FINALIZED)
     ) or 0
-    extracted_documents = select(Document.id).where(
-        Document.status.in_([
-            DocumentStatus.EXTRACTED, DocumentStatus.ENTITY_RESOLUTION,
-            DocumentStatus.HUMAN_REVIEW, DocumentStatus.FINALIZED,
-            DocumentStatus.NEO4J_SYNCED,
-        ])
-    )
-    raw_entities = db.scalar(
-        select(func.count()).select_from(RawEntity).where(RawEntity.document_id.in_(extracted_documents))
-    ) or 0
-    raw_relations = db.scalar(
-        select(func.count()).select_from(RawRelation).where(RawRelation.document_id.in_(extracted_documents))
-    ) or 0
+    # Count only persisted extraction rows; this also supports documents created
+    # before the workflow-status migration.
+    raw_entities = db.scalar(select(func.count()).select_from(RawEntity)) or 0
+    raw_relations = db.scalar(select(func.count()).select_from(RawRelation)) or 0
     pending_review = db.scalar(
         select(func.count()).select_from(EntityCandidate).join(
             EntityResolutionRun, EntityResolutionRun.id == EntityCandidate.run_id
         ).where(
             EntityResolutionRun.status != "FINALIZED",
-            EntityCandidate.classification == "REVIEW",
             EntityCandidate.review_status == "PENDING",
         )
     ) or 0
