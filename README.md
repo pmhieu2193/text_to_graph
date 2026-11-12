@@ -141,7 +141,7 @@ Trước khi ghi Neo4j, backend kiểm tra:
 - Mọi canonical relation có đủ hai endpoint.
 - Số raw relations được biểu diễn bởi canonical edges cộng self-loops bị loại khỏi graph view bằng số raw relations nguồn.
 
-Sync thay thế graph thuộc đúng `document_id` trong một Neo4j write transaction, không xóa graph của document khác. Node sử dụng label `Entity`. Relationship type trong Neo4j được lấy từ domain `relation_type`, chuẩn hóa thành chữ hoa và dấu gạch dưới (ví dụ `located in` → `LOCATED_IN`). Thuộc tính `relation_type` vẫn lưu giá trị nguồn.
+Sync thay thế graph thuộc đúng `document_id` trong một Neo4j write transaction, không xóa graph của document khác. Node sử dụng label `Entity`. Relationship type trong Neo4j được lấy từ domain `relation_type`, chuẩn hóa thành chữ hoa và dấu gạch dưới (ví dụ `located in` → `LOCATED_IN`). Thuộc tính `relation_type` vẫn lưu giá trị nguồn. Backend tạo query riêng theo từng relationship type bằng Cypher chuẩn; không yêu cầu cài APOC plugin.
 
 Sau khi sync thành công, file Cypher được xuất tại:
 
