@@ -5,6 +5,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     database_url: str = "sqlite:///./data/app.db"
+    cors_origins: list[str] = ["http://localhost:5173", "http://127.0.0.1:5173"]
     storage_dir: Path = Path("./storage/documents")
     extracted_text_dir: Path = Path("./storage/extracted")
     max_upload_size_mb: int = 30
