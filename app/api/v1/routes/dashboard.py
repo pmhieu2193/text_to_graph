@@ -14,7 +14,7 @@ router = APIRouter(tags=["Dashboard"])
 def get_dashboard(db: Session = Depends(get_db)):
     documents = db.scalar(select(func.count()).select_from(Document)) or 0
     finalized = db.scalar(
-        select(func.count()).select_from(Document).where(Document.status == DocumentStatus.FINALIZED)
+        select(func.count()).select_from(Document).where(Document.status.in_([DocumentStatus.FINALIZED, DocumentStatus.NEO4J_SYNCED]))
     ) or 0
     # Count only persisted extraction rows; this also supports documents created
     # before the workflow-status migration.
