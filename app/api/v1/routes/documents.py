@@ -5,6 +5,7 @@ from app.repositories.document_repository import DocumentRepository
 from app.schemas.document import DocumentListResponse,DocumentResponse,ChunkListResponse,ProcessResult
 from app.services.document_service import DocumentService
 from app.services.processing_service import DocumentProcessingService
+from app.models.document import DocumentStatus
 
 
 router=APIRouter(prefix='/documents',tags=['Documents'])
@@ -23,8 +24,17 @@ async def upload_document(
     return await service.upload(file)
 
 @router.get('',response_model=DocumentListResponse)
-def list_documents(page:int=Query(1,ge=1),page_size:int=Query(20,ge=1,le=100),db:Session=Depends(get_db)):
-    items,total=DocumentRepository(db).list(page,page_size);return dict(items=items,total=total,page=page,page_size=page_size)
+def list_documents(
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
+    search: str | None = Query(None, max_length=255),
+    status_filter: DocumentStatus | None = Query(None, alias="status"),
+    db: Session = Depends(get_db),
+):
+    items, total = DocumentRepository(db).list(
+        page, page_size, search=search, status=status_filter
+    )
+    return dict(items=items, total=total, page=page, page_size=page_size)
 @router.get('/{document_id}',response_model=DocumentResponse)
 def get_document(document_id:str,db:Session=Depends(get_db)):
     doc=DocumentRepository(db).get_by_id(document_id)
@@ -32,7 +42,15 @@ def get_document(document_id:str,db:Session=Depends(get_db)):
     return doc
 @router.post('/{document_id}/process',response_model=ProcessResult)
 def process_document(document_id:str,db:Session=Depends(get_db)):
-    try: return DocumentProcessingService(db).process(document_id)
+    try:
+        result = DocumentProcessingService(db).process(document_id)
+        document = DocumentRepository(db).get_by_id(document_id)
+        document.status = DocumentStatus.CHUNKED
+        document.error_message = None
+        db.commit()
+        db.refresh(document)
+        result['status'] = document.status
+        return result
     except LookupError as e: raise HTTPException(404,str(e)) from e
     except RuntimeError as e: raise HTTPException(409,str(e)) from e
     except ValueError as e: raise HTTPException(422,str(e)) from e
