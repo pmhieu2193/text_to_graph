@@ -240,10 +240,29 @@ class EntityResolutionService:
         )
         return "REVIEW" if fuzzy_review or embedding_review else "REJECT"
 
-    def list_candidates(self, document_id: str, run_id: str) -> list[dict]:
-        run = self.db.get(EntityResolutionRun, run_id)
-        if run is None or run.document_id != document_id:
-            raise LookupError("Không tìm thấy lần chạy ER thuộc tài liệu này.")
+    def get_current_run(self, document_id: str) -> EntityResolutionRun:
+        """Return the single current ER run for a document.
+
+        The public API is document-scoped. Keep run_id internally for database
+        relations and auditability, but fail loudly if legacy/corrupt data has
+        more than one run instead of silently selecting an arbitrary one.
+        """
+        runs = list(self.db.scalars(
+            select(EntityResolutionRun)
+            .where(EntityResolutionRun.document_id == document_id)
+            .order_by(EntityResolutionRun.created_at.desc(), EntityResolutionRun.id.desc())
+        ).all())
+        if not runs:
+            raise LookupError("Tài liệu chưa có ER run. Hãy tạo preview trước.")
+        if len(runs) > 1:
+            raise ValueError(
+                "Tài liệu có nhiều ER run; cần reset dữ liệu ER để khôi phục trạng thái một run."
+            )
+        return runs[0]
+
+    def list_candidates(self, document_id: str) -> list[dict]:
+        run = self.get_current_run(document_id)
+        run_id = run.id
         entities = aliased(RawEntity)
         rows = self.db.execute(
             select(EntityCandidate, RawEntity, entities)
@@ -427,11 +446,10 @@ class EntityResolutionService:
             "blocked_by_keep_separate": blocked,
         }
 
-    def auto_merge(self, document_id: str, run_id: str) -> dict:
-        """Apply only AUTO_MERGE candidates; this does not finalize the run."""
-        run = self.db.get(EntityResolutionRun, run_id)
-        if run is None or run.document_id != document_id:
-            raise LookupError("Không tìm thấy lần chạy ER thuộc tài liệu này.")
+    def auto_merge(self, document_id: str) -> dict:
+        """Apply only AUTO_MERGE candidates for the document's current run."""
+        run = self.get_current_run(document_id)
+        run_id = run.id
         if run.status == "FINALIZED":
             raise ValueError("Lần chạy ER đã finalize; không thể thay đổi kết quả.")
         try:
@@ -549,16 +567,15 @@ class EntityResolutionService:
         ))
         return result, self_loops
 
-    def finalize(self, document_id: str, run_id: str) -> dict:
-        """Commit the final ER state and export an auditable workbook.
+    def finalize(self, document_id: str) -> dict:
+        """Finalize the document's single current ER run and export an auditable workbook.
 
         Explicit user decisions are preserved. Remaining AUTO_MERGE candidates
         are merged; all other PENDING candidates become SKIP, never
         KEEP_SEPARATE. SKIP is not a semantic assertion of distinct identity.
         """
-        run = self.db.get(EntityResolutionRun, run_id)
-        if run is None or run.document_id != document_id:
-            raise LookupError("Không tìm thấy lần chạy ER thuộc tài liệu này.")
+        run = self.get_current_run(document_id)
+        run_id = run.id
         if run.status == "FINALIZED":
             raise ValueError("Lần chạy ER này đã được finalize trước đó.")
         report_path = None
@@ -580,7 +597,7 @@ class EntityResolutionService:
             self._refresh_canonical_aliases(document_id)
             entities = self._canonical_entities_payload(document_id)
             relations, self_loop_count = self._canonical_relations_payload(document_id)
-            candidates = self.list_candidates(document_id, run_id)
+            candidates = self.list_candidates(document_id)
 
             counts = self.db.execute(
                 select(EntityCandidate.review_status, EntityCandidate.decision)
