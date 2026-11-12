@@ -193,7 +193,7 @@ Swagger UI: `http://127.0.0.1:8000/docs`
 | POST | `/documents/{document_id}/process` | Trích xuất text và chunk PDF |
 | GET | `/documents/{document_id}/chunks` | Danh sách chunks |
 | POST | `/documents/{document_id}/extract` | LLM extraction; hỗ trợ `?force=true` |
-| GET | `/documents/documents/{document_id}/result` | Kết quả raw entities/relations |
+| GET | `/documents/{document_id}/result` | Kết quả raw entities/relations |
 | POST | `/documents/{document_id}/entity-resolution/preview` | Sinh ER candidates và báo cáo |
 | GET | `/documents/{document_id}/entity-resolution/candidates` | Lấy candidate của ER run hiện hành |
 | POST | `/documents/{document_id}/entity-resolution/candidates/{pair_id}/decision` | Quyết định một candidate |
@@ -231,7 +231,7 @@ GET  /documents/{id}/entity-resolution/canonical-relations
 POST /documents/{id}/entity-resolution/sync-neo4j
 ```
 
-Các API ER không nhận `run_id` trong URL. Response vẫn trả `run_id` để trace và hỗ trợ debug.
+Các API ER không nhận `run_id` trong URL. Response vẫn trả `run_id` để trace và hỗ trợ debug.\n\nCác endpoint document cũ có prefix lặp `/api/v1/documents/documents/...` vẫn được giữ dưới dạng alias tương thích ngược; nên dùng các đường dẫn chuẩn trong bảng trên cho client mới.
 
 ## 6. Cài đặt và chạy local
 
