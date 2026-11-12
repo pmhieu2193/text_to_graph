@@ -52,3 +52,12 @@ def get_extraction_result(document_id: str, db: Session = Depends(get_db)):
         "entities": entities,
         "relations": relations,
     }
+
+@router.get(
+    "/documents/{document_id}/result",
+    response_model=DocumentExtractionResultResponse,
+    include_in_schema=False,
+)
+def get_extraction_result_legacy(document_id: str, db: Session = Depends(get_db)):
+    """Backward-compatible alias for the former duplicated documents prefix."""
+    return get_extraction_result(document_id, db)
