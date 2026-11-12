@@ -13,7 +13,8 @@ from app.models.document import Document
 from app.models.entity_resolution import EntityResolutionRun
 from app.models.extraction import RawEntity, RawRelation
 from app.services.entity_resolution.service import EntityResolutionService
-
+import re
+import unicodedata
 
 class Neo4jGraphSyncService:
     """Synchronize one finalized document graph to Neo4j atomically."""
@@ -94,13 +95,27 @@ class Neo4jGraphSyncService:
 
     @staticmethod
     def _relationship_type(value: str) -> str:
-        """Normalize and validate a domain relation type for Neo4j."""
+        """Normalize Vietnamese relation types for Neo4j."""
         cleaned = " ".join((value or "").split()).strip()
         if not cleaned:
             raise ValueError("relation_type không được để trống.")
-        normalized = cleaned.upper().replace(" ", "_").replace("-", "_")
-        if not normalized.replace("_", "").isalnum() or not normalized[0].isalpha():
-            raise ValueError(f"relation_type không hợp lệ để tạo Neo4j relationship type: {value!r}")
+        # Chuyển & thành AND để tránh mất ý nghĩa của R&D
+        normalized = cleaned.upper().replace("&", " AND ")
+        # Loại bỏ dấu tiếng Việt
+        normalized = unicodedata.normalize("NFKD", normalized)
+        normalized = "".join(
+            char for char in normalized
+            if not unicodedata.combining(char)
+        )
+        # Chuẩn hóa khoảng trắng và dấu phân cách
+        normalized = re.sub(r"[\s\-]+", "_", normalized)
+        normalized = re.sub(r"[^A-Z0-9_]", "", normalized)
+        normalized = re.sub(r"_+", "_", normalized).strip("_")
+
+        if not normalized or not normalized[0].isalpha():
+            raise ValueError(
+                f"relation_type không hợp lệ để tạo Neo4j relationship type: {value!r}"
+            )
         return normalized
 
     def _build_cypher_export(self, document_id: str, nodes: list[dict], edges: list[dict]) -> str:

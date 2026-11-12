@@ -1,26 +1,33 @@
+
+# Core API
 fastapi>=0.115.0
 uvicorn[standard]>=0.30.0
 sqlalchemy>=2.0.0
 alembic>=1.13.0
 pydantic-settings>=2.0.0
 python-multipart>=0.0.9
+
+# PDF processing
 PyMuPDF>=1.24.0
 
-# LLM
-google-genai>=1.0.0
+# LLM - Gemini
+google-genai>=1.67.0,<2.0.0
+google-ai-generativelanguage>=0.6.18,<0.7.0
 python-dotenv>=1.0.0
 
 # Development / tests
 pytest>=8.0.0
 httpx>=0.27.0
 pandas>=2.2.0
+
+# Entity Resolution
 rapidfuzz>=3.9.0
 
-# Optional dependencies for the BGE-M3
+# Embedding - BGE-M3
 sentence-transformers>=6.2.0
-
-# FAISS
 FlagEmbedding>=1.3.5
+
+# Vector search
 faiss-cpu>=1.8.0
 
 # Report generation
@@ -28,3 +35,6 @@ openpyxl>=3.1.0
 
 # Neo4j graph synchronization
 neo4j>=5.20,<7
+
+# Compatibility constraints
+pyarrow>=19.0.1,<20.0.0

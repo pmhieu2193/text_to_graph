@@ -32,6 +32,7 @@ def test_manager_loads_entities_by_primary_key():
         entity_type = "Person"
         name = "Jensen Huang"
         aliases = ["Huang"]
+        evidence = ["evidence1", "evidence2"]
 
     manager = ManageRawEntity()
     manager.load_from_db([Row()])
