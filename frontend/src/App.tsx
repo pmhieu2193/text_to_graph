@@ -155,7 +155,7 @@ function Workspace({ notify }: { notify:(kind:Toast['kind'],message:string)=>voi
   const erCompleted = Boolean(workflowQ.data?.entity_resolution?.completed);
   const completedThrough = doc?.status === 'NEO4J_SYNCED' ? 5
     : currentIndex === 0 ? -1
-    : currentIndex === 3 ? (reviewCompleted ? 3 : 2)
+    : currentIndex === 3 ? (doc?.status === 'HUMAN_REVIEW' ? 3 : 2)
     : currentIndex - 1;
   const canVisit = (index:number) => index <= completedThrough || index === currentIndex
     || (index === 3 && erCompleted) || (index === 4 && ['FINALIZED','NEO4J_SYNCED'].includes(doc?.status || '')) || (index === 5 && rank >= 5);
