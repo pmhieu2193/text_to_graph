@@ -237,9 +237,7 @@ def test_sync_failure_marks_run_failed_and_does_not_publish_export(tmp_path, mon
         with pytest.raises(RuntimeError, match="Neo4j sync thất bại"):
             Neo4jGraphSyncService(db).sync(document_id)
 
-        run = db.get(__import__(
-            "app.models.entity_resolution", fromlist=["EntityResolutionRun"]
-        ).EntityResolutionRun, "RUN-NEO4J")
+        run = db.get(EntityResolutionRun, "RUN-NEO4J")
         assert run.sync_status == "SYNC_FAILED"
         assert run.sync_error is not None
         assert not (tmp_path / f"neo4j_sync_{document_id}.cypher.txt").exists()
