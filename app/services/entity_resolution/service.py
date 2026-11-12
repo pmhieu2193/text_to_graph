@@ -570,9 +570,10 @@ class EntityResolutionService:
     def finalize(self, document_id: str, apply_auto_merge: bool = True) -> dict:
         """Finalize the document's single current ER run and export an auditable workbook.
 
-        Explicit user decisions are preserved. Remaining AUTO_MERGE candidates
-        are merged; all other PENDING candidates become SKIP, never
-        KEEP_SEPARATE. SKIP is not a semantic assertion of distinct identity.
+        Explicit user decisions are preserved. AUTO_MERGE candidates are
+        processed only when apply_auto_merge is true. All remaining PENDING
+        candidates become SKIP, never KEEP_SEPARATE. SKIP is not a semantic
+        assertion of distinct identity.
         """
         run = self.get_current_run(document_id)
         run_id = run.id
