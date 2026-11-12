@@ -50,6 +50,9 @@ class ERCandidateListResponse(BaseModel):
     document_id: str
     run_id: str
     items: list[ERCandidateResponse] = Field(default_factory=list)
+    total: int = 0
+    page: int = 1
+    page_size: int = 20
 
 
 class AutoMergeResponse(BaseModel):
@@ -123,7 +126,7 @@ class Neo4jSyncResponse(BaseModel):
     node_count: int
     relation_count: int
     removed_self_loop_count: int
-    cypher_path: str
+    cypher_path: str | None = None
 
 
 class ERResetResponse(BaseModel):
