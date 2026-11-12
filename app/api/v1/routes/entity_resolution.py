@@ -2,14 +2,29 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.schemas.entity_resolution import CandidateDecisionRequest
+from app.schemas.entity_resolution import (
+    AutoMergeResponse,
+    CandidateDecisionRequest,
+    CandidateDecisionResponse,
+    CanonicalEntityListResponse,
+    CanonicalRelationListResponse,
+    ERCandidateListResponse,
+    ERPreviewResponse,
+    ERResetResponse,
+    FinalizeERResponse,
+    Neo4jDeleteResponse,
+    Neo4jSyncResponse,
+)
 from app.services.entity_resolution.service import EntityResolutionService
 from app.services.entity_resolution.neo4j_sync import Neo4jGraphSyncService
 
 router = APIRouter()
 
 
-@router.post("/documents/{document_id}/entity-resolution/preview")
+@router.post(
+    "/documents/{document_id}/entity-resolution/preview",
+    response_model=ERPreviewResponse,
+)
 def create_er_preview(document_id: str, db: Session = Depends(get_db)):
     try:
         dataframe, report_path, run_id = EntityResolutionService(db).preview(document_id)
@@ -37,19 +52,28 @@ def create_er_preview(document_id: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=503, detail=str(exc)) from exc
 
 
-@router.get("/documents/{document_id}/entity-resolution/runs/{run_id}/candidates")
-def list_er_candidates(
-    document_id: str, run_id: str, db: Session = Depends(get_db)
-):
+@router.get(
+    "/documents/{document_id}/entity-resolution/candidates",
+    response_model=ERCandidateListResponse,
+)
+def list_er_candidates(document_id: str, db: Session = Depends(get_db)):
     try:
-        items = EntityResolutionService(db).list_candidates(document_id, run_id)
-        return {"document_id": document_id, "run_id": run_id, "items": items}
+        service = EntityResolutionService(db)
+        run = service.get_current_run(document_id)
+        return {
+            "document_id": document_id,
+            "run_id": run.id,
+            "items": service.list_candidates(document_id),
+        }
     except LookupError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
 
 
 @router.post(
-    "/documents/{document_id}/entity-resolution/candidates/{pair_id}/decision"
+    "/documents/{document_id}/entity-resolution/candidates/{pair_id}/decision",
+    response_model=CandidateDecisionResponse,
 )
 def decide_er_candidate(
     document_id: str,
@@ -68,13 +92,13 @@ def decide_er_candidate(
 
 
 @router.post(
-    "/documents/{document_id}/entity-resolution/runs/{run_id}/auto-merge"
+    "/documents/{document_id}/entity-resolution/auto-merge",
+    response_model=AutoMergeResponse,
 )
-def auto_merge_er_candidates(
-    document_id: str, run_id: str, db: Session = Depends(get_db)
-):
+def auto_merge_er_candidates(document_id: str, db: Session = Depends(get_db)):
     try:
-        return EntityResolutionService(db).auto_merge(document_id, run_id)
+        result = EntityResolutionService(db).auto_merge(document_id)
+        return {"document_id": document_id, **result}
     except LookupError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
     except ValueError as exc:
@@ -82,13 +106,12 @@ def auto_merge_er_candidates(
 
 
 @router.post(
-    "/documents/{document_id}/entity-resolution/runs/{run_id}/finalize"
+    "/documents/{document_id}/entity-resolution/finalize",
+    response_model=FinalizeERResponse,
 )
-def finalize_er_run(
-    document_id: str, run_id: str, db: Session = Depends(get_db)
-):
+def finalize_er_run(document_id: str, db: Session = Depends(get_db)):
     try:
-        return EntityResolutionService(db).finalize(document_id, run_id)
+        return EntityResolutionService(db).finalize(document_id)
     except LookupError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
     except ValueError as exc:
@@ -97,7 +120,10 @@ def finalize_er_run(
         raise HTTPException(status_code=500, detail=str(exc)) from exc
 
 
-@router.delete("/documents/{document_id}/entity-resolution/reset")
+@router.delete(
+    "/documents/{document_id}/entity-resolution/reset",
+    response_model=ERResetResponse,
+)
 def reset_er_document(document_id: str, db: Session = Depends(get_db)):
     try:
         return EntityResolutionService(db).reset(document_id)
@@ -107,7 +133,10 @@ def reset_er_document(document_id: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=409, detail=str(exc)) from exc
 
 
-@router.delete("/documents/{document_id}/neo4j-graph")
+@router.delete(
+    "/documents/{document_id}/neo4j-graph",
+    response_model=Neo4jDeleteResponse,
+)
 def delete_document_neo4j_graph(document_id: str, db: Session = Depends(get_db)):
     try:
         return Neo4jGraphSyncService(db).delete_document_graph(document_id)
@@ -119,10 +148,13 @@ def delete_document_neo4j_graph(document_id: str, db: Session = Depends(get_db))
         raise HTTPException(status_code=502, detail=str(exc)) from exc
 
 
-@router.post("/documents/{document_id}/entity-resolution/runs/{run_id}/sync-neo4j")
-def sync_er_run_to_neo4j(document_id: str, run_id: str, db: Session = Depends(get_db)):
+@router.post(
+    "/documents/{document_id}/entity-resolution/sync-neo4j",
+    response_model=Neo4jSyncResponse,
+)
+def sync_er_run_to_neo4j(document_id: str, db: Session = Depends(get_db)):
     try:
-        return Neo4jGraphSyncService(db).sync(document_id, run_id)
+        return Neo4jGraphSyncService(db).sync(document_id)
     except LookupError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
     except ValueError as exc:
@@ -131,7 +163,10 @@ def sync_er_run_to_neo4j(document_id: str, run_id: str, db: Session = Depends(ge
         raise HTTPException(status_code=502, detail=str(exc)) from exc
 
 
-@router.get("/documents/{document_id}/entity-resolution/canonical-relations")
+@router.get(
+    "/documents/{document_id}/entity-resolution/canonical-relations",
+    response_model=CanonicalRelationListResponse,
+)
 def get_canonical_relations(document_id: str, db: Session = Depends(get_db)):
     try:
         return {
@@ -142,7 +177,10 @@ def get_canonical_relations(document_id: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 
-@router.get("/documents/{document_id}/entity-resolution/canonical-entities")
+@router.get(
+    "/documents/{document_id}/entity-resolution/canonical-entities",
+    response_model=CanonicalEntityListResponse,
+)
 def get_canonical_entities(document_id: str, db: Session = Depends(get_db)):
     try:
         return {
