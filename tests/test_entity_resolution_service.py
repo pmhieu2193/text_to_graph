@@ -433,3 +433,122 @@ def test_reset_er_preserves_raw_data_and_allows_a_fresh_run(tmp_path):
         _frame, _report, second_run_id = service.preview("D4")
         assert second_run_id != first_run_id
         assert db.get(RawEntity, "RAW-D4") is not None
+
+def test_keep_separate_blocks_a_later_transitive_cluster_merge():
+    engine = _build_db()
+    with Session(engine, expire_on_commit=False) as db:
+        document = Document(
+            id="D5", original_filename="separation.pdf",
+            stored_filename="separation.pdf", file_path="storage/separation.pdf",
+            content_type="application/pdf", file_size=10, sha256="5" * 64,
+            status=DocumentStatus.COMPLETED,
+        )
+        db.add(document)
+        db.flush()
+        chunks = {}
+        for raw_id in ("A", "B", "C"):
+            chunk = DocumentChunk(
+                document_id="D5", chunk_index=len(chunks) + 1,
+                content=raw_id, char_count=1,
+            )
+            db.add(chunk)
+            db.flush()
+            chunks[raw_id] = chunk.id
+            db.add(RawEntity(
+                id=raw_id, document_id="D5", chunk_id=chunk.id, local_id=raw_id,
+                name=raw_id, aliases=[], entity_type="ORGANIZATION",
+                evidence=[raw_id], confidence=0.9, provider="test", model_name="fake",
+            ))
+        db.flush()
+        canonicals = {
+            raw_id: CanonicalEntity(
+                id=f"CAN-{raw_id}", document_id="D5",
+                entity_type="ORGANIZATION", name=raw_id, aliases=[],
+            )
+            for raw_id in ("A", "B", "C")
+        }
+        db.add_all(canonicals.values())
+        db.flush()
+        db.add_all([
+            CanonicalEntityMember(
+                raw_entity_id=raw_id, canonical_entity_id=f"CAN-{raw_id}",
+                document_id="D5",
+            )
+            for raw_id in ("A", "B", "C")
+        ])
+        run = EntityResolutionRun(id="RUN-D5", document_id="D5", status="COMPLETED")
+        db.add(run)
+        db.flush()
+        db.add_all([
+            EntityCandidate(
+                id="PAIR-AB", run_id=run.id, document_id="D5",
+                entity_a_id="A", entity_b_id="B", classification="AUTO_MERGE",
+                final_score=0.97, match_method="HYBRID",
+                evidence_a=["A"], evidence_b=["B"], review_status="PENDING",
+            ),
+            EntityCandidate(
+                id="PAIR-BC", run_id=run.id, document_id="D5",
+                entity_a_id="B", entity_b_id="C", classification="AUTO_MERGE",
+                final_score=0.99, match_method="HYBRID",
+                evidence_a=["B"], evidence_b=["C"], review_status="PENDING",
+            ),
+            EntityCandidate(
+                id="PAIR-AC", run_id=run.id, document_id="D5",
+                entity_a_id="A", entity_b_id="C", classification="AUTO_MERGE",
+                final_score=0.98, match_method="HYBRID",
+                evidence_a=["A"], evidence_b=["C"], review_status="PENDING",
+            ),
+        ])
+        db.commit()
+
+        service = EntityResolutionService(
+            db,
+            embedding_matcher=object(),
+            string_matcher=object(),
+            report_writer=FakeReportWriter(Path("unused.xlsx")),
+        )
+        decision = service.decide("D5", "PAIR-AB", "KEEP_SEPARATE")
+        assert decision["review_status"] == "KEPT_SEPARATE"
+
+        result = service.auto_merge("D5")
+        assert result["merged_or_already_same_cluster"] == 1
+        assert result["blocked_by_keep_separate"] == 1
+        members = {
+            raw_id: canonical_id
+            for raw_id, canonical_id in db.query(
+                CanonicalEntityMember.raw_entity_id,
+                CanonicalEntityMember.canonical_entity_id,
+            ).all()
+        }
+        assert members["B"] == members["C"]
+        assert members["A"] != members["B"]
+
+
+def test_current_run_rejects_ambiguous_multiple_runs():
+    engine = _build_db()
+    with Session(engine, expire_on_commit=False) as db:
+        db.add(Document(
+            id="D6", original_filename="multiple.pdf",
+            stored_filename="multiple.pdf", file_path="storage/multiple.pdf",
+            content_type="application/pdf", file_size=10, sha256="6" * 64,
+            status=DocumentStatus.COMPLETED,
+        ))
+        db.flush()
+        db.add_all([
+            EntityResolutionRun(id="RUN-1", document_id="D6", status="COMPLETED"),
+            EntityResolutionRun(id="RUN-2", document_id="D6", status="COMPLETED"),
+        ])
+        db.commit()
+
+        service = EntityResolutionService(
+            db,
+            embedding_matcher=object(),
+            string_matcher=object(),
+            report_writer=FakeReportWriter(Path("unused.xlsx")),
+        )
+        try:
+            service.get_current_run("D6")
+            assert False, "Multiple runs must not be silently selected"
+        except ValueError as exc:
+            assert "nhiều ER run" in str(exc)
+
