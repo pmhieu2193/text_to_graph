@@ -184,8 +184,8 @@ class EntityResolutionService:
             "classification", "decision", "review_status",
         ]
         dataframe = pd.DataFrame.from_records(records, columns=columns)
-        report_path = self.report_writer.write(document_id, dataframe)
-        run.report_path = str(report_path)
+        report_path = None
+        run.report_path = None
         run.status = "COMPLETED"
         run.completed_at = datetime.now(timezone.utc)
         self._ensure_canonical_members(document_id)
@@ -617,15 +617,7 @@ class EntityResolutionService:
                 "deduplicated_relation_count": sum(item["raw_relation_count"] - 1 for item in relations),
                 "removed_self_loop_count": self_loop_count,
             }
-            report_path = self.report_writer.write_final(
-                document_id=document_id,
-                run_id=run_id,
-                candidates=candidates,
-                canonical_entities=entities,
-                canonical_relations=relations,
-                summary={**summary, **auto_result, "defaulted_to_skip": len(pending)},
-            )
-            run.report_path = str(report_path)
+            run.report_path = None
             run.status = "FINALIZED"
             run.completed_at = datetime.now(timezone.utc)
             self.db.commit()
@@ -636,7 +628,7 @@ class EntityResolutionService:
                 **summary,
                 **auto_result,
                 "defaulted_to_skip": len(pending),
-                "report_path": str(report_path),
+                "report_path": None,
                 "canonical_entities": entities,
                 "canonical_relations": relations,
             }
