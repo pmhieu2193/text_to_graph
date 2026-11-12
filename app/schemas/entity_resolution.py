@@ -111,7 +111,7 @@ class FinalizeERResponse(BaseModel):
     merged_or_already_same_cluster: int
     blocked_by_keep_separate: int
     defaulted_to_skip: int
-    report_path: str
+    report_path: str | None = None
     canonical_entities: list[CanonicalEntityResponse] = Field(default_factory=list)
     canonical_relations: list[CanonicalRelationResponse] = Field(default_factory=list)
 
