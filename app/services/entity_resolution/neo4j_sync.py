@@ -153,7 +153,8 @@ class Neo4jGraphSyncService:
         return "\n".join(statements).rstrip() + "\n"
 
     def sync(self, document_id: str) -> dict:
-        run = EntityResolutionService(self.db).get_current_run(document_id)
+        er_service = EntityResolutionService(self.db)
+        run = er_service.get_current_run(document_id)
         run_id = run.id
         if run.status != "FINALIZED":
             raise ValueError("Chỉ được sync một ER run đã FINALIZED.")
@@ -166,7 +167,6 @@ class Neo4jGraphSyncService:
         if not settings.neo4j_uri or not settings.neo4j_username or not settings.neo4j_password:
             raise RuntimeError("Thiếu NEO4J_URI, NEO4J_USERNAME hoặc NEO4J_PASSWORD.")
 
-        er_service = EntityResolutionService(self.db)
         entities = er_service._canonical_entities_payload(document_id)
         relations, self_loop_count = er_service._canonical_relations_payload(document_id)
 
