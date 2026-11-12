@@ -63,20 +63,36 @@ def create_er_preview(document_id: str, db: Session = Depends(get_db)):
     "/documents/{document_id}/entity-resolution/candidates",
     response_model=ERCandidateListResponse,
 )
-def list_er_candidates(document_id: str, db: Session = Depends(get_db)):
+def list_er_candidates(
+    document_id: str,
+    classification: str | None = Query(None),
+    review_status: str | None = Query(None),
+    decision: str | None = Query(None),
+    search: str | None = Query(None, max_length=200),
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
+    db: Session = Depends(get_db),
+):
     try:
         service = EntityResolutionService(db)
         run = service.get_current_run(document_id)
-        return {
-            "document_id": document_id,
-            "run_id": run.id,
-            "items": service.list_candidates(document_id),
-        }
+        items = service.list_candidates(document_id)
+        if classification:
+            items = [x for x in items if x['classification'] == classification.upper()]
+        if review_status:
+            items = [x for x in items if x['review_status'] == review_status.upper()]
+        if decision:
+            items = [x for x in items if (x['decision'] or '').upper() == decision.upper()]
+        if search:
+            needle = search.strip().casefold()
+            items = [x for x in items if needle in (x['entity_a'] or '').casefold() or needle in (x['entity_b'] or '').casefold()]
+        total = len(items)
+        start = (page - 1) * page_size
+        return {'document_id': document_id, 'run_id': run.id, 'items': items[start:start + page_size], 'total': total, 'page': page, 'page_size': page_size}
     except LookupError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
     except ValueError as exc:
         raise HTTPException(status_code=409, detail=str(exc)) from exc
-
 
 @router.post(
     "/documents/{document_id}/entity-resolution/candidates/{pair_id}/decision",
@@ -101,6 +117,23 @@ def decide_er_candidate(
         raise HTTPException(status_code=409, detail=str(exc)) from exc
 
 
+
+@router.post(
+    "/documents/{document_id}/entity-resolution/candidates/{pair_id}/keep-separate",
+    response_model=CandidateDecisionResponse,
+)
+def keep_candidate_separate(document_id: str, pair_id: str, db: Session = Depends(get_db)):
+    try:
+        result = EntityResolutionService(db).decide(document_id, pair_id, "KEEP_SEPARATE")
+        document = db.get(Document, document_id)
+        if document is not None:
+            document.status = DocumentStatus.HUMAN_REVIEW
+            db.commit()
+        return result
+    except LookupError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
 @router.post(
     "/documents/{document_id}/entity-resolution/auto-merge",
     response_model=AutoMergeResponse,
