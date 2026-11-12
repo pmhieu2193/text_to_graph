@@ -158,7 +158,7 @@ def test_auto_merge_handles_transitive_a_b_c_and_preserves_raw_relations(tmp_pat
         assert len(dataframe) == 2
         assert dataframe["classification"].tolist() == ["AUTO_MERGE", "AUTO_MERGE"]
 
-        result = service.auto_merge("D1", run_id)
+        result = service.auto_merge("D1")
         assert result["merged_or_already_same_cluster"] == 2
 
         members = {
@@ -238,7 +238,7 @@ def test_finalize_defaults_unresolved_review_to_skip_and_exports_workbook(tmp_pa
             report_writer=FakeReportWriter(tmp_path / "review.xlsx"),
         )
         _dataframe, _path, run_id = service.preview("D2")
-        result = service.finalize("D2", run_id)
+        result = service.finalize("D2")
 
         assert result["defaulted_to_skip"] == 1
         candidate = db.scalar(
@@ -256,7 +256,7 @@ def test_finalize_defaults_unresolved_review_to_skip_and_exports_workbook(tmp_pa
         assert workbook["Summary"].max_row == 2
         workbook.close()
         try:
-            service.finalize("D2", run_id)
+            service.finalize("D2")
             assert False, "finalize must be idempotency-protected"
         except ValueError:
             pass
@@ -352,7 +352,7 @@ def test_finalize_merges_aliases_and_deduplicates_inherited_relations(tmp_path):
             report_writer=FakeReportWriter(tmp_path / "unused.xlsx"),
         )
         _dataframe, _preview_path, run_id = service.preview("D3")
-        result = service.finalize("D3", run_id)
+        result = service.finalize("D3")
 
         assert result["merged_or_already_same_cluster"] == 1
         assert result["canonical_entity_count"] == 2
