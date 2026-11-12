@@ -82,3 +82,18 @@ class DocumentExtractionResultResponse(BaseModel):
     relations: list[RawRelationResponse] = Field(default_factory=list)
 
     model_config = ConfigDict(from_attributes=True)
+
+class DocumentExtractionSummaryResponse(BaseModel):
+    document_id: str
+    provider: str
+    model: str
+    total_chunks: int
+    processed_chunks: int
+    skipped_chunks: int
+    completed_chunks: int
+    failed_chunks: int
+    pending_chunks: int
+    entity_count: int
+    relation_count: int
+    using_fallback_key: bool = False
+
