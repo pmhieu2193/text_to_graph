@@ -160,7 +160,7 @@ function Workspace({ notify }: { notify:(kind:Toast['kind'],message:string)=>voi
     : currentIndex === 3 ? (reviewCompleted ? 3 : 2)
     : currentIndex - 1;
   const canVisit = (index:number) => index <= completedThrough || index === currentIndex
-    || (index === 4 && reviewCompleted) || (index === 5 && rank >= 5);
+    || (index === 3 && erCompleted) || (index === 4 && reviewCompleted) || (index === 5 && rank >= 5);
   const refresh = async () => { await Promise.all([qc.invalidateQueries({queryKey:['document',id]}),qc.invalidateQueries({queryKey:['workflow',id]}),qc.invalidateQueries({queryKey:['dashboard']}),qc.invalidateQueries({queryKey:['documents']})]); };
   if (docQ.isLoading) return <Loading/>;
   if (docQ.isError || !doc) return <ErrorPanel error={docQ.error} retry={()=>docQ.refetch()}/>;
