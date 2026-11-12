@@ -122,7 +122,7 @@ Merge không xóa raw entities/relations. Membership của các raw entity đư�
 
 Finalize là bước đóng ER run:
 
-- Áp dụng các AUTO_MERGE candidate còn PENDING.
+- Khi `auto_merge=true` (mặc định), áp dụng các AUTO_MERGE candidate còn PENDING. Khi `auto_merge=false`, không tự động merge.
 - Giữ nguyên các quyết định reviewer đã thực hiện.
 - Candidate PENDING còn lại chuyển thành `SKIP/SKIPPED`, không tự hiểu là hai entity khác nhau.
 - Tái tạo aliases từ tên và aliases của các raw members.
@@ -329,6 +329,24 @@ uvicorn app.main:app --reload
 - API: `http://127.0.0.1:8000`
 - Swagger: `http://127.0.0.1:8000/docs`
 - Health: `http://127.0.0.1:8000/health`
+
+### Start frontend
+
+Mở terminal thứ hai, từ thư mục gốc repository:
+
+```powershell
+cd frontend
+npm install
+npm run dev
+```
+
+Mở URL Vite hiển thị trong terminal (mặc định `http://localhost:5173`). Frontend gọi API tại `http://127.0.0.1:8000/api/v1` theo mặc định. Nếu API chạy ở địa chỉ khác, tạo `frontend/.env` với:
+
+```dotenv
+VITE_API_BASE_URL=http://127.0.0.1:8000/api/v1
+```
+
+Khởi động backend và frontend trong hai terminal riêng. CORS mặc định cho phép `localhost:5173` và `127.0.0.1:5173`.
 
 ## 7. Cấu hình chính
 
