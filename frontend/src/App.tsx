@@ -63,8 +63,8 @@ function App() {
           <Route path="*" element={<NotFound/>}/>
         </Routes>
       </div>
+      <footer className="app-footer"><span>KG Studio · Vietnamese PDF to Knowledge Graph</span><a href="https://github.com/pmhieu2193/text_to_graph" target="_blank" rel="noreferrer">GitHub repository <ArrowRight size={14}/></a></footer>
     </main>
-    <footer className="app-footer"><span>KG Studio · Vietnamese PDF to Knowledge Graph</span><a href="https://github.com/pmhieu2193/text_to_graph" target="_blank" rel="noreferrer">GitHub repository <ArrowRight size={14}/></a></footer>
     {toast && <div className={'toast '+toast.kind}><span>{toast.kind === 'success' ? <CircleCheck/> : toast.kind === 'error' ? <CircleX/> : <AlertCircle/>}</span>{toast.message}<button onClick={() => setToast(null)}><X size={15}/></button></div>}
   </div>;
 }
