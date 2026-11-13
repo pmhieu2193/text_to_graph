@@ -171,23 +171,31 @@ def delete_document(
         raise
 
     removed_files = []
+    cleanup_errors = []
     for path in (pdf_path, extracted_path, settings.extracted_text_dir / f"{document_id}.txt", BASE_DIR / "storage" / "extracted" / f"{document_id}.txt"):
         if path and path.is_file():
-            path.unlink(missing_ok=True)
-            removed_files.append(str(path))
+            try:
+                path.unlink(missing_ok=True)
+                removed_files.append(str(path))
+            except OSError as exc:
+                cleanup_errors.append({"path": str(path), "error": str(exc)})
     # Indexes and reports are named with this document's UUID. Only exact
     # document-specific patterns are removed; other documents are untouched.
-    for directory in (settings.er_index_dir, settings.er_report_dir, BASE_DIR / 'storage' / 'entity_resolution' / 'indexes', BASE_DIR / 'storage' / 'entity_resolution' / 'reports'):
+    for directory in (settings.er_index_dir, settings.er_report_dir, BASE_DIR / "storage" / "entity_resolution" / "indexes", BASE_DIR / "storage" / "entity_resolution" / "reports"):
         if directory.exists():
             for path in directory.glob(f"*{document_id}*"):
                 if path.is_file():
-                    path.unlink(missing_ok=True)
-                    removed_files.append(str(path))
+                    try:
+                        path.unlink(missing_ok=True)
+                        removed_files.append(str(path))
+                    except OSError as exc:
+                        cleanup_errors.append({"path": str(path), "error": str(exc)})
     return {
         "document_id": document_id,
         "deleted": True,
         "neo4j_graph_kept": keep_neo4j,
         "removed_files": removed_files,
+        "cleanup_errors": cleanup_errors,
     }
 
 
