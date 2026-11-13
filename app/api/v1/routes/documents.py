@@ -147,7 +147,7 @@ def delete_document(
             ) from exc
 
     pdf_path = resolve_document_path(doc.file_path)
-    extracted_path = Path(doc.extracted_text_path) if doc.extracted_text_path else None
+    extracted_path = resolve_document_path(doc.extracted_text_path) if doc.extracted_text_path else None
     try:
         # Explicit deletion order also works when SQLite foreign-key enforcement
         # was disabled in an older local database.
@@ -175,7 +175,7 @@ def delete_document(
             removed_files.append(str(path))
     # Indexes and reports are named with this document's UUID. Only exact
     # document-specific patterns are removed; other documents are untouched.
-    for directory in (settings.er_index_dir, settings.er_report_dir):
+    for directory in (settings.er_index_dir, settings.er_report_dir, BASE_DIR / 'storage' / 'entity_resolution' / 'indexes', BASE_DIR / 'storage' / 'entity_resolution' / 'reports'):
         if directory.exists():
             for path in directory.glob(f"*{document_id}*"):
                 if path.is_file():
