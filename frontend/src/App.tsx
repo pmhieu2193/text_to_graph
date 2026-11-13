@@ -156,7 +156,10 @@ function Workspace({ notify }: { notify:(kind:Toast['kind'],message:string)=>voi
   const rank = statusRank[doc?.status || 'UPLOADED'] ?? 0;
   const activeIndex = steps.findIndex(s=>s.key===step);
   const currentIndex = Math.max(0,Math.min(5,rank));
-  const erCompleted = Boolean(workflowQ.data?.entity_resolution?.completed);
+  // The API commits ENTITY_RESOLUTION only after the ER run is persisted.
+  // Use document status as a fallback while the workflow query is refreshing.
+  const erCompleted = Boolean(workflowQ.data?.entity_resolution?.completed)
+    || ['ENTITY_RESOLUTION','HUMAN_REVIEW','FINALIZED','NEO4J_SYNCED'].includes(doc?.status || '');
   const completedThrough = doc?.status === 'NEO4J_SYNCED' ? 5
     : currentIndex === 0 ? -1
     : currentIndex === 3 ? (doc?.status === 'HUMAN_REVIEW' ? 3 : 2)
@@ -193,7 +196,9 @@ function StepPage({step,id,doc,workflow,notify,refresh,onNext,onGoStep}:{step:st
   const processQ=useQuery({queryKey:['chunks',id,page],queryFn:async()=> (await api.get('/documents/'+id+'/chunks',{params:{page,page_size:10}})).data,enabled:step==='processing'&&doc.status!=='UPLOADED'});
   const rawE=useQuery({queryKey:['raw-entities',id,page,search],queryFn:async()=> (await api.get('/documents/'+id+'/raw-entities',{params:{page,page_size:10,search:search||undefined}})).data,enabled:step==='extraction'&&doc.status!=='CHUNKED'});
   const rawR=useQuery({queryKey:['raw-relations',id,page,search],queryFn:async()=> (await api.get('/documents/'+id+'/raw-relations',{params:{page,page_size:10,search:search||undefined}})).data,enabled:step==='extraction'&&doc.status!=='CHUNKED'});
-  const candidatesQ=useQuery({queryKey:['candidates',id,page],queryFn:async()=> (await api.get('/documents/'+id+'/entity-resolution/candidates',{params:{page,page_size:10}})).data,enabled:['entity-resolution','human-review'].includes(step)&&Boolean(workflow?.entity_resolution?.completed)});
+  const erRunExists = Boolean(workflow?.entity_resolution?.completed)
+    || ['ENTITY_RESOLUTION','HUMAN_REVIEW','FINALIZED','NEO4J_SYNCED'].includes(doc.status);
+  const candidatesQ=useQuery({queryKey:['candidates',id,page],queryFn:async()=> (await api.get('/documents/'+id+'/entity-resolution/candidates',{params:{page,page_size:10}})).data,enabled:['entity-resolution','human-review'].includes(step)&&erRunExists});
   const summaryQ=useQuery({queryKey:['er-summary',id],queryFn:async()=> (await api.get('/documents/'+id+'/entity-resolution/summary')).data,enabled:['entity-resolution','human-review','finalize'].includes(step)&&doc.status!=='EXTRACTED'});
   const canonE=useQuery({queryKey:['canonical-entities',id],queryFn:async()=> (await api.get('/documents/'+id+'/entity-resolution/canonical-entities')).data,enabled:step==='finalize'&&['FINALIZED','NEO4J_SYNCED'].includes(doc.status)});
   const canonR=useQuery({queryKey:['canonical-relations',id],queryFn:async()=> (await api.get('/documents/'+id+'/entity-resolution/canonical-relations')).data,enabled:step==='finalize'&&['FINALIZED','NEO4J_SYNCED'].includes(doc.status)});
