@@ -73,11 +73,24 @@ def get_document_workflow(document_id: str, db: Session = Depends(get_db)):
             CanonicalEntity.merged_into_id.is_(None),
         )
     ) or 0
+    raw_unique_edge_count = len(db.execute(
+        select(RawRelation.subject_entity_id, RawRelation.object_entity_id)
+        .where(
+            RawRelation.document_id == document_id,
+            RawRelation.subject_entity_id != RawRelation.object_entity_id,
+        )
+        .distinct()
+    ).all())
     canonical_relation_count = 0
+    canonical_unique_edge_count = 0
     removed_self_loop_count = 0
     if run is not None and run.status == "FINALIZED":
         canonical_relations, removed_self_loop_count = EntityResolutionService(db)._canonical_relations_payload(document_id)
         canonical_relation_count = len(canonical_relations)
+        canonical_unique_edge_count = len({
+            (item["canonical_subject_id"], item["canonical_object_id"])
+            for item in canonical_relations
+        })
     entity_reduction = round(
         (raw_entity_count - canonical_entity_count) / raw_entity_count * 100, 2
     ) if raw_entity_count else 0.0
@@ -127,5 +140,11 @@ def get_document_workflow(document_id: str, db: Session = Depends(get_db)):
             "relation_reduction_count": raw_relation_count - canonical_relation_count,
             "relation_reduction_percent": relation_reduction,
             "removed_self_loop_count": removed_self_loop_count,
+            "raw_unique_edge_count": raw_unique_edge_count,
+            "canonical_unique_edge_count": canonical_unique_edge_count,
+            "average_degree_before": round(2 * raw_unique_edge_count / raw_entity_count, 3) if raw_entity_count else 0.0,
+            "average_degree_after": round(2 * canonical_unique_edge_count / canonical_entity_count, 3) if canonical_entity_count else 0.0,
+            "density_before": round(raw_unique_edge_count / (raw_entity_count * (raw_entity_count - 1)), 5) if raw_entity_count > 1 else 0.0,
+            "density_after": round(canonical_unique_edge_count / (canonical_entity_count * (canonical_entity_count - 1)), 5) if canonical_entity_count > 1 else 0.0,
         },
     }
