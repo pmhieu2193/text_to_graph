@@ -4,9 +4,9 @@ import { Link, NavLink, Route, Routes, useNavigate, useParams } from 'react-rout
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import {
-  Activity, ArrowLeft, ArrowRight, Check, ChevronRight, CircleHelp, Clock3, FilePlus2,
-  FileText, Files, Gauge, GitMerge, LayoutDashboard, Loader2, Network, RefreshCw,
-  Search, Settings as SettingsIcon, ShieldCheck, UploadCloud, Workflow, X, Languages,
+  Activity, ArrowLeft, ArrowRight, Check, ChevronRight, CircleHelp, FilePlus2,
+  FileText, Files, GitMerge, LayoutDashboard, Loader2, Network, RefreshCw,
+  Search, Settings as SettingsIcon, ShieldCheck, UploadCloud, Workflow, X,
   Download, Database, AlertCircle, CircleCheck, CircleX, Sparkles, Eye
 } from 'lucide-react';
 import { api, messageOf } from './api';
@@ -64,7 +64,8 @@ function App() {
         </Routes>
       </div>
     </main>
-    <footer className="app-footer"><span>KG Studio · Vietnamese PDF to Knowledge Graph</span><a href="https://github.com/pmhieu2193/text_to_graph" target="_blank" rel="noreferrer">GitHub repository <ArrowRight size={14}/></a></footer>\n    {toast && <div className={'toast '+toast.kind}><span>{toast.kind === 'success' ? <CircleCheck/> : toast.kind === 'error' ? <CircleX/> : <AlertCircle/>}</span>{toast.message}<button onClick={() => setToast(null)}><X size={15}/></button></div>}
+    <footer className="app-footer"><span>KG Studio · Vietnamese PDF to Knowledge Graph</span><a href="https://github.com/pmhieu2193/text_to_graph" target="_blank" rel="noreferrer">GitHub repository <ArrowRight size={14}/></a></footer>
+    {toast && <div className={'toast '+toast.kind}><span>{toast.kind === 'success' ? <CircleCheck/> : toast.kind === 'error' ? <CircleX/> : <AlertCircle/>}</span>{toast.message}<button onClick={() => setToast(null)}><X size={15}/></button></div>}
   </div>;
 }
 
