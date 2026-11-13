@@ -626,7 +626,18 @@ class EntityResolutionService:
                 "deduplicated_relation_count": sum(item["raw_relation_count"] - 1 for item in relations),
                 "removed_self_loop_count": self_loop_count,
             }
-            run.report_path = None
+            # Persist an auditable final workbook before committing the finalized
+            # run. If export fails, the transaction is rolled back so the run
+            # cannot be marked FINALIZED without its required report.
+            report_path = self.report_writer.write_final(
+                document_id=document_id,
+                run_id=run_id,
+                candidates=candidates,
+                canonical_entities=entities,
+                canonical_relations=relations,
+                summary={**summary, **auto_result, "defaulted_to_skip": len(pending)},
+            )
+            run.report_path = str(report_path)
             run.status = "FINALIZED"
             run.completed_at = datetime.now(timezone.utc)
             self.db.commit()
@@ -637,7 +648,7 @@ class EntityResolutionService:
                 **summary,
                 **auto_result,
                 "defaulted_to_skip": len(pending),
-                "report_path": None,
+                "report_path": str(report_path),
                 "canonical_entities": entities,
                 "canonical_relations": relations,
             }
