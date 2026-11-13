@@ -388,7 +388,7 @@ This is a portfolio-scale MVP, not a production multi-tenant service. Current li
 - One current ER run is maintained per document; parallel/versioned canonical snapshots are not supported.
 - Candidate retrieval is top-K based and can miss valid pairs.
 - Similarity thresholds are heuristic and have not been calibrated as probabilities on a large, independently labeled benchmark.
-- BGE-M3/PyTorch can require substantial memory and CPU time; first-time model download adds startup/run latency.
+- BGE-M3/PyTorch can require substantial memory and CPU time; the model download increases the initial backend image build time and image size.
 - SQLite is suitable for this single-instance MVP; high write concurrency and multi-worker scaling need a different deployment design.
 - Authentication, authorization, multi-user audit ownership, rate limiting, and production secret management are not yet implemented.
 - Long-running extraction and embedding work is currently handled by the application workflow rather than a dedicated distributed job queue.
