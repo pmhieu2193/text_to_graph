@@ -170,7 +170,7 @@ flowchart TD
 #### 1. Clone the project
 
 ```bash
-git clone --branch feature/entity-resolution-hitl-alembic https://github.com/pmhieu2193/text_to_graph.git
+git clone https://github.com/pmhieu2193/text_to_graph.git
 cd text_to_graph
 ```
 
