@@ -75,7 +75,7 @@ class DocumentService:
                 id=document_id,
                 original_filename=original_name,
                 stored_filename=stored_filename,
-                file_path=str(Path("storage") / "documents" / stored_filename),
+                file_path=str(Path("data") / "documents" / stored_filename),
                 content_type="application/pdf",
                 file_size=size,
                 sha256=digest.hexdigest(),
