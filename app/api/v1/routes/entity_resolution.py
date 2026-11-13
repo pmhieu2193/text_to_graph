@@ -183,12 +183,67 @@ def finalize_er_run(
     response_model=ERResetResponse,
 )
 def reset_er_document(document_id: str, db: Session = Depends(get_db)):
+    """Reset ER and return the document to the post-extraction state for a clean rerun."""
     try:
-        return EntityResolutionService(db).reset(document_id)
+        document = db.get(Document, document_id)
+        if document is None:
+            raise LookupError("Không tìm thấy tài liệu.")
+
+        from app.models.entity_resolution import EntityResolutionRun
+        runs = list(db.query(EntityResolutionRun).filter(
+            EntityResolutionRun.document_id == document_id
+        ).all())
+        # If this document has ever been synced (or a sync failed midway), remove
+        # its isolated graph before deleting the canonical ER state.
+        if any(run.sync_status != "NOT_SYNCED" for run in runs):
+            Neo4jGraphSyncService(db).delete_document_graph(document_id)
+
+        result = EntityResolutionService(db).reset(document_id)
+
+        # A rerun must start from the raw extraction stage, not from a stale
+        # workflow status. Raw entities/relations and chunks remain untouched.
+        document = db.get(Document, document_id)
+        document.status = DocumentStatus.EXTRACTED
+        document.error_message = None
+        db.commit()
+
+        # Remove only artifacts whose names contain this document ID.
+        from app.core.config import settings, BASE_DIR
+        cleanup_errors = []
+        for directory in (
+            settings.er_index_dir,
+            settings.er_report_dir,
+            BASE_DIR / "storage" / "entity_resolution" / "indexes",
+            BASE_DIR / "storage" / "entity_resolution" / "reports",
+        ):
+            if directory.exists():
+                for artifact in directory.glob(f"*{document_id}*"):
+                    if artifact.is_file():
+                        try:
+                            artifact.unlink(missing_ok=True)
+                        except OSError as exc:
+                            cleanup_errors.append({"path": str(artifact), "error": str(exc)})
+
+        result["status"] = "RESET"
+        result["document_status"] = document.status.value
+        result["preserved"] = [
+            "uploaded_pdf", "document_chunks", "raw_entities", "raw_relations",
+            "chunk_extraction_runs",
+        ]
+        result["removed_artifacts"] = ["document_faiss_index", "document_er_reports"]
+        result["cleanup_errors"] = cleanup_errors
+        return result
     except LookupError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
     except ValueError as exc:
+        db.rollback()
         raise HTTPException(status_code=409, detail=str(exc)) from exc
+    except RuntimeError as exc:
+        db.rollback()
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
+    except OSError as exc:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Không thể dọn artifact ER: {exc}") from exc
 
 
 @router.delete(

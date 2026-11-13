@@ -132,8 +132,11 @@ class Neo4jSyncResponse(BaseModel):
 class ERResetResponse(BaseModel):
     document_id: str
     status: str
+    document_status: str | None = None
     deleted_runs: int
     preserved: list[str] = Field(default_factory=list)
+    removed_artifacts: list[str] = Field(default_factory=list)
+    cleanup_errors: list[dict] = Field(default_factory=list)
 
 
 class Neo4jDeleteResponse(BaseModel):
