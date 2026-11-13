@@ -189,9 +189,13 @@ Swagger UI: `http://127.0.0.1:8000/docs`
 
 | Method | Endpoint | Mô tả |
 |---|---|---|
-| POST | `/documents/upload` | Upload PDF |\n| POST | `/documents/{document_id}/quick-process` | Process PDF, extract entities/relations and create ER candidates, then stop at Human Review |\n| DELETE | `/documents/{document_id}` | Delete document, all local artifacts and optionally its Neo4j graph (`?keep_neo4j=true`) |
+| POST | `/documents/upload` | Upload PDF |
+| POST | `/documents/{document_id}/quick-process` | Process PDF, extract entities/relations and create ER candidates, then stop at Human Review |
+| DELETE | `/documents/{document_id}` | Delete document, all local artifacts and optionally its Neo4j graph (`?keep_neo4j=true`) |
 | GET | `/documents` | Danh sách document có phân trang |
-| GET | `/documents/{document_id}` | Chi tiết document |\n| GET | `/settings` | Read runtime LLM/Neo4j settings (secrets masked) |\n| PUT | `/settings` | Update runtime settings in `data/settings.json` |
+| GET | `/documents/{document_id}` | Chi tiết document |
+| GET | `/settings` | Read runtime LLM/Neo4j settings (secrets masked) |
+| PUT | `/settings` | Update runtime settings in `data/settings.json` |
 | POST | `/documents/{document_id}/process` | Trích xuất text và chunk PDF |
 | GET | `/documents/{document_id}/chunks` | Danh sách chunks |
 | POST | `/documents/{document_id}/extract` | LLM extraction; hỗ trợ `?force=true` |
