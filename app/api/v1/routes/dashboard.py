@@ -5,7 +5,8 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.models.document import Document, DocumentStatus
 from app.models.extraction import RawEntity, RawRelation
-from app.models.entity_resolution import EntityCandidate, EntityResolutionRun, CanonicalEntity\nfrom app.services.entity_resolution.service import EntityResolutionService
+from app.models.entity_resolution import EntityCandidate, EntityResolutionRun, CanonicalEntity
+from app.services.entity_resolution.service import EntityResolutionService, CanonicalEntity\nfrom app.services.entity_resolution.service import EntityResolutionService
 
 router = APIRouter(tags=["Dashboard"])
 
@@ -66,6 +67,23 @@ def get_document_workflow(document_id: str, db: Session = Depends(get_db)):
     raw_relation_count = db.scalar(
         select(func.count()).select_from(RawRelation).where(RawRelation.document_id == document_id)
     ) or 0
+    canonical_entity_count = db.scalar(
+        select(func.count()).select_from(CanonicalEntity).where(
+            CanonicalEntity.document_id == document_id,
+            CanonicalEntity.merged_into_id.is_(None),
+        )
+    ) or 0
+    canonical_relation_count = 0
+    removed_self_loop_count = 0
+    if run is not None and run.status == "FINALIZED":
+        canonical_relations, removed_self_loop_count = EntityResolutionService(db)._canonical_relations_payload(document_id)
+        canonical_relation_count = len(canonical_relations)
+    entity_reduction = round(
+        (raw_entity_count - canonical_entity_count) / raw_entity_count * 100, 2
+    ) if raw_entity_count else 0.0
+    relation_reduction = round(
+        (raw_relation_count - canonical_relation_count) / raw_relation_count * 100, 2
+    ) if raw_relation_count else 0.0
     pending_count = 0
     if run is not None:
         pending_count = db.scalar(
