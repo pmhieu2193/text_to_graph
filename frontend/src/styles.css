@@ -77,7 +77,7 @@
 /* Vietnamese typography and robust two-column entity comparison */
 :root{font-family:'Be Vietnam Pro',system-ui,sans-serif}
 button,input,select,textarea{font-family:'Be Vietnam Pro',system-ui,sans-serif}
-.compare-grid{grid-template-columns:minmax(0,1fr) 36px minmax(0,1fr);width:100%;align-items:stretch}
+.compare-grid{grid-template-columns:repeat(2,minmax(0,1fr));width:100%;align-items:stretch}
 .entity-detail{width:100%;min-width:0;max-width:100%;overflow:hidden;overflow-wrap:anywhere;word-break:normal}
 .entity-detail h3,.entity-detail p,.entity-detail blockquote,.alias-list span{min-width:0;max-width:100%;overflow-wrap:anywhere;word-break:break-word}
 .entity-detail .evidence-list{min-width:0;width:100%}
