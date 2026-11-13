@@ -6,7 +6,7 @@ from pathlib import Path
 from fastapi import HTTPException, UploadFile, status
 from sqlalchemy.orm import Session
 
-from app.core.config import settings
+from app.core.config import BASE_DIR, settings
 from app.models.document import Document, DocumentStatus
 from app.repositories.document_repository import DocumentRepository
 
@@ -75,7 +75,7 @@ class DocumentService:
                 id=document_id,
                 original_filename=original_name,
                 stored_filename=stored_filename,
-                file_path=str(Path("data") / "documents" / stored_filename),
+                file_path=(final_path.resolve().relative_to(BASE_DIR).as_posix() if final_path.resolve().is_relative_to(BASE_DIR) else str(final_path.resolve())),
                 content_type="application/pdf",
                 file_size=size,
                 sha256=digest.hexdigest(),
