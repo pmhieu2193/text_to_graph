@@ -136,6 +136,7 @@ class ERResetResponse(BaseModel):
     deleted_runs: int
     preserved: list[str] = Field(default_factory=list)
     removed_artifacts: list[str] = Field(default_factory=list)
+    cleanup_errors: list[dict] = Field(default_factory=list)
 
 
 class Neo4jDeleteResponse(BaseModel):
