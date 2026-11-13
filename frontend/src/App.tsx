@@ -17,6 +17,7 @@ const fmt = (value?: string | null) => value ? new Date(value).toLocaleString() 
 const bytes = (value: number) => value < 1024 * 1024 ? (value / 1024).toFixed(0) + ' KB' : (value / 1024 / 1024).toFixed(1) + ' MB';
 const statusTone = (s: string) => ['FINALIZED','NEO4J_SYNCED','CHUNKED','EXTRACTED'].includes(s) ? 'success' : ['FAILED','SYNC_FAILED'].includes(s) ? 'danger' : ['HUMAN_REVIEW','ENTITY_RESOLUTION','PROCESSING'].includes(s) ? 'warning' : 'neutral';
 const statusLabel = (s: string) => (s || 'UPLOADED').replaceAll('_',' ').toLowerCase().replace(/\b\w/g, x => x.toUpperCase());
+const scoreLabel = (value?: number | null) => value == null || !Number.isFinite(value) ? '—' : (value * 100).toFixed(1) + '%';
 const steps = [
   { key: 'processing', label: 'Processing', hint: 'Extract text and split into chunks', icon: Files },
   { key: 'extraction', label: 'Extraction', hint: 'Extract entities and relations with an LLM', icon: Sparkles },
@@ -31,10 +32,6 @@ function App() {
   const { t } = useTranslation();
   const [toast, setToast] = useState<Toast | null>(null);
   const notify = (kind: Toast['kind'], message: string) => { setToast({ kind, message }); window.setTimeout(() => setToast(null), 4500); };
-  const [langOpen, setLangOpen] = useState(false);
-  const changeLanguage = (lang: string) => { i18n.changeLanguage(lang); localStorage.setItem('kg-language', lang); setLangOpen(false); };
-  const location = useLocation();
-  useEffect(() => { setLangOpen(false); }, [location.pathname]);
   return <div className="app-shell">
     <aside className="sidebar">
       <div className="brand-mark"><Network size={21}/></div>
