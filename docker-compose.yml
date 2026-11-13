@@ -29,6 +29,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        BGE_MODEL_ID: ${BGE_MODEL_ID:-BAAI/bge-m3}
     container_name: vietgraph-backend
     restart: unless-stopped
     environment:
@@ -40,8 +42,11 @@ services:
       NEO4J_USERNAME: neo4j
       NEO4J_PASSWORD: ${NEO4J_PASSWORD:?Set NEO4J_PASSWORD in .env}
       NEO4J_DATABASE: neo4j
-      HF_HOME: /models/huggingface
-      TRANSFORMERS_CACHE: /models/huggingface
+      ER_EMBEDDING_MODEL: /opt/models/bge-m3
+      HF_HOME: /opt/huggingface
+      TRANSFORMERS_CACHE: /opt/huggingface
+      HF_HUB_OFFLINE: "1"
+      TRANSFORMERS_OFFLINE: "1"
       MAX_UPLOAD_SIZE_MB: ${MAX_UPLOAD_SIZE_MB:-30}
       LLM_PROVIDER: ${LLM_PROVIDER:-gemini}
       LLM_MODEL: ${LLM_MODEL:-gemini-2.5-flash}
@@ -66,7 +71,6 @@ services:
       - "${BACKEND_PORT:-8000}:8000"
     volumes:
       - ./data:/app/data
-      - huggingface_cache:/models/huggingface
     depends_on:
       neo4j:
         condition: service_healthy
@@ -99,7 +103,6 @@ volumes:
   neo4j_data:
   neo4j_logs:
   neo4j_import:
-  huggingface_cache:
 
 networks:
   vietgraph:
