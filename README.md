@@ -237,7 +237,26 @@ Các API ER không nhận `run_id` trong URL. Response vẫn trả `run_id` đ�
 
 Các endpoint document cũ có prefix lặp `/api/v1/documents/documents/...` vẫn được giữ dưới dạng alias tương thích ngược; nên dùng các đường dẫn chuẩn trong bảng trên cho client mới.
 
-## 6. Cài đặt và chạy local
+## 6. Persistent data và runtime settings
+
+Toàn bộ dữ liệu runtime nằm dưới `data/` để có thể mount thành Docker volume:
+
+```text
+data/
+├── app.db
+├── settings.json                 # API keys và Neo4j connection (không commit)
+├── documents/                    # PDF gốc
+├── extracted/                    # Legacy extracted text; chunk mới lưu trong SQLite
+└── entity_resolution/
+    ├── indexes/                  # FAISS .index và .meta.json
+    └── reports/                  # XLSX và Cypher TXT
+```
+
+Khi khởi động, ứng dụng tự chuyển các artifact cũ từ `storage/` vào vị trí tương ứng trong `data/` nếu đích chưa tồn tại. Đường dẫn document cũ trong SQLite vẫn được resolve trong giai đoạn chuyển đổi. Không xóa `data/` khi cập nhật image hoặc source code.
+
+API `GET/PUT /api/v1/settings` đọc và cập nhật cấu hình LLM/Neo4j. Secret chỉ được trả về dưới dạng trạng thái đã cấu hình, không trả plaintext. File `data/settings.json` chứa secret dạng plaintext nên chỉ dùng trên máy đáng tin cậy; khi triển khai Docker, mount volume với quyền truy cập hạn chế và không public endpoint settings ra Internet nếu chưa có authentication.
+
+## 7. Cài đặt và chạy local
 
 ### Yêu cầu
 
@@ -348,7 +367,7 @@ VITE_API_BASE_URL=http://127.0.0.1:8000/api/v1
 
 Khởi động backend và frontend trong hai terminal riêng. CORS mặc định cho phép `localhost:5173` và `127.0.0.1:5173`.
 
-## 7. Cấu hình chính
+## 8. Cấu hình chính
 
 | Biến | Mặc định / ý nghĩa |
 |---|---|
@@ -375,7 +394,7 @@ Khởi động backend và frontend trong hai terminal riêng. CORS mặc địn
 | `NEO4J_USERNAME` / `NEO4J_PASSWORD` | Neo4j credentials |
 | `NEO4J_DATABASE` | Database đích |
 
-## 8. Reset và chạy lại
+## 9. Reset và chạy lại
 
 ### Reset Entity Resolution
 
@@ -403,7 +422,7 @@ Nếu graph đã sync hoặc đang ở trạng thái sync khác `NOT_SYNCED`, c�
 
 ER reset không xóa raw extraction. Vì vậy nếu mục đích là thay đổi nội dung chunk hoặc tạo lại raw IDs, cần có quy trình reset extraction riêng; không nên hiểu ER reset là xóa toàn bộ pipeline. Hiện tại processing/extraction được chặn khi ER run/canonical mapping còn tồn tại để tránh phá vỡ các tham chiếu.
 
-## 9. Kiểm thử
+## 10. Kiểm thử
 
 Cài dependencies rồi chạy:
 
@@ -426,7 +445,7 @@ Các test trọng tâm bao gồm:
 
 Các test Neo4j dùng fake driver nên không cần Neo4j server. Nên chạy thêm smoke test thủ công với một Neo4j instance thực tế trước khi triển khai.
 
-## 10. Các giới hạn hiện tại và hướng phát triển
+## 11. Các giới hạn hiện tại và hướng phát triển
 
 - Mỗi document chỉ có một ER run hiện hành; chưa hỗ trợ lưu nhiều phiên bản canonical snapshot song song.
 - ER được giới hạn trong document; chưa có cross-document entity resolution.
@@ -438,7 +457,7 @@ Các test Neo4j dùng fake driver nên không cần Neo4j server. Nên chạy th
 
 Hướng phát triển hợp lý: bộ dữ liệu đánh giá ER có nhãn, đo precision/recall theo từng loại entity, versioning extraction, incremental sync, frontend review workflow và quan sát pipeline qua structured logging.
 
-## 11. Cấu trúc thư mục
+## 12. Cấu trúc thư mục
 
 ```text
 app/
@@ -462,6 +481,6 @@ tests/                      # Automated tests
 storage/                    # Local PDFs, FAISS indexes and reports
 ```
 
-## 12. Dữ liệu và bảo mật
+## 13. Dữ liệu và bảo mật
 
 Chỉ sử dụng tài liệu mà bạn có quyền xử lý. API key, database credentials và dữ liệu PDF thực tế không nên đưa vào repository công khai. Kiểm tra `.gitignore` và nội dung commit trước khi push.
