@@ -43,7 +43,7 @@ def get_dashboard(db: Session = Depends(get_db)):
                 "filename": item.original_filename,
                 "status": item.status.value,
                 "uploaded_at": item.uploaded_at,
-                "updated_at": item.updated_at,
+                "updated_at": item.updated_at,\n                "file_size": item.file_size,\n                "chunk_count": item.chunk_count,
             } for item in recent
         ],
     }
@@ -96,5 +96,5 @@ def get_document_workflow(document_id: str, db: Session = Depends(get_db)):
             "sync_status": run.sync_status if run else "NOT_SYNCED",
         },
         "finalized": bool(run and run.status == "FINALIZED"),
-        "neo4j_synced": bool(run and run.sync_status == "SYNCED"),
+        "neo4j_synced": bool(run and run.sync_status == "SYNCED"),\n        "metrics": {\n            "raw_entity_count": raw_entity_count,\n            "canonical_entity_count": canonical_entity_count,\n            "entity_reduction_count": raw_entity_count - canonical_entity_count,\n            "entity_reduction_percent": entity_reduction,\n            "raw_relation_count": raw_relation_count,\n            "canonical_relation_count": canonical_relation_count,\n            "relation_reduction_count": raw_relation_count - canonical_relation_count,\n            "relation_reduction_percent": relation_reduction,\n            "removed_self_loop_count": removed_self_loop_count,\n        },
     }
