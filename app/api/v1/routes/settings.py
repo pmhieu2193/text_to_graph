@@ -28,8 +28,8 @@ def get_runtime_settings():
         "llm_model": settings.llm_model,
         "llm_api_key": _masked(settings.llm_api_key),
         "llm_fallback_api_key": _masked(settings.llm_fallback_api_key),
-        "neo4j_uri": settings.neo4j_uri or "",
-        "neo4j_username": settings.neo4j_username or "",
+        "neo4j_uri": settings.neo4j_uri or "bolt://localhost:7687",
+        "neo4j_username": settings.neo4j_username or "neo4j",
         "neo4j_password": _masked(settings.neo4j_password),
         "neo4j_database": settings.neo4j_database,
     }
