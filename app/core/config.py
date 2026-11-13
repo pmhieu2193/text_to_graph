@@ -1,4 +1,5 @@
 import json
+import shutil
 from pathlib import Path
 from typing import Any
 
@@ -60,6 +61,73 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+
+
+def _normalize_data_path(value: Path, folder: str) -> Path:
+    path = Path(value)
+    if not path.is_absolute():
+        normalized = path.as_posix().removeprefix("./")
+        if normalized.startswith("storage/"):
+            normalized = "data/" + normalized.removeprefix("storage/")
+        path = BASE_DIR / normalized
+    return path.resolve()
+
+
+for setting_name, folder in (
+    ("storage_dir", "documents"),
+    ("extracted_text_dir", "extracted"),
+    ("er_index_dir", "entity_resolution/indexes"),
+    ("er_report_dir", "entity_resolution/reports"),
+):
+    configured = Path(getattr(settings, setting_name))
+    if not configured.is_absolute():
+        normalized = configured.as_posix().removeprefix("./")
+        if normalized.startswith("storage/"):
+            normalized = "data/" + normalized.removeprefix("storage/")
+        configured = BASE_DIR / normalized
+    setattr(settings, setting_name, configured.resolve())
+
+
+def _migrate_legacy_storage() -> None:
+    """Move old ./storage artifacts into ./data while preserving existing files."""
+    legacy_root = BASE_DIR / "storage"
+    if not legacy_root.exists():
+        return
+    destinations = {
+        "documents": settings.storage_dir,
+        "extracted": settings.extracted_text_dir,
+        "entity_resolution/indexes": settings.er_index_dir,
+        "entity_resolution/reports": settings.er_report_dir,
+    }
+    for relative, destination in destinations.items():
+        source = legacy_root / relative
+        if not source.exists():
+            continue
+        for old_file in source.rglob("*"):
+            if not old_file.is_file():
+                continue
+            target = destination / old_file.relative_to(source)
+            target.parent.mkdir(parents=True, exist_ok=True)
+            if not target.exists():
+                shutil.move(str(old_file), str(target))
+        # Remove empty legacy directories only; never delete non-empty files.
+        for directory in sorted(source.rglob("*"), reverse=True):
+            if directory.is_dir():
+                try:
+                    directory.rmdir()
+                except OSError:
+                    pass
+        try:
+            source.rmdir()
+        except OSError:
+            pass
+    try:
+        legacy_root.rmdir()
+    except OSError:
+        pass
+
+
+_migrate_legacy_storage()
 
 
 def _load_persisted_settings() -> dict[str, Any]:
