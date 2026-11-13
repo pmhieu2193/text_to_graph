@@ -189,12 +189,13 @@ Linux/macOS:
 cp .env.example .env
 ```
 
-Set at least these values in `.env`:
+Set at least these values in `.env`. `BGE_MODEL_ID` selects the Hugging Face model repository downloaded during the backend image build; leave it as `BAAI/bge-m3` unless intentionally switching models:
 
 ```dotenv
 NEO4J_PASSWORD=replace_with_a_strong_password
 LLM_API_KEY=your_gemini_api_key
 APP_PORT=8080
+BGE_MODEL_ID=BAAI/bge-m3
 ```
 
 Use a Neo4j password that satisfies Neo4j's password requirements. Do not commit `.env` or real credentials.
@@ -205,7 +206,7 @@ Use a Neo4j password that satisfies Neo4j's password requirements. Do not commit
 docker compose up -d --build
 ```
 
-The first build can take several minutes because the backend installs PyTorch/ML dependencies. The first Entity Resolution run can also take time while BGE-M3 is downloaded into the persistent model cache.
+The first build can take significantly longer: Docker installs the PyTorch/ML dependencies and downloads the complete BGE-M3 model into the backend image. Entity Resolution does not need to download model files at runtime. The model is loaded from `/opt/models/bge-m3` using the same `BGEM3FlagModel(..., use_fp16=False)` initialization as the application code.
 
 Check container status:
 
@@ -243,7 +244,6 @@ The following data survives container recreation and image rebuilds:
 | `./data/` | SQLite database, uploaded PDFs, settings, FAISS indexes, reports |
 | `neo4j_data` | Neo4j graph database |
 | `neo4j_logs` | Neo4j logs |
-| `huggingface_cache` | Downloaded embedding models and tokenizer cache |
 
 Typical application data layout:
 
@@ -267,7 +267,7 @@ docker compose up -d
 
 This keeps named volumes and the host `data/` directory.
 
-**Warning:** `docker compose down -v` deletes named volumes, including the Neo4j database and model cache. Do not use it if you need to preserve Neo4j data. Back up `data/` and the Neo4j volume before migrations or destructive maintenance.
+**Warning:** `docker compose down -v` deletes named volumes, including the Neo4j database. The BGE-M3 model is part of the backend image, not a persistent volume; rebuilding the backend image downloads it again when the build cache does not contain that layer. Back up `data/` and the Neo4j volume before migrations or destructive maintenance.
 
 ### Option B — Run locally without Docker
 
