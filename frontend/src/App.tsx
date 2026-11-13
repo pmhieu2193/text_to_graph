@@ -213,8 +213,8 @@ function StepPage({step,id,doc,workflow,notify,refresh,onNext,onGoStep}:{step:st
   const pending=summaryQ.data?.pending_count ?? workflow?.entity_resolution?.pending_count;
   const done = step==='processing'?doc.status!=='UPLOADED'&&doc.status!=='FAILED'
     :step==='extraction'?['EXTRACTED','ENTITY_RESOLUTION','HUMAN_REVIEW','FINALIZED','NEO4J_SYNCED'].includes(doc.status)
-    :step==='entity-resolution'?Boolean(workflow?.entity_resolution?.completed)
-    :step==='human-review'?Boolean(workflow?.entity_resolution?.completed)
+    :step==='entity-resolution'?erRunExists
+    :step==='human-review'?erRunExists
     :step==='finalize'?doc.status==='FINALIZED'||doc.status==='NEO4J_SYNCED'
     :step==='neo4j-sync'?doc.status==='NEO4J_SYNCED':false;
   const canNext = step==='human-review'?Boolean(workflow?.entity_resolution?.completed):done;
