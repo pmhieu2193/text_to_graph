@@ -63,21 +63,11 @@ class Settings(BaseSettings):
 settings = Settings()
 
 
-def _normalize_data_path(value: Path, folder: str) -> Path:
-    path = Path(value)
-    if not path.is_absolute():
-        normalized = path.as_posix().removeprefix("./")
-        if normalized.startswith("storage/"):
-            normalized = "data/" + normalized.removeprefix("storage/")
-        path = BASE_DIR / normalized
-    return path.resolve()
-
-
-for setting_name, folder in (
-    ("storage_dir", "documents"),
-    ("extracted_text_dir", "extracted"),
-    ("er_index_dir", "entity_resolution/indexes"),
-    ("er_report_dir", "entity_resolution/reports"),
+for setting_name in (
+    "storage_dir",
+    "extracted_text_dir",
+    "er_index_dir",
+    "er_report_dir",
 ):
     configured = Path(getattr(settings, setting_name))
     if not configured.is_absolute():
