@@ -99,7 +99,7 @@ def test_raw_entity_pagination_search_and_not_found():
 
         second = client.get(
             "/documents/DOC-RAW/raw-entities",
-            params={"page": 2, "page_size": 1, "entity_type": "LOCATION"},
+            params={"page": 1, "page_size": 1, "entity_type": "LOCATION"},
         )
         assert second.status_code == 200
         assert second.json()["total"] == 1
