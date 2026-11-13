@@ -240,6 +240,9 @@ def test_finalize_defaults_unresolved_review_to_skip_and_exports_workbook(tmp_pa
         _dataframe, _path, run_id = service.preview("D2")
         result = service.finalize("D2")
 
+        persisted_run = db.get(EntityResolutionRun, run_id)
+        assert persisted_run.status == "FINALIZED"
+        assert persisted_run.report_path == result["report_path"]
         assert result["defaulted_to_skip"] == 1
         candidate = db.scalar(
             select(EntityCandidate).where(EntityCandidate.run_id == run_id)
