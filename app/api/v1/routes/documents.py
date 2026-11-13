@@ -137,6 +137,8 @@ def delete_document(
     runs = list(db.query(EntityResolutionRun).filter(
         EntityResolutionRun.document_id == document_id
     ).all())
+    if any(run.sync_status == "SYNCING" for run in runs):
+        raise HTTPException(status_code=409, detail="Document đang được đồng bộ Neo4j; hãy thử xóa lại sau khi sync kết thúc.")
     if not keep_neo4j and any(run.sync_status != "NOT_SYNCED" for run in runs):
         try:
             Neo4jGraphSyncService(db).delete_document_graph(document_id)
@@ -169,7 +171,7 @@ def delete_document(
         raise
 
     removed_files = []
-    for path in (pdf_path, extracted_path):
+    for path in (pdf_path, extracted_path, settings.extracted_text_dir / f"{document_id}.txt", BASE_DIR / "storage" / "extracted" / f"{document_id}.txt"):
         if path and path.is_file():
             path.unlink(missing_ok=True)
             removed_files.append(str(path))
