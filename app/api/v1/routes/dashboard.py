@@ -64,6 +64,15 @@ def get_document_workflow(document_id: str, db: Session = Depends(get_db)):
     raw_entity_count = db.scalar(
         select(func.count()).select_from(RawEntity).where(RawEntity.document_id == document_id)
     ) or 0
+    raw_entity_rows = db.scalars(
+        select(RawEntity).where(RawEntity.document_id == document_id)
+    ).all()
+    # LLM-style baseline: every extracted entity record plus each alias it
+    # emitted. Aliases are labels, not independent graph nodes after ER.
+    original_entity_name_count = sum(
+        1 + len(set(alias.strip() for alias in (entity.aliases or []) if alias and alias.strip()))
+        for entity in raw_entity_rows
+    )
     raw_relation_count = db.scalar(
         select(func.count()).select_from(RawRelation).where(RawRelation.document_id == document_id)
     ) or 0
@@ -132,6 +141,11 @@ def get_document_workflow(document_id: str, db: Session = Depends(get_db)):
         "neo4j_synced": bool(run and run.sync_status == "SYNCED"),
         "metrics": {
             "raw_entity_count": raw_entity_count,
+            "original_entity_name_count": original_entity_name_count,
+            "original_to_canonical_reduction_count": original_entity_name_count - canonical_entity_count,
+            "original_to_canonical_reduction_percent": round(
+                (original_entity_name_count - canonical_entity_count) / original_entity_name_count * 100, 2
+            ) if original_entity_name_count else 0.0,
             "canonical_entity_count": canonical_entity_count,
             "entity_reduction_count": raw_entity_count - canonical_entity_count,
             "entity_reduction_percent": entity_reduction,
