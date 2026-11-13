@@ -70,7 +70,11 @@ def get_document_workflow(document_id: str, db: Session = Depends(get_db)):
     # LLM-style baseline: every extracted entity record plus each alias it
     # emitted. Aliases are labels, not independent graph nodes after ER.
     original_entity_name_count = sum(
-        1 + len(set(alias.strip() for alias in (entity.aliases or []) if alias and alias.strip()))
+        len({
+            value.strip().casefold()
+            for value in [entity.name, *(entity.aliases or [])]
+            if isinstance(value, str) and value.strip()
+        })
         for entity in raw_entity_rows
     )
     raw_relation_count = db.scalar(
