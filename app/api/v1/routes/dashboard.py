@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.models.document import Document, DocumentStatus
 from app.models.extraction import RawEntity, RawRelation
-from app.models.entity_resolution import EntityCandidate, EntityResolutionRun
+from app.models.entity_resolution import EntityCandidate, EntityResolutionRun, CanonicalEntity\nfrom app.services.entity_resolution.service import EntityResolutionService
 
 router = APIRouter(tags=["Dashboard"])
 
