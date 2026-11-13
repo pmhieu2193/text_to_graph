@@ -8,7 +8,7 @@ from app.core.config import settings
 app = FastAPI(
     title="Vietnamese Knowledge Graph API",
     description="Document upload and Knowledge Graph extraction API",
-    version="0.4.0",
+    version="1.0.0",
 )
 
 app.add_middleware(

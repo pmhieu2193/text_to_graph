@@ -12,9 +12,9 @@ htmlcov/
 .env
 .env.*
 !.env.example
-data/*
-!data/
-!data/.gitkeep
+data/**
+!data/**/
+!data/**/.gitkeep
 
 # Frontend dependencies and generated output
 frontend/node_modules/
@@ -29,8 +29,3 @@ frontend/*.tsbuildinfo
 .DS_Store
 Thumbs.db
 
-# Legacy runtime artifacts (migrated to data/ on startup)
-storage/documents/*
-storage/extracted/*
-storage/entity_resolution/indexes/*
-storage/entity_resolution/reports/*
