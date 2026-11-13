@@ -12,7 +12,8 @@ htmlcov/
 .env
 .env.*
 !.env.example
-data/
+data/*
+!data/
 !data/.gitkeep
 
 # Frontend dependencies and generated output
