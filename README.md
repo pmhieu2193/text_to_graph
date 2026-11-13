@@ -147,7 +147,7 @@ Sync thay thế graph thuộc đúng `document_id` trong một Neo4j write trans
 
 Sau khi sync thành công, file Cypher được xuất tại:
 
-`storage/entity_resolution/reports/neo4j_sync_<document_id>.cypher.txt`
+`data/entity_resolution/reports/neo4j_sync_<document_id>.cypher.txt`
 
 File chứa lệnh xóa và dựng lại graph của đúng document, có thể mở bằng Neo4j Browser/Neo4j Cypher Shell để kiểm tra hoặc chạy lại. Chỉ dùng file với database/schema tương thích và kiểm tra `document_id` trước khi chạy. Không chạy file nếu không muốn thay thế graph hiện tại của document đó.
 
