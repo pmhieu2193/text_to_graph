@@ -54,10 +54,7 @@ function App() {
     <main className="main-area">
       <header className="topbar">
         <div className="topbar-title">Convert Vietnamese PDF to Knowledge Graph <span>· Neo4j</span></div>
-        <div className="topbar-actions">
-          <button className="icon-button" title="Language" onClick={() => setLangOpen(!langOpen)}><Languages size={17}/><span>{i18n.language.toUpperCase()}</span></button>
-          {langOpen && <div className="language-menu"><button onClick={() => changeLanguage('en')}>English</button><button onClick={() => changeLanguage('vi')}>Tiếng Việt</button></div>}
-        </div>
+        <div className="topbar-actions"/>
       </header>
       <div className="page-wrap">
         <Routes>
