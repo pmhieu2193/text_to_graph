@@ -1,14 +1,29 @@
+# Python
 .venv/
 __pycache__/
 *.py[cod]
-.env
-data/
-storage/documents/*
-!storage/documents/.gitkeep
-storage/extracted/*
-!storage/extracted/.gitkeep
 .pytest_cache/
-storage/entity_resolution/indexes/*
-!storage/entity_resolution/indexes/.gitkeep
-storage/entity_resolution/reports/*
-!storage/entity_resolution/reports/.gitkeep
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Secrets and local environment
+.env
+.env.*
+!.env.example
+data/
+!data/.gitkeep
+
+# Frontend dependencies and generated output
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+frontend/coverage/
+frontend/*.tsbuildinfo
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
