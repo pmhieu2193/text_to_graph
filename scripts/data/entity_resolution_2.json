@@ -1,0 +1,2263 @@
+{
+  "dataset_name": "Vietnamese Entity Resolution Benchmark (Expanded)",
+  "version": "2.0",
+  "description": "Tập dữ liệu mở rộng dùng để kiểm thử và benchmark bài toán Gom cụm thực thể (Entity Resolution / Entity Linking / Deduplication) trước khi đẩy vào CSDL đồ thị Neo4j. Bao gồm nhiều loại thực thể (PERSON, ORGANIZATION, LOCATION, EVENT, WORK, TECHNOLOGY, PRODUCT). canonical_id đóng vai trò nhãn Ground-Truth.",
+  "entity_count": 322,
+  "canonical_cluster_count": 100,
+  "entities": [
+    {
+      "id": "E001",
+      "canonical_id": "P_HCM",
+      "entity_type": "PERSON",
+      "name": "Hồ Chí Minh",
+      "description": "Lãnh tụ cách mạng Việt Nam, Chủ tịch nước Việt Nam Dân chủ Cộng hòa."
+    },
+    {
+      "id": "E002",
+      "canonical_id": "P_HCM",
+      "entity_type": "PERSON",
+      "name": "Nguyễn Ái Quốc",
+      "description": "Tên hoạt động cách mạng của Hồ Chí Minh trong thời kỳ hoạt động ở nước ngoài."
+    },
+    {
+      "id": "E003",
+      "canonical_id": "P_HCM",
+      "entity_type": "PERSON",
+      "name": "Bác Hồ",
+      "description": "Cách gọi thân mật, kính trọng dành cho Chủ tịch Hồ Chí Minh."
+    },
+    {
+      "id": "E004",
+      "canonical_id": "P_HCM",
+      "entity_type": "PERSON",
+      "name": "Nguyễn Sinh Cung",
+      "description": "Tên khai sinh của Chủ tịch Hồ Chí Minh."
+    },
+    {
+      "id": "E005",
+      "canonical_id": "P_VNG",
+      "entity_type": "PERSON",
+      "name": "Võ Nguyên Giáp",
+      "description": "Đại tướng Quân đội nhân dân Việt Nam, người chỉ huy chiến dịch Điện Biên Phủ."
+    },
+    {
+      "id": "E006",
+      "canonical_id": "P_VNG",
+      "entity_type": "PERSON",
+      "name": "Đại tướng Võ Nguyên Giáp",
+      "description": "Vị tướng quân đội Việt Nam, Tổng tư lệnh trong kháng chiến chống Pháp và chống Mỹ."
+    },
+    {
+      "id": "E007",
+      "canonical_id": "P_VNG",
+      "entity_type": "PERSON",
+      "name": "Võ Đại tướng",
+      "description": "Cách gọi Đại tướng Võ Nguyên Giáp trong một số ngữ cảnh báo chí và dân gian."
+    },
+    {
+      "id": "E008",
+      "canonical_id": "P_VNG",
+      "entity_type": "PERSON",
+      "name": "Anh Văn",
+      "description": "Bí danh thân mật của Đại tướng Võ Nguyên Giáp trong thời kỳ kháng chiến."
+    },
+    {
+      "id": "E009",
+      "canonical_id": "P_NHUE",
+      "entity_type": "PERSON",
+      "name": "Nguyễn Huệ",
+      "description": "Lãnh tụ phong trào Tây Sơn, vị tướng kiệt xuất trong lịch sử Việt Nam."
+    },
+    {
+      "id": "E010",
+      "canonical_id": "P_NHUE",
+      "entity_type": "PERSON",
+      "name": "Hoàng đế Quang Trung",
+      "description": "Niên hiệu của Nguyễn Huệ sau khi lên ngôi hoàng đế năm 1788."
+    },
+    {
+      "id": "E011",
+      "canonical_id": "P_NHUE",
+      "entity_type": "PERSON",
+      "name": "Vua Quang Trung",
+      "description": "Tên gọi phổ biến của hoàng đế Quang Trung, tức Nguyễn Huệ."
+    },
+    {
+      "id": "E012",
+      "canonical_id": "P_NHUE",
+      "entity_type": "PERSON",
+      "name": "Nguyễn Quang Bình",
+      "description": "Tên gọi khác của Nguyễn Huệ trong một số văn bản ngoại giao với nhà Thanh."
+    },
+    {
+      "id": "E013",
+      "canonical_id": "P_NDU",
+      "entity_type": "PERSON",
+      "name": "Nguyễn Du",
+      "description": "Đại thi hào Việt Nam, tác giả kiệt tác Truyện Kiều."
+    },
+    {
+      "id": "E014",
+      "canonical_id": "P_NDU",
+      "entity_type": "PERSON",
+      "name": "Đại thi hào Nguyễn Du",
+      "description": "Danh nhân văn hóa thế giới, nhà thơ lớn thời nhà Nguyễn."
+    },
+    {
+      "id": "E015",
+      "canonical_id": "P_NDU",
+      "entity_type": "PERSON",
+      "name": "Tố Như",
+      "description": "Tên chữ của đại thi hào Nguyễn Du."
+    },
+    {
+      "id": "E016",
+      "canonical_id": "P_NDU",
+      "entity_type": "PERSON",
+      "name": "Thanh Hiên",
+      "description": "Hiệu của nhà thơ Nguyễn Du."
+    },
+    {
+      "id": "E017",
+      "canonical_id": "P_TRAN_HUNG_DAO",
+      "entity_type": "PERSON",
+      "name": "Trần Hưng Đạo",
+      "description": "Danh tướng nhà Trần, chỉ huy quân dân Đại Việt ba lần đánh tan quân Nguyên Mông."
+    },
+    {
+      "id": "E018",
+      "canonical_id": "P_TRAN_HUNG_DAO",
+      "entity_type": "PERSON",
+      "name": "Hưng Đạo Đại Vương",
+      "description": "Tước hiệu được phong của danh tướng Trần Quốc Tuấn."
+    },
+    {
+      "id": "E019",
+      "canonical_id": "P_TRAN_HUNG_DAO",
+      "entity_type": "PERSON",
+      "name": "Trần Quốc Tuấn",
+      "description": "Tên thật của Trần Hưng Đạo, kiệt tác gia quân sự thời Trần."
+    },
+    {
+      "id": "E020",
+      "canonical_id": "P_TRAN_HUNG_DAO",
+      "entity_type": "PERSON",
+      "name": "Đức Thánh Trần",
+      "description": "Tôn xưng của nhân dân Việt Nam dành cho Hưng Đạo Đại Vương Trần Quốc Tuấn."
+    },
+    {
+      "id": "E021",
+      "canonical_id": "P_LE_LOI",
+      "entity_type": "PERSON",
+      "name": "Lê Lợi",
+      "description": "Thủ lĩnh cuộc khởi nghĩa Lam Sơn, người sáng lập ra nhà Lê sơ."
+    },
+    {
+      "id": "E022",
+      "canonical_id": "P_LE_LOI",
+      "entity_type": "PERSON",
+      "name": "Vua Lê Thái Tổ",
+      "description": "Thụy hiệu của Lê Lợi sau khi lên ngôi hoàng đế năm 1428."
+    },
+    {
+      "id": "E023",
+      "canonical_id": "P_LE_LOI",
+      "entity_type": "PERSON",
+      "name": "Bình Định Vương",
+      "description": "Danh xưng của Lê Lợi khi lãnh đạo cuộc khởi nghĩa Lam Sơn chống quân Minh."
+    },
+    {
+      "id": "E024",
+      "canonical_id": "P_NGUYEN_TRAI",
+      "entity_type": "PERSON",
+      "name": "Nguyễn Trãi",
+      "description": "Nhà văn hóa, quân sư đại tài thời Lê sơ, tác giả Bình Ngô đại cáo."
+    },
+    {
+      "id": "E025",
+      "canonical_id": "P_NGUYEN_TRAI",
+      "entity_type": "PERSON",
+      "name": "Ức Trai",
+      "description": "Hiệu của danh nhân Nguyễn Trãi."
+    },
+    {
+      "id": "E026",
+      "canonical_id": "P_NGUYEN_TRAI",
+      "entity_type": "PERSON",
+      "name": "Quan công thần Nguyễn Trãi",
+      "description": "Danh xưng khai quốc công thần nhà Lê sơ Nguyễn Trãi."
+    },
+    {
+      "id": "E027",
+      "canonical_id": "P_LY_THAI_TO",
+      "entity_type": "PERSON",
+      "name": "Lý Thái Tổ",
+      "description": "Vị vua sáng lập nhà Lý, người ban chiếu dời đô về Thăng Long năm 1010."
+    },
+    {
+      "id": "E028",
+      "canonical_id": "P_LY_THAI_TO",
+      "entity_type": "PERSON",
+      "name": "Lý Công Uẩn",
+      "description": "Tên thật của vua Lý Thái Tổ."
+    },
+    {
+      "id": "E029",
+      "canonical_id": "P_LY_THAI_TO",
+      "entity_type": "PERSON",
+      "name": "Vua Lý Thái Tổ",
+      "description": "Cách gọi tôn kính vị vua đầu tiên của triều đại nhà Lý."
+    },
+    {
+      "id": "E030",
+      "canonical_id": "P_NGO_QUYEN",
+      "entity_type": "PERSON",
+      "name": "Ngô Quyền",
+      "description": "Vị vua đánh tan quân Nam Hán trên sông Bạch Đằng năm 938, mở ra kỷ nguyên độc lập."
+    },
+    {
+      "id": "E031",
+      "canonical_id": "P_NGO_QUYEN",
+      "entity_type": "PERSON",
+      "name": "Tiền Ngô Vương",
+      "description": "Danh xưng lịch sử của Ngô Quyền sau khi xưng vương."
+    },
+    {
+      "id": "E032",
+      "canonical_id": "P_NGO_QUYEN",
+      "entity_type": "PERSON",
+      "name": "Vua Ngô Quyền",
+      "description": "Cách gọi thông dụng chỉ Ngô Quyền."
+    },
+    {
+      "id": "E033",
+      "canonical_id": "P_PHAN_BOI_CHAU",
+      "entity_type": "PERSON",
+      "name": "Phan Bội Châu",
+      "description": "Nhà cách mạng Việt Nam, thủ lĩnh phong trào Đông Du đầu thế kỷ 20."
+    },
+    {
+      "id": "E034",
+      "canonical_id": "P_PHAN_BOI_CHAU",
+      "entity_type": "PERSON",
+      "name": "Phan Sào Nam",
+      "description": "Tên chữ và hiệu phổ biến của Phan Bội Châu."
+    },
+    {
+      "id": "E035",
+      "canonical_id": "P_PHAN_BOI_CHAU",
+      "entity_type": "PERSON",
+      "name": "Cụ Phan Bội Châu",
+      "description": "Cách xưng hô tôn kính dành cho chí sĩ yêu nước Phan Bội Châu."
+    },
+    {
+      "id": "E036",
+      "canonical_id": "P_PHAN_CHAU_TRINH",
+      "entity_type": "PERSON",
+      "name": "Phan Châu Trinh",
+      "description": "Nhà cải cách văn hóa, chí sĩ yêu nước đầu thế kỷ 20 với chủ trương Duy Tân."
+    },
+    {
+      "id": "E037",
+      "canonical_id": "P_PHAN_CHAU_TRINH",
+      "entity_type": "PERSON",
+      "name": "Phan Tây Hồ",
+      "description": "Hiệu của chí sĩ Phan Châu Trinh."
+    },
+    {
+      "id": "E038",
+      "canonical_id": "P_PHAN_CHAU_TRINH",
+      "entity_type": "PERSON",
+      "name": "Phan Chu Trinh",
+      "description": "Biến thể chính tả thường gặp của tên Phan Châu Trinh."
+    },
+    {
+      "id": "E039",
+      "canonical_id": "P_ALAN_TURING",
+      "entity_type": "PERSON",
+      "name": "Alan Turing",
+      "description": "Nhà toán học, logic học và khoa học máy tính người Anh, cha đẻ của khoa học máy tính hiện đại."
+    },
+    {
+      "id": "E040",
+      "canonical_id": "P_ALAN_TURING",
+      "entity_type": "PERSON",
+      "name": "Alan Mathison Turing",
+      "description": "Tên đầy đủ của Alan Turing."
+    },
+    {
+      "id": "E041",
+      "canonical_id": "P_ALAN_TURING",
+      "entity_type": "PERSON",
+      "name": "A. M. Turing",
+      "description": "Tên viết tắt tác giả Alan Turing trong các công trình khoa học."
+    },
+    {
+      "id": "E042",
+      "canonical_id": "P_ALBERT_EINSTEIN",
+      "entity_type": "PERSON",
+      "name": "Albert Einstein",
+      "description": "Nhà vật lý lý thuyết người Đức, người phát triển thuyết tương đối."
+    },
+    {
+      "id": "E043",
+      "canonical_id": "P_ALBERT_EINSTEIN",
+      "entity_type": "PERSON",
+      "name": "A. Einstein",
+      "description": "Cách viết ngắn gọn tên của nhà vật lý Albert Einstein."
+    },
+    {
+      "id": "E044",
+      "canonical_id": "P_ALBERT_EINSTEIN",
+      "entity_type": "PERSON",
+      "name": "Einstein",
+      "description": "Họ của nhà vật lý vĩ đại Albert Einstein, thường dùng độc lập."
+    },
+    {
+      "id": "E045",
+      "canonical_id": "P_ELON_MUSK",
+      "entity_type": "PERSON",
+      "name": "Elon Musk",
+      "description": "Tỷ phú công nghệ, sáng lập SpaceX và CEO của Tesla."
+    },
+    {
+      "id": "E046",
+      "canonical_id": "P_ELON_MUSK",
+      "entity_type": "PERSON",
+      "name": "Elon Reeve Musk",
+      "description": "Tên đầy đủ của tỷ phú Elon Musk."
+    },
+    {
+      "id": "E047",
+      "canonical_id": "P_ELON_MUSK",
+      "entity_type": "PERSON",
+      "name": "Tỷ phú Elon Musk",
+      "description": "Danh xưng truyền thông dành cho Elon Musk."
+    },
+    {
+      "id": "E048",
+      "canonical_id": "P_SAM_ALTMAN",
+      "entity_type": "PERSON",
+      "name": "Sam Altman",
+      "description": "Nhà đầu tư và doanh nhân công nghệ, CEO của OpenAI."
+    },
+    {
+      "id": "E049",
+      "canonical_id": "P_SAM_ALTMAN",
+      "entity_type": "PERSON",
+      "name": "Samuel H. Altman",
+      "description": "Tên đầy đủ của Sam Altman."
+    },
+    {
+      "id": "E050",
+      "canonical_id": "P_SAM_ALTMAN",
+      "entity_type": "PERSON",
+      "name": "Samuel Harris Altman",
+      "description": "Tên pháp lý đầy đủ của CEO OpenAI Sam Altman."
+    },
+    {
+      "id": "E051",
+      "canonical_id": "P_JENSEN_HUANG",
+      "entity_type": "PERSON",
+      "name": "Jensen Huang",
+      "description": "Đồng sáng lập và CEO của tập đoàn công nghệ Nvidia."
+    },
+    {
+      "id": "E052",
+      "canonical_id": "P_JENSEN_HUANG",
+      "entity_type": "PERSON",
+      "name": "Hoàng Nhân Huân",
+      "description": "Tên phiên âm Hán-Việt của Jensen Huang (黃仁勳)."
+    },
+    {
+      "id": "E053",
+      "canonical_id": "P_JENSEN_HUANG",
+      "entity_type": "PERSON",
+      "name": "Jen-Hsun Huang",
+      "description": "Tên tiếng Anh gốc theo phiên âm Wade-Giles của Jensen Huang."
+    },
+    {
+      "id": "E054",
+      "canonical_id": "O_VNU",
+      "entity_type": "ORGANIZATION",
+      "name": "Đại học Quốc gia Hà Nội",
+      "description": "Đại học quốc gia đa ngành, đa lĩnh vực hàng đầu đặt tại Hà Nội."
+    },
+    {
+      "id": "E055",
+      "canonical_id": "O_VNU",
+      "entity_type": "ORGANIZATION",
+      "name": "ĐHQGHN",
+      "description": "Tên viết tắt tiếng Việt của Đại học Quốc gia Hà Nội."
+    },
+    {
+      "id": "E056",
+      "canonical_id": "O_VNU",
+      "entity_type": "ORGANIZATION",
+      "name": "Vietnam National University, Hanoi",
+      "description": "Tên giao dịch tiếng Anh của Đại học Quốc gia Hà Nội."
+    },
+    {
+      "id": "E057",
+      "canonical_id": "O_VNU",
+      "entity_type": "ORGANIZATION",
+      "name": "VNU Hanoi",
+      "description": "Tên viết tắt tiếng Anh của Đại học Quốc gia Hà Nội."
+    },
+    {
+      "id": "E058",
+      "canonical_id": "O_VNU_HCM",
+      "entity_type": "ORGANIZATION",
+      "name": "Đại học Quốc gia Thành phố Hồ Chí Minh",
+      "description": "Đại học quốc gia trọng điểm đặt tại miền Nam Việt Nam."
+    },
+    {
+      "id": "E059",
+      "canonical_id": "O_VNU_HCM",
+      "entity_type": "ORGANIZATION",
+      "name": "ĐHQG-HCM",
+      "description": "Tên viết tắt chính thức của Đại học Quốc gia Thành phố Hồ Chí Minh."
+    },
+    {
+      "id": "E060",
+      "canonical_id": "O_VNU_HCM",
+      "entity_type": "ORGANIZATION",
+      "name": "Vietnam National University Ho Chi Minh City",
+      "description": "Tên tiếng Anh của Đại học Quốc gia TP.HCM."
+    },
+    {
+      "id": "E061",
+      "canonical_id": "O_VNU_HCM",
+      "entity_type": "ORGANIZATION",
+      "name": "VNU-HCM",
+      "description": "Tên viết tắt tiếng Anh ngắn gọn của ĐHQG TP.HCM."
+    },
+    {
+      "id": "E062",
+      "canonical_id": "O_HUST",
+      "entity_type": "ORGANIZATION",
+      "name": "Đại học Bách khoa Hà Nội",
+      "description": "Trường đại học kỹ thuật hàng đầu tại Việt Nam."
+    },
+    {
+      "id": "E063",
+      "canonical_id": "O_HUST",
+      "entity_type": "ORGANIZATION",
+      "name": "ĐHBK Hà Nội",
+      "description": "Cách gọi tắt phổ biến của Đại học Bách khoa Hà Nội."
+    },
+    {
+      "id": "E064",
+      "canonical_id": "O_HUST",
+      "entity_type": "ORGANIZATION",
+      "name": "Hanoi University of Science and Technology",
+      "description": "Tên tiếng Anh chính thức của Đại học Bách khoa Hà Nội."
+    },
+    {
+      "id": "E065",
+      "canonical_id": "O_HUST",
+      "entity_type": "ORGANIZATION",
+      "name": "HUST",
+      "description": "Tên viết tắt tiếng Anh của Đại học Bách khoa Hà Nội."
+    },
+    {
+      "id": "E066",
+      "canonical_id": "O_VIET_MINH",
+      "entity_type": "ORGANIZATION",
+      "name": "Việt Minh",
+      "description": "Mặt trận chính trị do Đảng Cộng sản Đông Dương thành lập năm 1941."
+    },
+    {
+      "id": "E067",
+      "canonical_id": "O_VIET_MINH",
+      "entity_type": "ORGANIZATION",
+      "name": "Mặt trận Việt Minh",
+      "description": "Tên gọi thông dụng của tổ chức Việt Nam Độc lập Đồng minh."
+    },
+    {
+      "id": "E068",
+      "canonical_id": "O_VIET_MINH",
+      "entity_type": "ORGANIZATION",
+      "name": "Việt Nam Độc lập Đồng minh",
+      "description": "Tên đầy đủ của tổ chức cách mạng thường gọi là Việt Minh."
+    },
+    {
+      "id": "E069",
+      "canonical_id": "O_UNESCO",
+      "entity_type": "ORGANIZATION",
+      "name": "UNESCO",
+      "description": "Tổ chức Giáo dục, Khoa học và Văn hóa của Liên Hợp Quốc."
+    },
+    {
+      "id": "E070",
+      "canonical_id": "O_UNESCO",
+      "entity_type": "ORGANIZATION",
+      "name": "Tổ chức UNESCO",
+      "description": "Cơ quan chuyên môn của Liên Hợp Quốc về văn hóa và giáo dục."
+    },
+    {
+      "id": "E071",
+      "canonical_id": "O_UNESCO",
+      "entity_type": "ORGANIZATION",
+      "name": "United Nations Educational, Scientific and Cultural Organization",
+      "description": "Tên đầy đủ tiếng Anh của tổ chức UNESCO."
+    },
+    {
+      "id": "E072",
+      "canonical_id": "O_UN",
+      "entity_type": "ORGANIZATION",
+      "name": "Liên Hợp Quốc",
+      "description": "Tổ chức liên chính phủ lớn nhất thế giới có nhiệm vụ duy trì hòa bình."
+    },
+    {
+      "id": "E073",
+      "canonical_id": "O_UN",
+      "entity_type": "ORGANIZATION",
+      "name": "LHQ",
+      "description": "Tên viết tắt tiếng Việt của Liên Hợp Quốc."
+    },
+    {
+      "id": "E074",
+      "canonical_id": "O_UN",
+      "entity_type": "ORGANIZATION",
+      "name": "United Nations",
+      "description": "Tên tiếng Anh của Liên Hợp Quốc."
+    },
+    {
+      "id": "E075",
+      "canonical_id": "O_UN",
+      "entity_type": "ORGANIZATION",
+      "name": "UN",
+      "description": "Viết tắt tiếng Anh của United Nations."
+    },
+    {
+      "id": "E076",
+      "canonical_id": "O_WHO",
+      "entity_type": "ORGANIZATION",
+      "name": "Tổ chức Y tế Thế giới",
+      "description": "Cơ quan chuyên môn của Liên Hợp Quốc chịu trách nhiệm về y tế công cộng."
+    },
+    {
+      "id": "E077",
+      "canonical_id": "O_WHO",
+      "entity_type": "ORGANIZATION",
+      "name": "WHO",
+      "description": "Tên viết tắt tiếng Anh của Tổ chức Y tế Thế giới."
+    },
+    {
+      "id": "E078",
+      "canonical_id": "O_WHO",
+      "entity_type": "ORGANIZATION",
+      "name": "World Health Organization",
+      "description": "Tên đầy đủ tiếng Anh của Tổ chức Y tế Thế giới."
+    },
+    {
+      "id": "E079",
+      "canonical_id": "O_OPENAI",
+      "entity_type": "ORGANIZATION",
+      "name": "OpenAI",
+      "description": "Phòng nghiên cứu trí tuệ nhân tạo phát triển GPT và ChatGPT."
+    },
+    {
+      "id": "E080",
+      "canonical_id": "O_OPENAI",
+      "entity_type": "ORGANIZATION",
+      "name": "OpenAI Inc.",
+      "description": "Tên pháp lý công ty nghiên cứu AI OpenAI."
+    },
+    {
+      "id": "E081",
+      "canonical_id": "O_OPENAI",
+      "entity_type": "ORGANIZATION",
+      "name": "Công ty OpenAI",
+      "description": "Cách gọi báo chí tiếng Việt cho OpenAI."
+    },
+    {
+      "id": "E082",
+      "canonical_id": "O_GOOGLE",
+      "entity_type": "ORGANIZATION",
+      "name": "Google",
+      "description": "Tập đoàn công nghệ đa quốc gia chuyên về công cụ tìm kiếm và AI."
+    },
+    {
+      "id": "E083",
+      "canonical_id": "O_GOOGLE",
+      "entity_type": "ORGANIZATION",
+      "name": "Google LLC",
+      "description": "Tên pháp lý của công ty công nghệ Google."
+    },
+    {
+      "id": "E084",
+      "canonical_id": "O_GOOGLE",
+      "entity_type": "ORGANIZATION",
+      "name": "Alphabet Inc.",
+      "description": "Công ty mẹ của Google."
+    },
+    {
+      "id": "E085",
+      "canonical_id": "O_GOOGLE",
+      "entity_type": "ORGANIZATION",
+      "name": "Tập đoàn Google",
+      "description": "Cách gọi tiếng Việt của Google."
+    },
+    {
+      "id": "E086",
+      "canonical_id": "O_MICROSOFT",
+      "entity_type": "ORGANIZATION",
+      "name": "Microsoft",
+      "description": "Tập đoàn công nghệ máy tính đa quốc gia phát triển Windows và Azure."
+    },
+    {
+      "id": "E087",
+      "canonical_id": "O_MICROSOFT",
+      "entity_type": "ORGANIZATION",
+      "name": "Microsoft Corporation",
+      "description": "Tên đăng ký kinh doanh chính thức của Microsoft."
+    },
+    {
+      "id": "E088",
+      "canonical_id": "O_MICROSOFT",
+      "entity_type": "ORGANIZATION",
+      "name": "MSFT",
+      "description": "Mã chứng khoán và ký hiệu của tập đoàn Microsoft."
+    },
+    {
+      "id": "E089",
+      "canonical_id": "O_NVIDIA",
+      "entity_type": "ORGANIZATION",
+      "name": "Nvidia",
+      "description": "Tập đoàn công nghệ đa quốc gia thiết kế chip đồ họa GPU và vi xử lý AI."
+    },
+    {
+      "id": "E090",
+      "canonical_id": "O_NVIDIA",
+      "entity_type": "ORGANIZATION",
+      "name": "Nvidia Corporation",
+      "description": "Tên công ty niêm yết chính thức của Nvidia."
+    },
+    {
+      "id": "E091",
+      "canonical_id": "O_NVIDIA",
+      "entity_type": "ORGANIZATION",
+      "name": "Tập đoàn Nvidia",
+      "description": "Cách gọi tiếng Việt cho Nvidia."
+    },
+    {
+      "id": "E092",
+      "canonical_id": "O_VIETTEL",
+      "entity_type": "ORGANIZATION",
+      "name": "Viettel",
+      "description": "Tập đoàn viễn thông và công nghệ hàng đầu tại Việt Nam."
+    },
+    {
+      "id": "E093",
+      "canonical_id": "O_VIETTEL",
+      "entity_type": "ORGANIZATION",
+      "name": "Tập đoàn Công nghiệp - Viễn thông Quân đội",
+      "description": "Tên đầy đủ của Tập đoàn Viettel."
+    },
+    {
+      "id": "E094",
+      "canonical_id": "O_VIETTEL",
+      "entity_type": "ORGANIZATION",
+      "name": "Viettel Group",
+      "description": "Tên giao dịch quốc tế của Viettel."
+    },
+    {
+      "id": "E095",
+      "canonical_id": "O_VNPT",
+      "entity_type": "ORGANIZATION",
+      "name": "VNPT",
+      "description": "Tập đoàn bưu chính viễn thông lâu đời tại Việt Nam."
+    },
+    {
+      "id": "E096",
+      "canonical_id": "O_VNPT",
+      "entity_type": "ORGANIZATION",
+      "name": "Tập đoàn Bưu chính Viễn thông Việt Nam",
+      "description": "Tên đầy đủ của VNPT."
+    },
+    {
+      "id": "E097",
+      "canonical_id": "O_VNPT",
+      "entity_type": "ORGANIZATION",
+      "name": "Vietnam Posts and Telecommunications Group",
+      "description": "Tên tiếng Anh của VNPT."
+    },
+    {
+      "id": "E098",
+      "canonical_id": "O_FPT",
+      "entity_type": "ORGANIZATION",
+      "name": "FPT",
+      "description": "Tập đoàn dịch vụ công nghệ thông tin và tài chính tại Việt Nam."
+    },
+    {
+      "id": "E099",
+      "canonical_id": "O_FPT",
+      "entity_type": "ORGANIZATION",
+      "name": "Tập đoàn FPT",
+      "description": "Tên gọi phổ biến của FPT."
+    },
+    {
+      "id": "E100",
+      "canonical_id": "O_FPT",
+      "entity_type": "ORGANIZATION",
+      "name": "FPT Corporation",
+      "description": "Tên tiếng Anh chính thức của FPT."
+    },
+    {
+      "id": "E101",
+      "canonical_id": "O_VINFAST",
+      "entity_type": "ORGANIZATION",
+      "name": "VinFast",
+      "description": "Hãng sản xuất xe điện của Việt Nam thuộc Vingroup."
+    },
+    {
+      "id": "E102",
+      "canonical_id": "O_VINFAST",
+      "entity_type": "ORGANIZATION",
+      "name": "VinFast Auto",
+      "description": "Tên thương hiệu xe hơi VinFast trên sàn chứng khoán quốc tế."
+    },
+    {
+      "id": "E103",
+      "canonical_id": "O_VINFAST",
+      "entity_type": "ORGANIZATION",
+      "name": "Công ty Cổ phần Sản xuất và Kinh doanh VinFast",
+      "description": "Tên đăng ký kinh doanh chính thức của VinFast."
+    },
+    {
+      "id": "E104",
+      "canonical_id": "O_VINGROUP",
+      "entity_type": "ORGANIZATION",
+      "name": "Vingroup",
+      "description": "Tập đoàn kinh tế tư nhân đa ngành lớn nhất Việt Nam."
+    },
+    {
+      "id": "E105",
+      "canonical_id": "O_VINGROUP",
+      "entity_type": "ORGANIZATION",
+      "name": "Tập đoàn Vingroup",
+      "description": "Cách gọi đầy đủ tiếng Việt của Vingroup."
+    },
+    {
+      "id": "E106",
+      "canonical_id": "O_VINGROUP",
+      "entity_type": "ORGANIZATION",
+      "name": "Vingroup Joint Stock Company",
+      "description": "Tên tiếng Anh pháp lý của Vingroup."
+    },
+    {
+      "id": "E107",
+      "canonical_id": "O_BIDV",
+      "entity_type": "ORGANIZATION",
+      "name": "BIDV",
+      "description": "Ngân hàng thương mại cổ phần thương mại lớn tại Việt Nam."
+    },
+    {
+      "id": "E108",
+      "canonical_id": "O_BIDV",
+      "entity_type": "ORGANIZATION",
+      "name": "Ngân hàng TMCP Đầu tư và Phát triển Việt Nam",
+      "description": "Tên đầy đủ tiếng Việt của BIDV."
+    },
+    {
+      "id": "E109",
+      "canonical_id": "O_BIDV",
+      "entity_type": "ORGANIZATION",
+      "name": "Bank for Investment and Development of Vietnam",
+      "description": "Tên tiếng Anh chính thức của ngân hàng BIDV."
+    },
+    {
+      "id": "E110",
+      "canonical_id": "O_VIETCOMBANK",
+      "entity_type": "ORGANIZATION",
+      "name": "Vietcombank",
+      "description": "Ngân hàng thương mại cổ phần ngoại thương hàng đầu Việt Nam."
+    },
+    {
+      "id": "E111",
+      "canonical_id": "O_VIETCOMBANK",
+      "entity_type": "ORGANIZATION",
+      "name": "VCB",
+      "description": "Tên viết tắt và mã chứng khoán của Vietcombank."
+    },
+    {
+      "id": "E112",
+      "canonical_id": "O_VIETCOMBANK",
+      "entity_type": "ORGANIZATION",
+      "name": "Ngân hàng TMCP Ngoại thương Việt Nam",
+      "description": "Tên đăng ký chính thức của Vietcombank."
+    },
+    {
+      "id": "E113",
+      "canonical_id": "L_HANOI",
+      "entity_type": "LOCATION",
+      "name": "Hà Nội",
+      "description": "Thủ đô của Việt Nam, trung tâm chính trị và văn hóa quốc gia."
+    },
+    {
+      "id": "E114",
+      "canonical_id": "L_HANOI",
+      "entity_type": "LOCATION",
+      "name": "Thủ đô Hà Nội",
+      "description": "Tên gọi trang trọng chỉ thủ đô nước Việt Nam."
+    },
+    {
+      "id": "E115",
+      "canonical_id": "L_HANOI",
+      "entity_type": "LOCATION",
+      "name": "Thành phố Hà Nội",
+      "description": "Đơn vị hành chính cấp tỉnh/thành phố trực thuộc trung ương."
+    },
+    {
+      "id": "E116",
+      "canonical_id": "L_HANOI",
+      "entity_type": "LOCATION",
+      "name": "Thăng Long",
+      "description": "Tên gọi lịch sử của Hà Nội thời phong kiến."
+    },
+    {
+      "id": "E117",
+      "canonical_id": "L_HCMC",
+      "entity_type": "LOCATION",
+      "name": "Thành phố Hồ Chí Minh",
+      "description": "Đô thị lớn nhất về kinh tế và dân số tại miền Nam Việt Nam."
+    },
+    {
+      "id": "E118",
+      "canonical_id": "L_HCMC",
+      "entity_type": "LOCATION",
+      "name": "TP. Hồ Chí Minh",
+      "description": "Tên viết tắt chính thức của Thành phố Hồ Chí Minh."
+    },
+    {
+      "id": "E119",
+      "canonical_id": "L_HCMC",
+      "entity_type": "LOCATION",
+      "name": "Sài Gòn",
+      "description": "Tên gọi lịch sử và thông dụng dân dã của TP.HCM."
+    },
+    {
+      "id": "E120",
+      "canonical_id": "L_HCMC",
+      "entity_type": "LOCATION",
+      "name": "TP.HCM",
+      "description": "Cách viết tắt ngắn phổ biến trong báo chí."
+    },
+    {
+      "id": "E121",
+      "canonical_id": "L_HUE",
+      "entity_type": "LOCATION",
+      "name": "Huế",
+      "description": "Thành phố thuộc tỉnh Thừa Thiên Huế, cố đô thời triều Nguyễn."
+    },
+    {
+      "id": "E122",
+      "canonical_id": "L_HUE",
+      "entity_type": "LOCATION",
+      "name": "Thành phố Huế",
+      "description": "Đơn vị hành chính đô thị Huế."
+    },
+    {
+      "id": "E123",
+      "canonical_id": "L_HUE",
+      "entity_type": "LOCATION",
+      "name": "Cố đô Huế",
+      "description": "Danh xưng gắn liền với di sản văn hóa thế giới kinh đô cũ."
+    },
+    {
+      "id": "E124",
+      "canonical_id": "L_DANANG",
+      "entity_type": "LOCATION",
+      "name": "Đà Nẵng",
+      "description": "Thành phố cảng biển trung tâm kinh tế của miền Trung Việt Nam."
+    },
+    {
+      "id": "E125",
+      "canonical_id": "L_DANANG",
+      "entity_type": "LOCATION",
+      "name": "Thành phố Đà Nẵng",
+      "description": "Đơn vị hành chính thành phố trực thuộc trung ương Đà Nẵng."
+    },
+    {
+      "id": "E126",
+      "canonical_id": "L_DANANG",
+      "entity_type": "LOCATION",
+      "name": "TP. Đà Nẵng",
+      "description": "Tên viết tắt thông dụng của Đà Nẵng."
+    },
+    {
+      "id": "E127",
+      "canonical_id": "L_HAIPHONG",
+      "entity_type": "LOCATION",
+      "name": "Hải Phòng",
+      "description": "Thành phố cảng quan trọng tại khu vực Đồng bằng sông Hồng."
+    },
+    {
+      "id": "E128",
+      "canonical_id": "L_HAIPHONG",
+      "entity_type": "LOCATION",
+      "name": "Thành phố Hải Phòng",
+      "description": "Đơn vị hành chính cấp thành phố trực thuộc trung ương."
+    },
+    {
+      "id": "E129",
+      "canonical_id": "L_HAIPHONG",
+      "entity_type": "LOCATION",
+      "name": "Thành phố Hoa phượng đỏ",
+      "description": "Biệt danh nổi tiếng của Hải Phòng."
+    },
+    {
+      "id": "E130",
+      "canonical_id": "L_DALAT",
+      "entity_type": "LOCATION",
+      "name": "Đà Lạt",
+      "description": "Thành phố du lịch nghỉ dưỡng nổi tiếng trên cao nguyên Lâm Viên."
+    },
+    {
+      "id": "E131",
+      "canonical_id": "L_DALAT",
+      "entity_type": "LOCATION",
+      "name": "Thành phố Đà Lạt",
+      "description": "Đơn vị hành chính thành phố thuộc tỉnh Lâm Đồng."
+    },
+    {
+      "id": "E132",
+      "canonical_id": "L_DALAT",
+      "entity_type": "LOCATION",
+      "name": "Thành phố ngàn hoa",
+      "description": "Biệt danh thơ mộng của Đà Lạt."
+    },
+    {
+      "id": "E133",
+      "canonical_id": "L_CANTHO",
+      "entity_type": "LOCATION",
+      "name": "Cần Thơ",
+      "description": "Thành phố trung tâm vùng Đồng bằng sông Cửu Long."
+    },
+    {
+      "id": "E134",
+      "canonical_id": "L_CANTHO",
+      "entity_type": "LOCATION",
+      "name": "Thành phố Cần Thơ",
+      "description": "Thành phố trực thuộc trung ương tại miền Tây."
+    },
+    {
+      "id": "E135",
+      "canonical_id": "L_CANTHO",
+      "entity_type": "LOCATION",
+      "name": "Tây Đô",
+      "description": "Tên gọi dân dã lịch sử chỉ trung tâm Cần Thơ."
+    },
+    {
+      "id": "E136",
+      "canonical_id": "L_QUANGNINH",
+      "entity_type": "LOCATION",
+      "name": "Quảng Ninh",
+      "description": "Tỉnh ven biển thuộc vùng Duyên hải Bắc Bộ."
+    },
+    {
+      "id": "E137",
+      "canonical_id": "L_QUANGNINH",
+      "entity_type": "LOCATION",
+      "name": "Tỉnh Quảng Ninh",
+      "description": "Đơn vị hành chính cấp tỉnh Quảng Ninh."
+    },
+    {
+      "id": "E138",
+      "canonical_id": "L_QUANGNINH",
+      "entity_type": "LOCATION",
+      "name": "Đất mỏ Quảng Ninh",
+      "description": "Cách gọi tượng hình quen thuộc của tỉnh Quảng Ninh."
+    },
+    {
+      "id": "E139",
+      "canonical_id": "L_HALONG_BAY",
+      "entity_type": "LOCATION",
+      "name": "Vịnh Hạ Long",
+      "description": "Di sản thiên nhiên thế giới UNESCO nổi tiếng tại Quảng Ninh."
+    },
+    {
+      "id": "E140",
+      "canonical_id": "L_HALONG_BAY",
+      "entity_type": "LOCATION",
+      "name": "Hạ Long Bay",
+      "description": "Tên tiếng Anh của Vịnh Hạ Long."
+    },
+    {
+      "id": "E141",
+      "canonical_id": "L_HALONG_BAY",
+      "entity_type": "LOCATION",
+      "name": "Vịnh Hạ Long UNESCO",
+      "description": "Tên gọi danh thắng Vịnh Hạ Long kèm danh hiệu di sản."
+    },
+    {
+      "id": "E142",
+      "canonical_id": "L_PHU_QUOC",
+      "entity_type": "LOCATION",
+      "name": "Phú Quốc",
+      "description": "Đảo lớn nhất Việt Nam nằm trong Vịnh Thái Lan."
+    },
+    {
+      "id": "E143",
+      "canonical_id": "L_PHU_QUOC",
+      "entity_type": "LOCATION",
+      "name": "Đảo Phú Quốc",
+      "description": "Cách gọi phổ biến chỉ hòn đảo Phú Quốc."
+    },
+    {
+      "id": "E144",
+      "canonical_id": "L_PHU_QUOC",
+      "entity_type": "LOCATION",
+      "name": "Thành phố Phú Quốc",
+      "description": "Đơn vị hành chính thành phố đảo thuộc tỉnh Kiên Giang."
+    },
+    {
+      "id": "E145",
+      "canonical_id": "L_PHU_QUOC",
+      "entity_type": "LOCATION",
+      "name": "Đảo Ngọc Phú Quốc",
+      "description": "Biệt danh du lịch của Phú Quốc."
+    },
+    {
+      "id": "E146",
+      "canonical_id": "L_VIETNAM",
+      "entity_type": "LOCATION",
+      "name": "Việt Nam",
+      "description": "Quốc gia nằm ở phía đông bán đảo Đông Dương."
+    },
+    {
+      "id": "E147",
+      "canonical_id": "L_VIETNAM",
+      "entity_type": "LOCATION",
+      "name": "Cộng hòa Xã hội chủ nghĩa Việt Nam",
+      "description": "Tên quốc hiệu chính thức của Việt Nam."
+    },
+    {
+      "id": "E148",
+      "canonical_id": "L_VIETNAM",
+      "entity_type": "LOCATION",
+      "name": "VN",
+      "description": "Mã quốc gia viết tắt của Việt Nam."
+    },
+    {
+      "id": "E149",
+      "canonical_id": "L_VIETNAM",
+      "entity_type": "LOCATION",
+      "name": "Vietnam",
+      "description": "Tên gọi quốc tế tiếng Anh của Việt Nam."
+    },
+    {
+      "id": "E150",
+      "canonical_id": "L_USA",
+      "entity_type": "LOCATION",
+      "name": "Mỹ",
+      "description": "Quốc gia liên bang nằm ở Bắc Mỹ."
+    },
+    {
+      "id": "E151",
+      "canonical_id": "L_USA",
+      "entity_type": "LOCATION",
+      "name": "Hoa Kỳ",
+      "description": "Tên gọi chính thức bằng tiếng Việt của nước Mỹ."
+    },
+    {
+      "id": "E152",
+      "canonical_id": "L_USA",
+      "entity_type": "LOCATION",
+      "name": "Hợp chúng quốc Hoa Kỳ",
+      "description": "Dịch nghĩa tên chính thức United States of America."
+    },
+    {
+      "id": "E153",
+      "canonical_id": "L_USA",
+      "entity_type": "LOCATION",
+      "name": "United States of America",
+      "description": "Tên đầy đủ tiếng Anh của nước Mỹ."
+    },
+    {
+      "id": "E154",
+      "canonical_id": "L_USA",
+      "entity_type": "LOCATION",
+      "name": "USA",
+      "description": "Tên viết tắt quốc tế của nước Mỹ."
+    },
+    {
+      "id": "E155",
+      "canonical_id": "L_JAPAN",
+      "entity_type": "LOCATION",
+      "name": "Nhật Bản",
+      "description": "Quốc đảo nằm ở Đông Á."
+    },
+    {
+      "id": "E156",
+      "canonical_id": "L_JAPAN",
+      "entity_type": "LOCATION",
+      "name": "Nhật Bản Quốc",
+      "description": "Tên quốc hiệu đầy đủ Hán-Việt của Nhật Bản."
+    },
+    {
+      "id": "E157",
+      "canonical_id": "L_JAPAN",
+      "entity_type": "LOCATION",
+      "name": "Nước Nhật",
+      "description": "Cách gọi đời sống quen thuộc."
+    },
+    {
+      "id": "E158",
+      "canonical_id": "L_JAPAN",
+      "entity_type": "LOCATION",
+      "name": "Japan",
+      "description": "Tên tiếng Anh của Nhật Bản."
+    },
+    {
+      "id": "E159",
+      "canonical_id": "L_SILICON_VALLEY",
+      "entity_type": "LOCATION",
+      "name": "Thung lũng Silicon",
+      "description": "Trung tâm công nghệ và đổi mới sáng tạo toàn cầu tại California."
+    },
+    {
+      "id": "E160",
+      "canonical_id": "L_SILICON_VALLEY",
+      "entity_type": "LOCATION",
+      "name": "Silicon Valley",
+      "description": "Tên tiếng Anh nguyên bản của Thung lũng Silicon."
+    },
+    {
+      "id": "E161",
+      "canonical_id": "L_SILICON_VALLEY",
+      "entity_type": "LOCATION",
+      "name": "Silicon Valley California",
+      "description": "Tên vùng Silicon Valley kèm địa danh bang California."
+    },
+    {
+      "id": "E162",
+      "canonical_id": "E_DIEN_BIEN",
+      "entity_type": "EVENT",
+      "name": "Chiến dịch Điện Biên Phủ",
+      "description": "Chiến dịch quân sự lừng lẫy năm 1954 chấm dứt ách thống trị của thực dân Pháp."
+    },
+    {
+      "id": "E163",
+      "canonical_id": "E_DIEN_BIEN",
+      "entity_type": "EVENT",
+      "name": "Chiến thắng Điện Biên Phủ",
+      "description": "Chiến thắng quân sự lịch sử ngày 7 tháng 5 năm 1954."
+    },
+    {
+      "id": "E164",
+      "canonical_id": "E_DIEN_BIEN",
+      "entity_type": "EVENT",
+      "name": "Chiến dịch Điện Biên",
+      "description": "Tên gọi rút gọn thường dùng trong tài liệu lịch sử."
+    },
+    {
+      "id": "E165",
+      "canonical_id": "E_AUGUST",
+      "entity_type": "EVENT",
+      "name": "Cách mạng tháng Tám",
+      "description": "Cuộc cách mạng giải phóng dân tộc diễn ra tại Việt Nam tháng 8 năm 1945."
+    },
+    {
+      "id": "E166",
+      "canonical_id": "E_AUGUST",
+      "entity_type": "EVENT",
+      "name": "Tổng khởi nghĩa tháng Tám năm 1945",
+      "description": "Cuộc tổng khởi nghĩa giành chính quyền trên toàn quốc năm 1945."
+    },
+    {
+      "id": "E167",
+      "canonical_id": "E_AUGUST",
+      "entity_type": "EVENT",
+      "name": "Cách mạng tháng 8 năm 1945",
+      "description": "Biến thể chữ số của tên gọi Cách mạng tháng Tám."
+    },
+    {
+      "id": "E168",
+      "canonical_id": "E_304",
+      "entity_type": "EVENT",
+      "name": "Chiến dịch Hồ Chí Minh",
+      "description": "Chiến dịch quân sự cuối cùng giải phóng hoàn toàn miền Nam năm 1975."
+    },
+    {
+      "id": "E169",
+      "canonical_id": "E_304",
+      "entity_type": "EVENT",
+      "name": "Giải phóng miền Nam 30/4/1975",
+      "description": "Sự kiện lịch sử thống nhất đất nước ngày 30 tháng 4 năm 1975."
+    },
+    {
+      "id": "E170",
+      "canonical_id": "E_304",
+      "entity_type": "EVENT",
+      "name": "Chiến dịch Giải phóng Sài Gòn",
+      "description": "Tên gọi ban đầu của Chiến dịch Hồ Chí Minh."
+    },
+    {
+      "id": "E171",
+      "canonical_id": "E_BACH_DANG_1288",
+      "entity_type": "EVENT",
+      "name": "Trận Bạch Đằng 1288",
+      "description": "Trận thủy chiến lịch sử do Trần Hưng Đạo chỉ hoạch đánh tan quân Nguyên Mông."
+    },
+    {
+      "id": "E172",
+      "canonical_id": "E_BACH_DANG_1288",
+      "entity_type": "EVENT",
+      "name": "Chiến thắng Bạch Đằng năm 1288",
+      "description": "Sự kiện tiêu diệt toàn bộ thủy quân Nguyên Mông trên sông Bạch Đằng."
+    },
+    {
+      "id": "E173",
+      "canonical_id": "E_BACH_DANG_1288",
+      "entity_type": "EVENT",
+      "name": "Trận thủy chiến sông Bạch Đằng 1288",
+      "description": "Mô tả chi tiết trận chiến trên sông Bạch Đằng năm 1288."
+    },
+    {
+      "id": "E174",
+      "canonical_id": "E_COVID19",
+      "entity_type": "EVENT",
+      "name": "Đại dịch COVID-19",
+      "description": "Đại dịch truyền nhiễm toàn cầu do virus SARS-CoV-2 gây ra."
+    },
+    {
+      "id": "E175",
+      "canonical_id": "E_COVID19",
+      "entity_type": "EVENT",
+      "name": "Đại dịch Covid",
+      "description": "Cách gọi tắt phổ biến của đại dịch COVID-19."
+    },
+    {
+      "id": "E176",
+      "canonical_id": "E_COVID19",
+      "entity_type": "EVENT",
+      "name": "Khủng hoảng COVID-19",
+      "description": "Thuật ngữ kinh tế - xã hội chỉ đại dịch COVID-19."
+    },
+    {
+      "id": "E177",
+      "canonical_id": "E_COVID19",
+      "entity_type": "EVENT",
+      "name": "Coronavirus Pandemic",
+      "description": "Tên tiếng Anh của đại dịch virus corona."
+    },
+    {
+      "id": "E178",
+      "canonical_id": "E_WORLD_WAR_2",
+      "entity_type": "EVENT",
+      "name": "Chiến tranh thế giới thứ hai",
+      "description": "Cuộc xung đột quân sự toàn cầu quy mô lớn nhất lịch sử từ 1939 đến 1945."
+    },
+    {
+      "id": "E179",
+      "canonical_id": "E_WORLD_WAR_2",
+      "entity_type": "EVENT",
+      "name": "Thế chiến II",
+      "description": "Cách gọi tắt tiếng Việt của Chiến tranh thế giới thứ hai."
+    },
+    {
+      "id": "E180",
+      "canonical_id": "E_WORLD_WAR_2",
+      "entity_type": "EVENT",
+      "name": "World War II",
+      "description": "Tên tiếng Anh của Chiến tranh thế giới thứ hai."
+    },
+    {
+      "id": "E181",
+      "canonical_id": "E_WORLD_WAR_2",
+      "entity_type": "EVENT",
+      "name": "WW2",
+      "description": "Viết tắt tiếng Anh cực kỳ phổ biến của World War II."
+    },
+    {
+      "id": "E182",
+      "canonical_id": "E_TET_OFFENSIVE",
+      "entity_type": "EVENT",
+      "name": "Cuộc Tổng tiến công và nổi dậy Tết Mậu Thân 1968",
+      "description": "Đợt tấn công quân sự bất ngờ vào dịp Tết năm 1968."
+    },
+    {
+      "id": "E183",
+      "canonical_id": "E_TET_OFFENSIVE",
+      "entity_type": "EVENT",
+      "name": "Sự kiện Mậu Thân 1968",
+      "description": "Cách gọi ngắn về cuộc tấn công Tết Mậu Thân 1968."
+    },
+    {
+      "id": "E184",
+      "canonical_id": "E_TET_OFFENSIVE",
+      "entity_type": "EVENT",
+      "name": "Tet Offensive",
+      "description": "Tên tiếng Anh phổ biến trong tài liệu phương Tây về sự kiện Mậu Thân."
+    },
+    {
+      "id": "E185",
+      "canonical_id": "W_TRUYEN_KIEU",
+      "entity_type": "WORK",
+      "name": "Truyện Kiều",
+      "description": "Tác phẩm truyện thơ Nôm kinh điển của đại thi hào Nguyễn Du."
+    },
+    {
+      "id": "E186",
+      "canonical_id": "W_TRUYEN_KIEU",
+      "entity_type": "WORK",
+      "name": "Đoạn trường tân thanh",
+      "description": "Tên chữ Hán nguyên bản của tác phẩm Truyện Kiều."
+    },
+    {
+      "id": "E187",
+      "canonical_id": "W_TRUYEN_KIEU",
+      "entity_type": "WORK",
+      "name": "Kim Vân Kiều truyện thơ",
+      "description": "Tên mô tả tác phẩm thơ Nôm Kiều."
+    },
+    {
+      "id": "E188",
+      "canonical_id": "W_BINH_NGO",
+      "entity_type": "WORK",
+      "name": "Bình Ngô đại cáo",
+      "description": "Bản tuyên ngôn độc lập do Nguyễn Trãi soạn thảo năm 1428."
+    },
+    {
+      "id": "E189",
+      "canonical_id": "W_BINH_NGO",
+      "entity_type": "WORK",
+      "name": "Bình Ngô Đại Cáo",
+      "description": "Cách viết hoa tiêu chuẩn tên tác phẩm Bình Ngô đại cáo."
+    },
+    {
+      "id": "E190",
+      "canonical_id": "W_BINH_NGO",
+      "entity_type": "WORK",
+      "name": "Đại cáo bình Ngô",
+      "description": "Biến thể đảo thứ tự từ của tên tác phẩm Bình Ngô đại cáo."
+    },
+    {
+      "id": "E191",
+      "canonical_id": "W_NAM_QUOC_SON_HA",
+      "entity_type": "WORK",
+      "name": "Nam quốc sơn hà",
+      "description": "Bài thơ thần khẳng định chủ quyền Đại Việt gắn với Lý Thường Kiệt."
+    },
+    {
+      "id": "E192",
+      "canonical_id": "W_NAM_QUOC_SON_HA",
+      "entity_type": "WORK",
+      "name": "Bài thơ Nam quốc sơn hà",
+      "description": "Cách gọi mô tả bài thơ Nam quốc sơn hà."
+    },
+    {
+      "id": "E193",
+      "canonical_id": "W_NAM_QUOC_SON_HA",
+      "entity_type": "WORK",
+      "name": "Sông núi nước Nam",
+      "description": "Dịch nghĩa tiếng Việt của tựa đề bài thơ Nam quốc sơn hà."
+    },
+    {
+      "id": "E194",
+      "canonical_id": "W_DAI_VIET_SU_KY",
+      "entity_type": "WORK",
+      "name": "Đại Việt sử ký toàn thư",
+      "description": "Bộ sử chính thống ghi chép lịch sử Việt Nam từ thời Hồng Bàng đến thời Lê."
+    },
+    {
+      "id": "E195",
+      "canonical_id": "W_DAI_VIET_SU_KY",
+      "entity_type": "WORK",
+      "name": "Bộ sử Đại Việt sử ký toàn thư",
+      "description": "Cách gọi trang trọng bộ đại sử phẩm của Việt Nam."
+    },
+    {
+      "id": "E196",
+      "canonical_id": "W_DAI_VIET_SU_KY",
+      "entity_type": "WORK",
+      "name": "Complete Annals of Dai Viet",
+      "description": "Tên dịch tiếng Anh của bộ sách Đại Việt sử ký toàn thư."
+    },
+    {
+      "id": "E197",
+      "canonical_id": "W_NHAT_KY_TRONG_TUT",
+      "entity_type": "WORK",
+      "name": "Nhật ký trong tù",
+      "description": "Tập thơ bằng chữ Hán do Hồ Chí Minh sáng tác trong ngục thất Quảng Tây."
+    },
+    {
+      "id": "E198",
+      "canonical_id": "W_NHAT_KY_TRONG_TUT",
+      "entity_type": "WORK",
+      "name": "Ngục trung nhật ký",
+      "description": "Tên chữ Hán nguyên bản của tập thơ Nhật ký trong tù."
+    },
+    {
+      "id": "E199",
+      "canonical_id": "W_NHAT_KY_TRONG_TUT",
+      "entity_type": "WORK",
+      "name": "Prison Diary",
+      "description": "Tên dịch tiếng Anh của tập thơ Nhật ký trong tù."
+    },
+    {
+      "id": "E200",
+      "canonical_id": "W_DECLARATION_INDEP",
+      "entity_type": "WORK",
+      "name": "Tuyên ngôn Độc lập 1945",
+      "description": "Văn bản lịch sử khai sinh nước Việt Nam Dân chủ Cộng hòa do Bác Hồ đọc ngày 2/9/1945."
+    },
+    {
+      "id": "E201",
+      "canonical_id": "W_DECLARATION_INDEP",
+      "entity_type": "WORK",
+      "name": "Bản Tuyên ngôn Độc lập",
+      "description": "Cách gọi ngắn gọn chỉ văn bản Tuyên ngôn Độc lập năm 1945."
+    },
+    {
+      "id": "E202",
+      "canonical_id": "W_DECLARATION_INDEP",
+      "entity_type": "WORK",
+      "name": "Tuyên ngôn Độc lập nước Việt Nam Dân chủ Cộng hòa",
+      "description": "Tên đầy đủ của bản Tuyên ngôn Độc lập."
+    },
+    {
+      "id": "E203",
+      "canonical_id": "T_NEO4J",
+      "entity_type": "TECHNOLOGY",
+      "name": "Neo4j",
+      "description": "Hệ quản trị cơ sở dữ liệu đồ thị hàng đầu thế giới."
+    },
+    {
+      "id": "E204",
+      "canonical_id": "T_NEO4J",
+      "entity_type": "TECHNOLOGY",
+      "name": "Hệ quản trị cơ sở dữ liệu đồ thị Neo4j",
+      "description": "Mô tả đầy đủ tiếng Việt của phần mềm Neo4j."
+    },
+    {
+      "id": "E205",
+      "canonical_id": "T_NEO4J",
+      "entity_type": "TECHNOLOGY",
+      "name": "Neo4j Graph Database",
+      "description": "Tên tiếng Anh chuyên ngành của Neo4j Graph DB."
+    },
+    {
+      "id": "E206",
+      "canonical_id": "T_NEO4J",
+      "entity_type": "TECHNOLOGY",
+      "name": "Neo4j DB",
+      "description": "Viết tắt kỹ thuật của CSDL Neo4j."
+    },
+    {
+      "id": "E207",
+      "canonical_id": "T_PYTHON",
+      "entity_type": "TECHNOLOGY",
+      "name": "Python",
+      "description": "Ngôn ngữ lập trình bậc cao phổ biến trong AI, Data Science và Backend."
+    },
+    {
+      "id": "E208",
+      "canonical_id": "T_PYTHON",
+      "entity_type": "TECHNOLOGY",
+      "name": "Ngôn ngữ lập trình Python",
+      "description": "Cách gọi đầy đủ của Python."
+    },
+    {
+      "id": "E209",
+      "canonical_id": "T_PYTHON",
+      "entity_type": "TECHNOLOGY",
+      "name": "Python Programming Language",
+      "description": "Tên tiếng Anh chính thức của ngôn ngữ Python."
+    },
+    {
+      "id": "E210",
+      "canonical_id": "T_RAG",
+      "entity_type": "TECHNOLOGY",
+      "name": "RAG",
+      "description": "Kỹ thuật kết hợp truy xuất thông tin với mô hình sinh trong xử lý ngôn ngữ tự nhiên."
+    },
+    {
+      "id": "E211",
+      "canonical_id": "T_RAG",
+      "entity_type": "TECHNOLOGY",
+      "name": "Retrieval-Augmented Generation",
+      "description": "Tên tiếng Anh đầy đủ của kiến trúc RAG."
+    },
+    {
+      "id": "E212",
+      "canonical_id": "T_RAG",
+      "entity_type": "TECHNOLOGY",
+      "name": "Mô hình RAG",
+      "description": "Cách gọi kỹ thuật RAG trong tiếng Việt."
+    },
+    {
+      "id": "E213",
+      "canonical_id": "T_GRAPHRAG",
+      "entity_type": "TECHNOLOGY",
+      "name": "GraphRAG",
+      "description": "Phương pháp RAG kết hợp Đồ thị tri thức (Knowledge Graph) để cải thiện ngữ cảnh."
+    },
+    {
+      "id": "E214",
+      "canonical_id": "T_GRAPHRAG",
+      "entity_type": "TECHNOLOGY",
+      "name": "Graph Retrieval-Augmented Generation",
+      "description": "Tên đầy đủ của kỹ thuật GraphRAG."
+    },
+    {
+      "id": "E215",
+      "canonical_id": "T_GRAPHRAG",
+      "entity_type": "TECHNOLOGY",
+      "name": "RAG dựa trên Đồ thị",
+      "description": "Dịch nghĩa tiếng Việt của khái niệm GraphRAG."
+    },
+    {
+      "id": "E216",
+      "canonical_id": "T_TRANSFORMER",
+      "entity_type": "TECHNOLOGY",
+      "name": "Transformer",
+      "description": "Kiến trúc mạng nơ-ron học sâu dựa trên cơ chế self-attention công bố năm 2017."
+    },
+    {
+      "id": "E217",
+      "canonical_id": "T_TRANSFORMER",
+      "entity_type": "TECHNOLOGY",
+      "name": "Kiến trúc Transformer",
+      "description": "Mô tả kỹ thuật tiếng Việt của mô hình Transformer."
+    },
+    {
+      "id": "E218",
+      "canonical_id": "T_TRANSFORMER",
+      "entity_type": "TECHNOLOGY",
+      "name": "Transformer Architecture",
+      "description": "Tên tiếng Anh chuẩn của kiến trúc mô hình Transformer."
+    },
+    {
+      "id": "E219",
+      "canonical_id": "T_BERT",
+      "entity_type": "TECHNOLOGY",
+      "name": "BERT",
+      "description": "Mô hình học sâu biểu diễn ngôn ngữ hai chiều của Google."
+    },
+    {
+      "id": "E220",
+      "canonical_id": "T_BERT",
+      "entity_type": "TECHNOLOGY",
+      "name": "Bidirectional Encoder Representations from Transformers",
+      "description": "Tên đầy đủ của mô hình BERT."
+    },
+    {
+      "id": "E221",
+      "canonical_id": "T_BERT",
+      "entity_type": "TECHNOLOGY",
+      "name": "Mô hình BERT",
+      "description": "Cách gọi ngắn gọn trong nghiên cứu NLP."
+    },
+    {
+      "id": "E222",
+      "canonical_id": "T_LLM",
+      "entity_type": "TECHNOLOGY",
+      "name": "LLM",
+      "description": "Mô hình ngôn ngữ trí tuệ nhân tạo quy mô lớn huấn luyện trên dữ liệu khổng lồ."
+    },
+    {
+      "id": "E223",
+      "canonical_id": "T_LLM",
+      "entity_type": "TECHNOLOGY",
+      "name": "Large Language Model",
+      "description": "Tên tiếng Anh đầy đủ của LLM."
+    },
+    {
+      "id": "E224",
+      "canonical_id": "T_LLM",
+      "entity_type": "TECHNOLOGY",
+      "name": "Mô hình ngôn ngữ lớn",
+      "description": "Dịch nghĩa tiếng Việt chính thức của thuật ngữ LLM."
+    },
+    {
+      "id": "E225",
+      "canonical_id": "T_CHATGPT",
+      "entity_type": "TECHNOLOGY",
+      "name": "ChatGPT",
+      "description": "Chatbot trí tuệ nhân tạo đa năng do OpenAI phát triển dựa trên dòng GPT."
+    },
+    {
+      "id": "E226",
+      "canonical_id": "T_CHATGPT",
+      "entity_type": "TECHNOLOGY",
+      "name": "OpenAI ChatGPT",
+      "description": "Tên chatbot ChatGPT đi kèm tên công ty phát triển."
+    },
+    {
+      "id": "E227",
+      "canonical_id": "T_CHATGPT",
+      "entity_type": "TECHNOLOGY",
+      "name": "Chat GPT",
+      "description": "Cách viết tách từ phổ biến trong giao tiếp hàng ngày."
+    },
+    {
+      "id": "E228",
+      "canonical_id": "T_GPT4",
+      "entity_type": "TECHNOLOGY",
+      "name": "GPT-4",
+      "description": "Mô hình ngôn ngữ đa phương thức lớn được công bố bởi OpenAI năm 2023."
+    },
+    {
+      "id": "E229",
+      "canonical_id": "T_GPT4",
+      "entity_type": "TECHNOLOGY",
+      "name": "Generative Pre-trained Transformer 4",
+      "description": "Tên đầy đủ của thế hệ mô hình GPT-4."
+    },
+    {
+      "id": "E230",
+      "canonical_id": "T_GPT4",
+      "entity_type": "TECHNOLOGY",
+      "name": "Mô hình GPT-4",
+      "description": "Cách gọi kỹ thuật của GPT-4 trong tiếng Việt."
+    },
+    {
+      "id": "E231",
+      "canonical_id": "T_DOCKER",
+      "entity_type": "TECHNOLOGY",
+      "name": "Docker",
+      "description": "Nền tảng đóng gói ứng dụng trong các container nhẹ và độc lập."
+    },
+    {
+      "id": "E232",
+      "canonical_id": "T_DOCKER",
+      "entity_type": "TECHNOLOGY",
+      "name": "Nền tảng Docker",
+      "description": "Mô tả tiếng Việt cho phần mềm Docker."
+    },
+    {
+      "id": "E233",
+      "canonical_id": "T_DOCKER",
+      "entity_type": "TECHNOLOGY",
+      "name": "Docker Container Engine",
+      "description": "Tên thành phần cốt lõi của công nghệ Docker."
+    },
+    {
+      "id": "E234",
+      "canonical_id": "T_KUBERNETES",
+      "entity_type": "TECHNOLOGY",
+      "name": "Kubernetes",
+      "description": "Hệ thống quản lý và điều phối các container ứng dụng nguồn mở."
+    },
+    {
+      "id": "E235",
+      "canonical_id": "T_KUBERNETES",
+      "entity_type": "TECHNOLOGY",
+      "name": "K8s",
+      "description": "Tên viết tắt kỹ thuật nổi tiếng của Kubernetes."
+    },
+    {
+      "id": "E236",
+      "canonical_id": "T_KUBERNETES",
+      "entity_type": "TECHNOLOGY",
+      "name": "Nền tảng Kubernetes",
+      "description": "Mô tả dịch vụ của hệ thống Kubernetes."
+    },
+    {
+      "id": "E237",
+      "canonical_id": "T_POSTGRESQL",
+      "entity_type": "TECHNOLOGY",
+      "name": "PostgreSQL",
+      "description": "Hệ quản trị cơ sở dữ liệu quan hệ mã nguồn mở mạnh mẽ."
+    },
+    {
+      "id": "E238",
+      "canonical_id": "T_POSTGRESQL",
+      "entity_type": "TECHNOLOGY",
+      "name": "Postgres",
+      "description": "Cách gọi tắt phổ biến của hệ CSDL PostgreSQL."
+    },
+    {
+      "id": "E239",
+      "canonical_id": "T_POSTGRESQL",
+      "entity_type": "TECHNOLOGY",
+      "name": "Hệ quản trị CSDL PostgreSQL",
+      "description": "Mô tả đầy đủ bằng tiếng Việt của PostgreSQL."
+    },
+    {
+      "id": "E240",
+      "canonical_id": "T_VECTOR_DB",
+      "entity_type": "TECHNOLOGY",
+      "name": "Vector Database",
+      "description": "Cơ sở dữ liệu chuyên dụng để lưu trữ và truy vấn vector nhúng (embeddings)."
+    },
+    {
+      "id": "E241",
+      "canonical_id": "T_VECTOR_DB",
+      "entity_type": "TECHNOLOGY",
+      "name": "Vector DB",
+      "description": "Tên viết tắt thông dụng của Vector Database."
+    },
+    {
+      "id": "E242",
+      "canonical_id": "T_VECTOR_DB",
+      "entity_type": "TECHNOLOGY",
+      "name": "CSDL Vector",
+      "description": "Thuật ngữ tiếng Việt chỉ cơ sở dữ liệu vector."
+    },
+    {
+      "id": "E243",
+      "canonical_id": "T_MILVUS",
+      "entity_type": "TECHNOLOGY",
+      "name": "Milvus",
+      "description": "Cơ sở dữ liệu vector mã nguồn mở phục vụ cho tìm kiếm tương đồng quy mô lớn."
+    },
+    {
+      "id": "E244",
+      "canonical_id": "T_MILVUS",
+      "entity_type": "TECHNOLOGY",
+      "name": "Milvus Vector Database",
+      "description": "Tên đầy đủ kèm phân loại của Milvus."
+    },
+    {
+      "id": "E245",
+      "canonical_id": "T_MILVUS",
+      "entity_type": "TECHNOLOGY",
+      "name": "Hệ quản trị CSDL Milvus",
+      "description": "Mô tả tiếng Việt cho phần mềm CSDL Milvus."
+    },
+    {
+      "id": "E246",
+      "canonical_id": "T_KNOWLEDGE_GRAPH",
+      "entity_type": "CONCEPT",
+      "name": "Knowledge Graph",
+      "description": "Mạng lưới tri thức biểu diễn đối tượng và quan hệ giữa chúng dạng đồ thị."
+    },
+    {
+      "id": "E247",
+      "canonical_id": "T_KNOWLEDGE_GRAPH",
+      "entity_type": "CONCEPT",
+      "name": "Đồ thị tri thức",
+      "description": "Dịch nghĩa chuẩn tiếng Việt của thuật ngữ Knowledge Graph."
+    },
+    {
+      "id": "E248",
+      "canonical_id": "T_KNOWLEDGE_GRAPH",
+      "entity_type": "CONCEPT",
+      "name": "KG",
+      "description": "Viết tắt chuyên ngành của Knowledge Graph."
+    },
+    {
+      "id": "E249",
+      "canonical_id": "PR_IPHONE",
+      "entity_type": "PRODUCT",
+      "name": "iPhone",
+      "description": "Dòng điện thoại thông minh nổi tiếng do Apple sản xuất."
+    },
+    {
+      "id": "E250",
+      "canonical_id": "PR_IPHONE",
+      "entity_type": "PRODUCT",
+      "name": "Apple iPhone",
+      "description": "Tên sản phẩm iPhone kèm thương hiệu Apple."
+    },
+    {
+      "id": "E251",
+      "canonical_id": "PR_IPHONE",
+      "entity_type": "PRODUCT",
+      "name": "Điện thoại iPhone",
+      "description": "Cách gọi phổ thông tiếng Việt chỉ dòng smartphone của Apple."
+    },
+    {
+      "id": "E252",
+      "canonical_id": "PR_MACBOOK",
+      "entity_type": "PRODUCT",
+      "name": "MacBook",
+      "description": "Dòng máy tính xách tay cao cấp của Apple chạy hệ điều hành macOS."
+    },
+    {
+      "id": "E253",
+      "canonical_id": "PR_MACBOOK",
+      "entity_type": "PRODUCT",
+      "name": "Apple MacBook",
+      "description": "Tên đầy đủ của sản phẩm máy tính MacBook."
+    },
+    {
+      "id": "E254",
+      "canonical_id": "PR_MACBOOK",
+      "entity_type": "PRODUCT",
+      "name": "Máy tính MacBook",
+      "description": "Cách gọi mô tả tiếng Việt cho dòng máy MacBook."
+    },
+    {
+      "id": "E255",
+      "canonical_id": "PR_GALAXY_S",
+      "entity_type": "PRODUCT",
+      "name": "Samsung Galaxy S",
+      "description": "Dòng smartphone flagship hàng đầu của Samsung."
+    },
+    {
+      "id": "E256",
+      "canonical_id": "PR_GALAXY_S",
+      "entity_type": "PRODUCT",
+      "name": "Galaxy S",
+      "description": "Cách gọi ngắn gọn dòng điện thoại cao cấp của Samsung."
+    },
+    {
+      "id": "E257",
+      "canonical_id": "PR_GALAXY_S",
+      "entity_type": "PRODUCT",
+      "name": "Điện thoại Samsung Galaxy S",
+      "description": "Mô tả tiếng Việt cho dòng điện thoại Galaxy S."
+    },
+    {
+      "id": "E258",
+      "canonical_id": "P_NGUYEN_ANH",
+      "entity_type": "PERSON",
+      "name": "Nguyễn Ánh",
+      "description": "Vị vua sáng lập ra triều đại nhà Nguyễn năm 1802."
+    },
+    {
+      "id": "E259",
+      "canonical_id": "P_NGUYEN_ANH",
+      "entity_type": "PERSON",
+      "name": "Hoàng đế Gia Long",
+      "description": "Niên hiệu của Nguyễn Ánh sau khi lên ngôi hoàng đế."
+    },
+    {
+      "id": "E260",
+      "canonical_id": "P_NGUYEN_ANH",
+      "entity_type": "PERSON",
+      "name": "Vua Gia Long",
+      "description": "Cách gọi dân dã và phổ biến dành cho Nguyễn Ánh."
+    },
+    {
+      "id": "E261",
+      "canonical_id": "P_VO_THI_SAU",
+      "entity_type": "PERSON",
+      "name": "Võ Thị Sáu",
+      "description": "Nữ anh hùng lực lượng vũ trang nhân dân Việt Nam tại Côn Đảo."
+    },
+    {
+      "id": "E262",
+      "canonical_id": "P_VO_THI_SAU",
+      "entity_type": "PERSON",
+      "name": "Anh hùng Võ Thị Sáu",
+      "description": "Danh xưng trang trọng tôn vinh nữ liệt sĩ Võ Thị Sáu."
+    },
+    {
+      "id": "E263",
+      "canonical_id": "P_VO_THI_SAU",
+      "entity_type": "PERSON",
+      "name": "Chị Sáu",
+      "description": "Cách gọi thân mật kính yêu dành cho Võ Thị Sáu."
+    },
+    {
+      "id": "E264",
+      "canonical_id": "L_CON_DAO",
+      "entity_type": "LOCATION",
+      "name": "Côn Đảo",
+      "description": "Quần đảo ngoài khơi bờ biển Nam Bộ thuộc tỉnh Bà Rịa - Vũng Tàu."
+    },
+    {
+      "id": "E265",
+      "canonical_id": "L_CON_DAO",
+      "entity_type": "LOCATION",
+      "name": "Quần đảo Côn Đảo",
+      "description": "Tên địa lý đầy đủ của khu vực Côn Đảo."
+    },
+    {
+      "id": "E266",
+      "canonical_id": "L_CON_DAO",
+      "entity_type": "LOCATION",
+      "name": "Huyện Côn Đảo",
+      "description": "Đơn vị hành chính cấp huyện của Côn Đảo."
+    },
+    {
+      "id": "E267",
+      "canonical_id": "L_CON_DAO",
+      "entity_type": "LOCATION",
+      "name": "Côn Lôn",
+      "description": "Tên gọi lịch sử xưa kia của Côn Đảo."
+    },
+    {
+      "id": "E268",
+      "canonical_id": "L_PHONG_NHA",
+      "entity_type": "LOCATION",
+      "name": "Phong Nha - Kẻ Bàng",
+      "description": "Vườn quốc gia và di sản thiên nhiên thế giới UNESCO tại Quảng Bình."
+    },
+    {
+      "id": "E269",
+      "canonical_id": "L_PHONG_NHA",
+      "entity_type": "LOCATION",
+      "name": "Vườn quốc gia Phong Nha - Kẻ Bàng",
+      "description": "Tên chính thức của di sản Phong Nha Kẻ Bàng."
+    },
+    {
+      "id": "E270",
+      "canonical_id": "L_PHONG_NHA",
+      "entity_type": "LOCATION",
+      "name": "Phong Nha Ke Bang National Park",
+      "description": "Tên tiếng Anh của di sản thiên nhiên Phong Nha - Kẻ Bàng."
+    },
+    {
+      "id": "E271",
+      "canonical_id": "O_VTV",
+      "entity_type": "ORGANIZATION",
+      "name": "Đài Truyền hình Việt Nam",
+      "description": "Đài truyền hình quốc gia trực thuộc Chính phủ Việt Nam."
+    },
+    {
+      "id": "E272",
+      "canonical_id": "O_VTV",
+      "entity_type": "ORGANIZATION",
+      "name": "VTV",
+      "description": "Tên viết tắt chính thức của Đài Truyền hình Việt Nam."
+    },
+    {
+      "id": "E273",
+      "canonical_id": "O_VTV",
+      "entity_type": "ORGANIZATION",
+      "name": "Vietnam Television",
+      "description": "Tên tiếng Anh của Đài Truyền hình Việt Nam."
+    },
+    {
+      "id": "E274",
+      "canonical_id": "O_VOV",
+      "entity_type": "ORGANIZATION",
+      "name": "Đài Tiếng nói Việt Nam",
+      "description": "Đài phát thanh quốc gia của nước Cộng hòa Xã hội chủ nghĩa Việt Nam."
+    },
+    {
+      "id": "E275",
+      "canonical_id": "O_VOV",
+      "entity_type": "ORGANIZATION",
+      "name": "VOV",
+      "description": "Tên viết tắt tiếng Anh của Đài Tiếng nói Việt Nam (Voice of Vietnam)."
+    },
+    {
+      "id": "E276",
+      "canonical_id": "O_VOV",
+      "entity_type": "ORGANIZATION",
+      "name": "Voice of Vietnam",
+      "description": "Tên tiếng Anh chính thức của Đài Tiếng nói Việt Nam."
+    },
+    {
+      "id": "E277",
+      "canonical_id": "E_GENEVA_1954",
+      "entity_type": "EVENT",
+      "name": "Hiệp định Giơ-ne-vơ 1954",
+      "description": "Hiệp định lập lại hòa bình ở Đông Dương ký kết năm 1954."
+    },
+    {
+      "id": "E278",
+      "canonical_id": "E_GENEVA_1954",
+      "entity_type": "EVENT",
+      "name": "Hiệp định Geneva 1954",
+      "description": "Cách viết chuẩn quốc tế tên Hiệp định Geneva."
+    },
+    {
+      "id": "E279",
+      "canonical_id": "E_GENEVA_1954",
+      "entity_type": "EVENT",
+      "name": "Hội nghị Geneva năm 1954",
+      "description": "Hội nghị quốc tế bàn về hòa bình Đông Dương năm 1954."
+    },
+    {
+      "id": "E280",
+      "canonical_id": "E_PARIS_1973",
+      "entity_type": "EVENT",
+      "name": "Hiệp định Paris 1973",
+      "description": "Hiệp định chấm dứt chiến tranh, lập lại hòa bình ở Việt Nam ký năm 1973."
+    },
+    {
+      "id": "E281",
+      "canonical_id": "E_PARIS_1973",
+      "entity_type": "EVENT",
+      "name": "Hiệp định Pa-ri năm 1973",
+      "description": "Cách phiên âm tiếng Việt tên Hiệp định Paris 1973."
+    },
+    {
+      "id": "E282",
+      "canonical_id": "E_PARIS_1973",
+      "entity_type": "EVENT",
+      "name": "Paris Peace Accords",
+      "description": "Tên tiếng Anh chính thức của Hiệp định Paris 1973."
+    },
+    {
+      "id": "E283",
+      "canonical_id": "W_LICH_SU_NOI_CHIEN",
+      "entity_type": "WORK",
+      "name": "Việt Nam sử lược",
+      "description": "Tập sách lịch sử Việt Nam đầu tiên viết bằng chữ Quốc ngữ của Trần Trọng Kim."
+    },
+    {
+      "id": "E284",
+      "canonical_id": "W_LICH_SU_NOI_CHIEN",
+      "entity_type": "WORK",
+      "name": "Sách Việt Nam sử lược",
+      "description": "Cách gọi chỉ bộ sách lịch sử nổi tiếng Việt Nam sử lược."
+    },
+    {
+      "id": "E285",
+      "canonical_id": "W_LICH_SU_NOI_CHIEN",
+      "entity_type": "WORK",
+      "name": "Bộ sử Việt Nam sử lược",
+      "description": "Mô tả danh tác lịch sử của học giả Trần Trọng Kim."
+    },
+    {
+      "id": "E286",
+      "canonical_id": "P_HO_XUAN_HUONG",
+      "entity_type": "PERSON",
+      "name": "Hồ Xuân Hương",
+      "description": "Nữ sĩ nổi tiếng trong lịch sử văn học Việt Nam."
+    },
+    {
+      "id": "E287",
+      "canonical_id": "P_HO_XUAN_HUONG",
+      "entity_type": "PERSON",
+      "name": "Bà chúa Thơ Nôm",
+      "description": "Danh xưng tôn vinh tài năng xuất sắc của nữ sĩ Hồ Xuân Hương."
+    },
+    {
+      "id": "E288",
+      "canonical_id": "P_HO_XUAN_HUONG",
+      "entity_type": "PERSON",
+      "name": "Nữ sĩ Hồ Xuân Hương",
+      "description": "Cách gọi tôn kính nhà thơ Hồ Xuân Hương."
+    },
+    {
+      "id": "E289",
+      "canonical_id": "P_XUAN_DIEU",
+      "entity_type": "PERSON",
+      "name": "Xuân Diệu",
+      "description": "Nhà thơ lớn của phong trào Thơ mới Việt Nam."
+    },
+    {
+      "id": "E290",
+      "canonical_id": "P_XUAN_DIEU",
+      "entity_type": "PERSON",
+      "name": "Ông hoàng thơ tình",
+      "description": "Danh xưng dành riêng cho nhà thơ Xuân Diệu."
+    },
+    {
+      "id": "E291",
+      "canonical_id": "P_XUAN_DIEU",
+      "entity_type": "PERSON",
+      "name": "Ngô Xuân Diệu",
+      "description": "Tên khai sinh đầy đủ của nhà thơ Xuân Diệu."
+    },
+    {
+      "id": "E292",
+      "canonical_id": "P_HUY_CAN",
+      "entity_type": "PERSON",
+      "name": "Huy Cận",
+      "description": "Nhà thơ xuất sắc của Thơ mới và văn học hiện đại Việt Nam."
+    },
+    {
+      "id": "E293",
+      "canonical_id": "P_HUY_CAN",
+      "entity_type": "PERSON",
+      "name": "Cù Huy Cận",
+      "description": "Tên khai sinh của nhà thơ Huy Cận."
+    },
+    {
+      "id": "E294",
+      "canonical_id": "P_HUY_CAN",
+      "entity_type": "PERSON",
+      "name": "Nhà thơ Huy Cận",
+      "description": "Mô tả chức danh thi sĩ Huy Cận."
+    },
+    {
+      "id": "E295",
+      "canonical_id": "O_ADB",
+      "entity_type": "ORGANIZATION",
+      "name": "Ngân hàng Phát triển Châu Á",
+      "description": "Tổ chức tài chính đa phương thúc đẩy phát triển kinh tế khu vực."
+    },
+    {
+      "id": "E296",
+      "canonical_id": "O_ADB",
+      "entity_type": "ORGANIZATION",
+      "name": "ADB",
+      "description": "Viết tắt tiếng Anh của Ngân hàng Phát triển Châu Á."
+    },
+    {
+      "id": "E297",
+      "canonical_id": "O_ADB",
+      "entity_type": "ORGANIZATION",
+      "name": "Asian Development Bank",
+      "description": "Tên tiếng Anh đầy đủ của tổ chức ADB."
+    },
+    {
+      "id": "E298",
+      "canonical_id": "O_WORLD_BANK",
+      "entity_type": "ORGANIZATION",
+      "name": "Ngân hàng Thế giới",
+      "description": "Tổ chức tài chính quốc tế cung cấp khoản vay hỗ trợ các nước đang phát triển."
+    },
+    {
+      "id": "E299",
+      "canonical_id": "O_WORLD_BANK",
+      "entity_type": "ORGANIZATION",
+      "name": "WB",
+      "description": "Tên viết tắt tiếng Anh của Ngân hàng Thế giới."
+    },
+    {
+      "id": "E300",
+      "canonical_id": "O_WORLD_BANK",
+      "entity_type": "ORGANIZATION",
+      "name": "World Bank",
+      "description": "Tên tiếng Anh nguyên bản của Ngân hàng Thế giới."
+    },
+    {
+      "id": "E301",
+      "canonical_id": "O_WORLD_BANK",
+      "entity_type": "ORGANIZATION",
+      "name": "World Bank Group",
+      "description": "Tên tập đoàn Ngân hàng Thế giới."
+    },
+    {
+      "id": "E302",
+      "canonical_id": "O_IMF",
+      "entity_type": "ORGANIZATION",
+      "name": "Quỹ Tiền tệ Quốc tế",
+      "description": "Tổ chức quốc tế giám sát hệ thống tài chính toàn cầu."
+    },
+    {
+      "id": "E303",
+      "canonical_id": "O_IMF",
+      "entity_type": "ORGANIZATION",
+      "name": "IMF",
+      "description": "Tên viết tắt tiếng Anh của Quỹ Tiền tệ Quốc tế."
+    },
+    {
+      "id": "E304",
+      "canonical_id": "O_IMF",
+      "entity_type": "ORGANIZATION",
+      "name": "International Monetary Fund",
+      "description": "Tên đầy đủ tiếng Anh của tổ chức IMF."
+    },
+    {
+      "id": "E305",
+      "canonical_id": "L_MEKONG_RIVER",
+      "entity_type": "LOCATION",
+      "name": "Sông Mê Kông",
+      "description": "Dòng sông lớn bậc nhất châu Á chảy qua 6 quốc gia."
+    },
+    {
+      "id": "E306",
+      "canonical_id": "L_MEKONG_RIVER",
+      "entity_type": "LOCATION",
+      "name": "Sông Cửu Long",
+      "description": "Tên gọi đoạn sông Mê Kông chảy trên lãnh thổ Việt Nam."
+    },
+    {
+      "id": "E307",
+      "canonical_id": "L_MEKONG_RIVER",
+      "entity_type": "LOCATION",
+      "name": "Mekong River",
+      "description": "Tên tiếng Anh của dòng sông Mê Kông."
+    },
+    {
+      "id": "E308",
+      "canonical_id": "L_RED_RIVER",
+      "entity_type": "LOCATION",
+      "name": "Sông Hồng",
+      "description": "Dòng sông quan trọng bồi đắp nên Đồng bằng sông Hồng."
+    },
+    {
+      "id": "E309",
+      "canonical_id": "L_RED_RIVER",
+      "entity_type": "LOCATION",
+      "name": "Sông Thao",
+      "description": "Tên gọi đoạn sông Hồng chảy qua tỉnh Phú Thọ và Yên Bái."
+    },
+    {
+      "id": "E310",
+      "canonical_id": "L_RED_RIVER",
+      "entity_type": "LOCATION",
+      "name": "Red River",
+      "description": "Tên tiếng Anh của sông Hồng."
+    },
+    {
+      "id": "E311",
+      "canonical_id": "T_SQL",
+      "entity_type": "TECHNOLOGY",
+      "name": "SQL",
+      "description": "Ngôn ngữ truy vấn có cấu trúc chuẩn dùng cho cơ sở dữ liệu quan hệ."
+    },
+    {
+      "id": "E312",
+      "canonical_id": "T_SQL",
+      "entity_type": "TECHNOLOGY",
+      "name": "Structured Query Language",
+      "description": "Tên đầy đủ tiếng Anh của ngôn ngữ SQL."
+    },
+    {
+      "id": "E313",
+      "canonical_id": "T_SQL",
+      "entity_type": "TECHNOLOGY",
+      "name": "Ngôn ngữ SQL",
+      "description": "Cách gọi tiếng Việt của ngôn ngữ truy vấn SQL."
+    },
+    {
+      "id": "E314",
+      "canonical_id": "T_PANDAS",
+      "entity_type": "TECHNOLOGY",
+      "name": "Pandas",
+      "description": "Thư viện Python mã nguồn mở phục vụ phân tích và xử lý dữ liệu cấu trúc."
+    },
+    {
+      "id": "E315",
+      "canonical_id": "T_PANDAS",
+      "entity_type": "TECHNOLOGY",
+      "name": "Thư viện Pandas",
+      "description": "Cách gọi tiếng Việt chỉ thư viện Pandas trong Python."
+    },
+    {
+      "id": "E316",
+      "canonical_id": "T_PANDAS",
+      "entity_type": "TECHNOLOGY",
+      "name": "Pandas Python Library",
+      "description": "Tên tiếng Anh kỹ thuật của thư viện Pandas."
+    },
+    {
+      "id": "E317",
+      "canonical_id": "T_PYTORCH",
+      "entity_type": "TECHNOLOGY",
+      "name": "PyTorch",
+      "description": "Thư viện học sâu mã nguồn mở phát triển bởi Meta AI."
+    },
+    {
+      "id": "E318",
+      "canonical_id": "T_PYTORCH",
+      "entity_type": "TECHNOLOGY",
+      "name": "Thư viện PyTorch",
+      "description": "Cách gọi tiếng Việt của PyTorch."
+    },
+    {
+      "id": "E319",
+      "canonical_id": "T_PYTORCH",
+      "entity_type": "TECHNOLOGY",
+      "name": "PyTorch Deep Learning Framework",
+      "description": "Tên gọi đầy đủ mô tả PyTorch."
+    },
+    {
+      "id": "E320",
+      "canonical_id": "T_TENSORFLOW",
+      "entity_type": "TECHNOLOGY",
+      "name": "TensorFlow",
+      "description": "Nền tảng học máy mã nguồn mở phát triển bởi Google."
+    },
+    {
+      "id": "E321",
+      "canonical_id": "T_TENSORFLOW",
+      "entity_type": "TECHNOLOGY",
+      "name": "Thư viện TensorFlow",
+      "description": "Cách gọi tiếng Việt của TensorFlow."
+    },
+    {
+      "id": "E322",
+      "canonical_id": "T_TENSORFLOW",
+      "entity_type": "TECHNOLOGY",
+      "name": "Google TensorFlow",
+      "description": "Tên gọi TensorFlow kèm tên hãng Google."
+    }
+  ]
+}

@@ -1,71 +1,36 @@
-# =========================
-# Python Backend
-# =========================
+# Python
 .venv/
 __pycache__/
 *.py[cod]
-.env
-.env.*
-!.env.example
 .pytest_cache/
+.mypy_cache/
+.ruff_cache/
 .coverage
 htmlcov/
 
-# =========================
-# Backend Data
-# =========================
-data/
-storage/documents/*
-!storage/documents/.gitkeep
-storage/extracted/*
-!storage/extracted/.gitkeep
-storage/entity_resolution/indexes/*
-!storage/entity_resolution/indexes/.gitkeep
-storage/entity_resolution/reports/*
-!storage/entity_resolution/reports/.gitkeep
+# Secrets and local environment
+.env
+.env.*
+!.env.example
+data/*
+!data/
+!data/.gitkeep
 
-# =========================
-# React Frontend
-# =========================
-
-# Dependencies
+# Frontend dependencies and generated output
 frontend/node_modules/
-
-# Build output
 frontend/dist/
-frontend/build/
-
-# Cache
 frontend/.vite/
-frontend/.cache/
-frontend/.eslintcache/
-frontend/.parcel-cache/
-frontend/.turbo/
-
-# Logs
-frontend/npm-debug.log*
-frontend/yarn-debug.log*
-frontend/pnpm-debug.log*
-
-# Environment
-frontend/.env
-frontend/.env.*
-!frontend/.env.example
-
-# Test output
 frontend/coverage/
-frontend/test-results/
-frontend/playwright-report/
-
-# TypeScript generated files
 frontend/*.tsbuildinfo
 
-# =========================
-# IDE & OS
-# =========================
+# IDE / OS
 .vscode/
 .idea/
 .DS_Store
 Thumbs.db
-*.swp
-*.swo
+
+# Legacy runtime artifacts (migrated to data/ on startup)
+storage/documents/*
+storage/extracted/*
+storage/entity_resolution/indexes/*
+storage/entity_resolution/reports/*
