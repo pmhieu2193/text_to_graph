@@ -20,10 +20,13 @@ def resolve_document_path(stored_path: str) -> Path:
     if raw.is_absolute():
         return raw
     normalized = stored_path.replace("\\", "/")
+    legacy_relative = (BASE_DIR / normalized).resolve()
     if normalized.startswith("storage/documents/"):
         normalized = "data/documents/" + normalized.removeprefix("storage/documents/")
-    return (BASE_DIR / normalized).resolve()
-
+    elif normalized.startswith("storage/extracted/"):
+        normalized = "data/extracted/" + normalized.removeprefix("storage/extracted/")
+    current = (BASE_DIR / normalized).resolve()
+    return current if current.exists() or not legacy_relative.exists() else legacy_relative
 
 class DocumentProcessingService:
     def __init__(self, db):
@@ -75,7 +78,7 @@ class DocumentProcessingService:
             # Chunks in SQLite are the canonical extracted-text store. Do not
             # create a duplicate full-text .txt file on disk.
             self.repo.save_chunks(doc.id, rows)
-            old_text_path = Path(doc.extracted_text_path) if doc.extracted_text_path else None
+            old_text_path = resolve_document_path(doc.extracted_text_path) if doc.extracted_text_path else None
             if old_text_path and old_text_path.is_file():
                 old_text_path.unlink(missing_ok=True)
             doc.extracted_text_path = None
