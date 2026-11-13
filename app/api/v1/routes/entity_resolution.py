@@ -209,6 +209,7 @@ def reset_er_document(document_id: str, db: Session = Depends(get_db)):
 
         # Remove only artifacts whose names contain this document ID.
         from app.core.config import settings, BASE_DIR
+        cleanup_errors = []
         for directory in (
             settings.er_index_dir,
             settings.er_report_dir,
@@ -216,9 +217,12 @@ def reset_er_document(document_id: str, db: Session = Depends(get_db)):
             BASE_DIR / "storage" / "entity_resolution" / "reports",
         ):
             if directory.exists():
-                for path in directory.glob(f"*{document_id}*"):
-                    if path.is_file():
-                        path.unlink(missing_ok=True)
+                for artifact in directory.glob(f"*{document_id}*"):
+                    if artifact.is_file():
+                        try:
+                            artifact.unlink(missing_ok=True)
+                        except OSError as exc:
+                            cleanup_errors.append({"path": str(artifact), "error": str(exc)})
 
         result["status"] = "RESET"
         result["document_status"] = document.status.value
@@ -227,6 +231,7 @@ def reset_er_document(document_id: str, db: Session = Depends(get_db)):
             "chunk_extraction_runs",
         ]
         result["removed_artifacts"] = ["document_faiss_index", "document_er_reports"]
+        result["cleanup_errors"] = cleanup_errors
         return result
     except LookupError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
