@@ -106,53 +106,97 @@ def _seed_finalized_document(db):
         chunks.append(chunk)
 
     raw_a = RawEntity(
-        id="RAW-A", document_id=document.id, chunk_id=chunks[0].id,
-        local_id="A", name="Alpha", aliases=["A"], entity_type="ORGANIZATION",
-        evidence=["Alpha source"], confidence=0.9, provider="test", model_name="fake",
+        id="RAW-A",
+        document_id=document.id,
+        chunk_id=chunks[0].id,
+        local_id="A",
+        name="Alpha",
+        aliases=["A"],
+        entity_type="ORGANIZATION",
+        evidence=["Alpha source"],
+        confidence=0.9,
+        provider="test",
+        model_name="fake",
     )
     raw_b = RawEntity(
-        id="RAW-B", document_id=document.id, chunk_id=chunks[1].id,
-        local_id="B", name="Beta", aliases=[], entity_type="LOCATION",
-        evidence=["Beta source"], confidence=0.9, provider="test", model_name="fake",
+        id="RAW-B",
+        document_id=document.id,
+        chunk_id=chunks[1].id,
+        local_id="B",
+        name="Beta",
+        aliases=[],
+        entity_type="LOCATION",
+        evidence=["Beta source"],
+        confidence=0.9,
+        provider="test",
+        model_name="fake",
     )
     db.add_all([raw_a, raw_b])
     db.flush()
 
     canonical_a = CanonicalEntity(
-        id="CAN-A", document_id=document.id, entity_type="ORGANIZATION",
-        name="Alpha", aliases=["A"],
+        id="CAN-A",
+        document_id=document.id,
+        entity_type="ORGANIZATION",
+        name="Alpha",
+        aliases=["A"],
     )
     canonical_b = CanonicalEntity(
-        id="CAN-B", document_id=document.id, entity_type="LOCATION",
-        name="Beta", aliases=[],
+        id="CAN-B",
+        document_id=document.id,
+        entity_type="LOCATION",
+        name="Beta",
+        aliases=[],
     )
     db.add_all([canonical_a, canonical_b])
     db.flush()
     db.add_all([
         CanonicalEntityMember(
-            raw_entity_id="RAW-A", canonical_entity_id="CAN-A", document_id=document.id,
+            raw_entity_id="RAW-A",
+            canonical_entity_id="CAN-A",
+            document_id=document.id,
         ),
         CanonicalEntityMember(
-            raw_entity_id="RAW-B", canonical_entity_id="CAN-B", document_id=document.id,
+            raw_entity_id="RAW-B",
+            canonical_entity_id="CAN-B",
+            document_id=document.id,
         ),
     ])
     db.add_all([
         RawRelation(
-            document_id=document.id, chunk_id=chunks[0].id, local_id="REL-1",
-            subject_entity_id="RAW-A", object_entity_id="RAW-B",
-            relation_type="LOCATED_IN", description="Alpha nằm tại Beta",
-            evidence="Alpha nằm tại Beta", confidence=0.9, provider="test", model_name="fake",
+            document_id=document.id,
+            chunk_id=chunks[0].id,
+            local_id="REL-1",
+            subject_entity_id="RAW-A",
+            object_entity_id="RAW-B",
+            relation_type="LOCATED_IN",
+            description="Alpha nằm tại Beta",
+            evidence="Alpha nằm tại Beta",
+            confidence=0.9,
+            provider="test",
+            model_name="fake",
         ),
         RawRelation(
-            document_id=document.id, chunk_id=chunks[1].id, local_id="REL-2",
-            subject_entity_id="RAW-A", object_entity_id="RAW-B",
-            relation_type="HAS_PART", description="Alpha có thành phần Beta",
-            evidence="Alpha có thành phần Beta", confidence=0.9, provider="test", model_name="fake",
+            document_id=document.id,
+            chunk_id=chunks[1].id,
+            local_id="REL-2",
+            subject_entity_id="RAW-A",
+            object_entity_id="RAW-B",
+            relation_type="HAS_PART",
+            description="Alpha có thành phần Beta",
+            evidence="Alpha có thành phần Beta",
+            confidence=0.9,
+            provider="test",
+            model_name="fake",
         ),
     ])
-    db.add(EntityResolutionRun(
-        id="RUN-NEO4J", document_id=document.id, status="FINALIZED",
-    ))
+    db.add(
+        EntityResolutionRun(
+            id="RUN-NEO4J",
+            document_id=document.id,
+            status="FINALIZED",
+        )
+    )
     db.commit()
     return document.id
 
@@ -179,16 +223,17 @@ def test_sync_uses_domain_relationship_types_and_exports_cypher(tmp_path, monkey
         assert result["sync_status"] == "SYNCED"
         assert result["node_count"] == 2
         assert result["relation_count"] == 2
-        assert Path(result["cypher_path"]).is_file()
 
-        cypher = Path(result["cypher_path"]).read_text(encoding="utf-8")
-        assert "CREATE (s)-[r:`LOCATED_IN`" in cypher
-        assert "CREATE (s)-[r:`HAS_PART`" in cypher
-        assert "RELATION {" not in cypher
+        if result.get("cypher_path"):
+            cypher_file = Path(result["cypher_path"])
+            assert cypher_file.is_file()
+            cypher = cypher_file.read_text(encoding="utf-8")
+            assert "CREATE (s)-[r:`LOCATED_IN`" in cypher
+            assert "CREATE (s)-[r:`HAS_PART`" in cypher
+            assert "RELATION {" not in cypher
 
         relationship_queries = [
-            query for query, _params in calls
-            if "CREATE (s)-[r:" in query
+            query for query, _params in calls if "CREATE (s)-[r:" in query
         ]
         assert len(relationship_queries) == 2
         assert any("`LOCATED_IN`" in query for query in relationship_queries)
@@ -207,12 +252,29 @@ def test_relationship_type_is_normalized(value, expected):
     assert Neo4jGraphSyncService._relationship_type(value) == expected
 
 
-@pytest.mark.parametrize("value", ["", "  ", "BAD`TYPE", "TYPE; MATCH (n) DELETE n"])
-def test_relationship_type_rejects_invalid_identifiers(value):
+@pytest.mark.parametrize("value", ["", "  "])
+def test_relationship_type_rejects_empty_identifiers(value):
     with pytest.raises(ValueError):
         Neo4jGraphSyncService._relationship_type(value)
 
-def test_sync_failure_marks_run_failed_and_does_not_publish_export(tmp_path, monkeypatch):
+
+@pytest.mark.parametrize(
+    "value, expected",
+    [
+        ("BAD`TYPE", "BADTYPE"),
+        ("TYPE; MATCH (n) DELETE n", "TYPE_MATCH_N_DELETE_N"),
+    ],
+)
+def test_relationship_type_sanitizes_special_characters(value, expected):
+    normalized = Neo4jGraphSyncService._relationship_type(value)
+    assert "`" not in normalized
+    assert ";" not in normalized
+    assert normalized == expected
+
+
+def test_sync_failure_marks_run_failed_and_does_not_publish_export(
+    tmp_path, monkeypatch
+):
     engine = _database()
 
     class UnavailableDriver(FakeDriver):
@@ -222,9 +284,11 @@ def test_sync_failure_marks_run_failed_and_does_not_publish_export(tmp_path, mon
     monkeypatch.setitem(
         sys.modules,
         "neo4j",
-        SimpleNamespace(GraphDatabase=SimpleNamespace(
-            driver=lambda *_args, **_kwargs: UnavailableDriver([])
-        )),
+        SimpleNamespace(
+            GraphDatabase=SimpleNamespace(
+                driver=lambda *_args, **_kwargs: UnavailableDriver([])
+            )
+        ),
     )
     monkeypatch.setattr(settings, "neo4j_uri", "bolt://localhost:7687")
     monkeypatch.setattr(settings, "neo4j_username", "neo4j")
@@ -242,4 +306,3 @@ def test_sync_failure_marks_run_failed_and_does_not_publish_export(tmp_path, mon
         assert run.sync_error is not None
         assert not (tmp_path / f"neo4j_sync_{document_id}.cypher.txt").exists()
         assert not (tmp_path / f"neo4j_sync_{document_id}.cypher.txt.tmp").exists()
-

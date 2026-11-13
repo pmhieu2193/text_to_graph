@@ -17,29 +17,34 @@ class FakeEncoder:
     def encode(self, texts, **kwargs):
         self.calls += 1
         vectors = np.array(
-            [
-                [1.0, 0.0],
-                [0.999, 0.001],
-                [0.998, 0.002],
-            ],
+            [[1.0 - i * 0.001, i * 0.001] for i in range(len(texts))],
             dtype=np.float32,
         )
-        assert len(texts) == len(vectors)
         return {"dense_vecs": vectors}
 
 
-def test_embedding_matcher_encodes_all_variants_once_and_maps_back_to_entities():
+def test_embedding_matcher_encodes_all_variants_once_and_maps_back_to_entities(
+    tmp_path,
+):
     manager = ManageRawEntity()
     manager.entities = {
         "E1": RawEntityData(
-            id="E1", document_id="D1", chunk_id="C1",
-            entity_type="Organization", name="Nvidia",
-            aliases=["NVIDIA"], valid_variants=["Nvidia", "NVIDIA"],
+            id="E1",
+            document_id="D1",
+            chunk_id="C1",
+            entity_type="Organization",
+            name="Nvidia",
+            aliases=["NVIDIA"],
+            valid_variants=["Nvidia", "NVIDIA"],
         ),
         "E2": RawEntityData(
-            id="E2", document_id="D1", chunk_id="C2",
-            entity_type="Organization", name="Nvidia Corporation",
-            aliases=[], valid_variants=["Nvidia Corporation"],
+            id="E2",
+            document_id="D1",
+            chunk_id="C2",
+            entity_type="Organization",
+            name="Nvidia Corporation",
+            aliases=[],
+            valid_variants=["Nvidia Corporation"],
         ),
     }
     encoder = FakeEncoder()
@@ -47,6 +52,7 @@ def test_embedding_matcher_encodes_all_variants_once_and_maps_back_to_entities()
         top_k=10,
         candidate_limit=10,
         encoder=encoder,
+        index_dir=tmp_path,
     )
 
     candidates = matcher.generate(manager)
@@ -108,6 +114,7 @@ def test_second_run_loads_existing_index_without_encoding(
     second_result = second_matcher.generate(manager)
 
     assert first_result.keys() == second_result.keys()
+
 
 def test_empty_index_is_not_reused(tmp_path):
     manager = ManageRawEntity()
