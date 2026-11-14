@@ -6,6 +6,7 @@ from app.core.database import Base
 class DocumentStatus(str, enum.Enum):
     UPLOADED = 'UPLOADED'
     CHUNKED = 'CHUNKED'
+    PARTIAL_EXTRACTION = 'PARTIAL_EXTRACTION'
     EXTRACTED = 'EXTRACTED'
     ENTITY_RESOLUTION = 'ENTITY_RESOLUTION'
     HUMAN_REVIEW = 'HUMAN_REVIEW'

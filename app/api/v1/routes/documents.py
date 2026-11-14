@@ -76,8 +76,12 @@ def quick_process_document(document_id: str, db: Session = Depends(get_db)):
 
     try:
         extraction = DocumentExtractionService(db).extract_document(document_id)
-        if extraction.get("failed_chunks", 0) or extraction.get("pending_chunks", 0):
-            raise RuntimeError("Một số chunk extraction chưa hoàn tất.")
+        if extraction.get("completed_chunks", 0) != extraction.get("total_chunks", 0):
+            doc = db.get(Document, document_id)
+            doc.status = DocumentStatus.PARTIAL_EXTRACTION
+            doc.error_message = f"Extraction chưa hoàn tất: còn {extraction.get('total_chunks', 0) - extraction.get('completed_chunks', 0)} chunk."
+            db.commit()
+            raise RuntimeError("Một số chunk extraction chưa hoàn tất. Hãy tiếp tục tại bước Extraction.")
         doc = db.get(Document, document_id)
         doc.status = DocumentStatus.EXTRACTED
         doc.error_message = None
@@ -86,7 +90,8 @@ def quick_process_document(document_id: str, db: Session = Depends(get_db)):
         db.rollback()
         doc = db.get(Document, document_id)
         if doc:
-            doc.status = DocumentStatus.CHUNKED
+            if doc.status != DocumentStatus.PARTIAL_EXTRACTION:
+                doc.status = DocumentStatus.CHUNKED
             doc.error_message = str(exc)[:2000]
             db.commit()
         raise HTTPException(502, detail={"stage": "extraction", "message": str(exc)}) from exc

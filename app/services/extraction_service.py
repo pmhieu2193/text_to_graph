@@ -435,13 +435,8 @@ class DocumentExtractionService:
             for run in runs
         )
 
-        pending = sum(
-            run.status in {
-                "PENDING",
-                "RUNNING",
-            }
-            for run in runs
-        )
+        # Missing run rows also represent chunks that have not completed.
+        pending = max(0, len(chunks) - completed - failed)
 
         completed = sum(
             run.status == "COMPLETED"

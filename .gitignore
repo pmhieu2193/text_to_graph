@@ -29,3 +29,7 @@ frontend/*.tsbuildinfo
 .DS_Store
 Thumbs.db
 
+
+# Generated per-document benchmark exports
+benchmark/results/*
+!benchmark/results/.gitkeep
