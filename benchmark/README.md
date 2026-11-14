@@ -28,7 +28,7 @@ Generated results are ignored by Git. Run again after each workflow stage for a 
 
 ## Ground truth
 
-Start from `ground_truth_template.json`. The optional evaluator compares normalized exact entity name + type, and normalized subject/relation/object triples. Optional `entity_clusters` is a list of groups containing `raw_entity_id` values (copy from `entities.csv`) that refer to the same real-world entity. If ER is finalized, the tool computes final clustering pairwise P/R/F1.
+Start from `ground_truth_template.json`. The optional evaluator compares the complete set of distinct entity mention surface forms (normalized exact name + type), and normalized subject/relation/object triples. Include each distinct name variant that appears in the PDF; do not enter only one canonical name if the document uses aliases or titles. Optional `entity_clusters` is a list of groups containing `raw_entity_id` values (copy from `entities.csv`) that refer to the same real-world entity. If ER is finalized, the tool computes final clustering pairwise P/R/F1.
 
 Exact-name matching does not infer aliases or semantic equivalence. Label the complete evaluation scope consistently and inspect exported CSVs. An incomplete label set must not be described as full-document accuracy.
 
