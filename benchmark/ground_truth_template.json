@@ -1,6 +1,6 @@
 {
   "document_id": "REPLACE_WITH_DOCUMENT_UUID",
-  "entities": [{"name": "Canonical entity name", "entity_type": "PERSON"}],
+  "entities": [{"name": "Entity mention surface form exactly as used in the PDF (include each distinct alias/title)", "entity_type": "PERSON"}],
   "relations": [{"subject": "Subject entity", "relation_type": "RELATION_TYPE", "object": "Object entity"}],
   "entity_clusters": [["RAW_ENTITY_UUID_1", "RAW_ENTITY_UUID_2"]]
 }
