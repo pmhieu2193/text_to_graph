@@ -283,6 +283,12 @@ class DocumentExtractionService:
                 "Hãy gọi API /process trước."
             )
 
+        # Persist an incomplete state before starting provider calls. If the
+        # worker/process is interrupted, the document remains resumable.
+        document.status = DocumentStatus.PARTIAL_EXTRACTION
+        document.error_message = None
+        self.db.commit()
+
         processed = 0
         skipped = 0
 
