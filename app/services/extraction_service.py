@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.models.entity_resolution import CanonicalEntity, EntityResolutionRun
 
-from app.models.document import Document
+from app.models.document import Document, DocumentStatus
 
 from app.providers.llm.base import (
     LLMConfigurationError,
