@@ -436,17 +436,37 @@ class DocumentExtractionService:
             )
         )
 
-        failed = sum(
-            run.status == "FAILED"
-            for run in runs
-        )
+        # Count run states before deriving pending; completed must be
+        # initialized before it is used (previously caused UnboundLocalError).
+        completed_chunk_ids = {
+            run.chunk_id for run in runs if run.status == "COMPLETED"
+        }
+        failed_chunk_ids = {
+            run.chunk_id for run in runs if run.status == "FAILED"
+        }
+        running_chunk_ids = {
+            run.chunk_id for run in runs if run.status == "RUNNING"
+        }
 
-        # Missing run rows also represent chunks that have not completed.
-        pending = max(0, len(chunks) - completed - failed)
+        completed = len(completed_chunk_ids)
+        failed = len(failed_chunk_ids)
+        running = len(running_chunk_ids)
 
-        completed = sum(
-            run.status == "COMPLETED"
-            for run in runs
+        # A chunk without a run row is pending. Count unique chunk IDs so
+        # stale/duplicate rows cannot inflate the completion count.
+        known_chunk_ids = {chunk.id for chunk in chunks}
+        completed_chunk_ids &= known_chunk_ids
+        failed_chunk_ids &= known_chunk_ids
+        running_chunk_ids &= known_chunk_ids
+
+        completed = len(completed_chunk_ids)
+        failed = len(failed_chunk_ids)
+        running = len(running_chunk_ids)
+        pending = len(
+            known_chunk_ids
+            - completed_chunk_ids
+            - failed_chunk_ids
+            - running_chunk_ids
         )
 
         logger.info(
