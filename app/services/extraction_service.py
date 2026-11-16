@@ -469,12 +469,36 @@ class DocumentExtractionService:
             - running_chunk_ids
         )
 
+        # The service owns the authoritative extraction state. Persist it here
+        # rather than relying only on the API route, so every successful
+        # invocation (including resume runs that skip all completed chunks)
+        # synchronizes the document status.
+        document = self.db.get(Document, document_id)
+        if document is not None:
+            all_chunks_completed = (
+                known_chunk_ids == completed_chunk_ids
+                and len(known_chunk_ids) == len(chunks)
+            )
+            if all_chunks_completed:
+                document.status = DocumentStatus.EXTRACTED
+                document.error_message = None
+            else:
+                document.status = DocumentStatus.PARTIAL_EXTRACTION
+                document.error_message = (
+                    "Extraction chưa hoàn tất: "
+                    f"{failed} chunk FAILED, {running} chunk RUNNING, "
+                    f"{pending} chunk chưa có kết quả."
+                )
+            self.db.commit()
+
         logger.info(
             "Extraction completed: document=%s, "
-            "completed=%s, failed=%s, skipped=%s",
+            "completed=%s, failed=%s, running=%s, pending=%s, skipped=%s",
             document_id,
             completed,
             failed,
+            running,
+            pending,
             skipped,
         )
 

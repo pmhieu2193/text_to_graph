@@ -40,14 +40,8 @@ def extract_document(
             document_id=document_id,
             force=force,
         )
-        document = db.get(Document, document_id)
-        if document is not None:
-            all_completed = result.get("completed_chunks", 0) == result.get("total_chunks", 0)
-            document.status = DocumentStatus.EXTRACTED if all_completed else DocumentStatus.PARTIAL_EXTRACTION
-            document.error_message = None if all_completed else (
-                f"Extraction chưa hoàn tất: còn {result.get('total_chunks', 0) - result.get('completed_chunks', 0)} chunk."
-            )
-            db.commit()
+        # Document status is synchronized and committed by
+        # DocumentExtractionService after it has inspected all chunk runs.
         return result
     except LookupError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc

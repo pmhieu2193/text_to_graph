@@ -206,7 +206,7 @@ Bạn là hệ thống trích xuất đồ thị tri thức (KG) từ văn bản
 3. Gom cụm và chuẩn hóa các thực thể cùng chỉ một đối tượng. Ví dụ: "Hà Nội" và "Thủ đô Hà Nội", hoặc các tên viết tắt, biệt danh nếu văn bản xác nhận chúng cùng một thực thể. Chọn một tên đại diện phù hợp và đưa các tên gọi thay thế thực sự vào danh sách `aliases`. Không đưa đại từ, từ chỉ định, mốc thời gian tương đối, danh từ chung, cụm tham chiếu như "dự án này", "thành phố đó", vai trò, chức danh hoặc mô tả vào `aliases`. Chỉ gộp khi có đủ căn cứ từ văn bản; nếu không chắc chắn, giữ riêng. Thực thể đại diện kế thừa toàn bộ quan hệ của các thực thể được gộp; sau khi gộp, cập nhật các tham chiếu và loại bỏ quan hệ trùng lặp.
 4. Không tự suy diễn hoặc tạo thực thể, quan hệ không có căn cứ trong văn bản.
 5. Giữ nguyên ý nghĩa và tên gọi thực thể theo nguồn; không tự ý thay đổi nội dung.
-6. Loại thực thể sử dụng tên ngắn gọn, nhất quán theo Schema.org (Person, Organization, Place, Event, Product,...). `relation_type` sử dụng định dạng UPPER_SNAKE_CASE, viết hoa nối các từ bằng dấu gạch dưới và có dấu tiếng Việt.
+6. Loại thực thể sử dụng tên ngắn gọn, nhất quán theo Schema.org (Person, Organization, Place, Event, Product,...). `relation_type` sử dụng định dạng TIẾNG_VIỆT_VIẾT_HOA_CÓ_DẤU.
 7. `evidence` của thực thể là danh sách các đoạn trích nguyên văn, nguyên câu chứa nó từ nguồn. `confidence` nằm trong khoảng 0–1.
 
 **QUY TẮC RELATION:**
