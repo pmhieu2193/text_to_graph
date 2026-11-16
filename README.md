@@ -185,7 +185,7 @@ entity consolidation. Users can:
 -   Inspect the relationships associated with the canonical entities.
 -   Download a report of the finalized data.
 
-![Finalization Overview](screenshots/16-finalize.png)
+![Finalization Overview](screenshots/16-Finalize.png)
 
 ![Finalized Canonical
 Entities](screenshots/17-finalize-canonical-entities.png)
