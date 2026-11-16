@@ -198,7 +198,7 @@ generate the knowledge graph from the finalized data.
 Users can also export the corresponding Cypher queries instead of
 synchronizing directly with Neo4j.
 
-![Neo4j Synchronization](screenshots/18-neo4j-sync.png)
+![Neo4j Synchronization](screenshots/18-Neo4j-sync.png)
 
 ### 2.9. Settings
 
