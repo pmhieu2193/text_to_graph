@@ -28,65 +28,252 @@ VietGraph is a full-stack application for extracting entities and relationships 
 
 A knowledge graph built directly from LLM output can contain duplicate nodes, inconsistent labels, and redundant edges. VietGraph separates **raw extraction** from **entity resolution** so that the original evidence remains available while canonical entities are reviewed and synchronized to a graph database.
 
-## 2. Demo
+## 2. Demo & User Guide
 
-Add project screenshots or a short walkthrough video here before sharing the repository with recruiters.
+This section provides an overview of the application's main features and
+guides users through the document-to-knowledge-graph workflow.
 
-Suggested demo sequence:
+### 2.1. Dashboard
 
-1. Upload a Vietnamese PDF and run document processing.
-2. Show extracted entities, aliases, relationships, and source evidence.
-3. Open Entity Resolution and compare two candidate entities.
-4. Review a candidate using Merge, Keep Separate, or Skip.
-5. Finalize the canonical graph and inspect the summary metrics.
-6. Synchronize the document graph and open it in Neo4j Browser.
+The dashboard provides an overview of the application and its
+document-processing activities.
 
-Suggested assets:
+![Dashboard](screenshots/01-dashboard.png)
 
-- `docs/screenshots/01-dashboard.png`
-- `docs/screenshots/02-document-details.png`
-- `docs/screenshots/03-entity-review.png`
-- `docs/screenshots/04-finalize-metrics.png`
-- `docs/screenshots/05-neo4j-graph.png`
-- YouTube demo: *add link*
+### 2.2. Document Management
 
-## 3. Key features
+The Documents page displays uploaded documents and their current
+processing statuses. Users can:
 
-### Document ingestion and extraction
-- Upload and validate PDF documents.
-- Extract text and split it into overlapping chunks.
-- Keep document metadata, chunk content, and raw extraction records in the application database.
-- Use Gemini to extract structured entities, aliases, and relationships from Vietnamese text.
-- Preserve evidence and source references for traceability.
+-   Upload new PDF documents.
+-   Delete documents that are no longer needed, along with their
+    associated data.
+-   Search and filter the document list.
+-   Check the processing progress of each document.
+-   Resume processing for documents that have not completed the
+    workflow.
+-   Restart the workflow from the Entity Resolution stage when a new
+    extraction run is unnecessary, helping avoid additional LLM API
+    usage.
 
-### Hybrid Entity Resolution
-- Generate candidate pairs using exact/string matching and RapidFuzz.
-- Generate semantic candidates with BGE-M3 embeddings and FAISS nearest-neighbor search.
-- Combine available matching scores and classify candidates into automatic merge, manual review, or reject groups.
-- Scope resolution to one document; independent documents do not share canonical entities.
-- Retain raw entities and relations instead of destructively rewriting extraction output.
+![Document List and Details](screenshots/02-document-details.png)
 
-### Human-in-the-Loop review
-- Compare candidate entities and their evidence side by side.
-- Support `MERGE`, `KEEP_SEPARATE`, and `SKIP` decisions.
-- Apply automatic merges to eligible candidates.
-- Process transitive clusters such as A-B and B-C using current canonical membership.
-- Prevent a merge that conflicts with a recorded Keep Separate decision.
+![Delete Document](screenshots/03-delete-document.png)
 
-### Canonical graph and Neo4j
-- Build canonical entities and map raw entity records to canonical clusters.
-- Aggregate entity names and aliases.
-- Project raw relationships onto canonical endpoints.
-- Deduplicate equivalent relationships and omit self-loops created by entity merging from the graph view.
-- Export a final XLSX report and a Cypher synchronization artifact.
-- Synchronize one document's graph without replacing other documents' graph data.
+![Reset Entity Resolution](screenshots/04-reset-er.png)
 
-### Workflow and operations
-- Document-scoped API endpoints with pagination and filtering.
-- Runtime LLM and Neo4j settings, with secrets masked in API responses.
-- Alembic database migrations.
-- Reset and rerun Entity Resolution while preserving the source extraction layer.
-- Dockerized frontend, backend, and Neo4j with persistent storage.
+### 2.3. Document Processing
+
+The processing workflow is divided into separate stages so users can
+track the current status of a document and inspect data produced by
+previous stages.
+
+This part of the workflow focuses on preparing the document for
+extraction, including document cleaning and splitting the content into
+smaller chunks.
+
+Users can navigate between completed stages to review previously
+processed data. If an error occurs, the document remains at its latest
+successfully completed state, allowing the workflow to be resumed rather
+than restarted from the beginning.
+
+For users who are already familiar with the workflow and want a quicker
+experience, **Quick Process** provides a shortcut to the Human Review
+stage. Data from previous processing stages remains available for
+inspection.
+
+#### 2.3.1. Document Chunking
+
+The application displays the generated chunks and their content. Users
+can inspect the chunk list and open individual chunks to review their
+contents. Select **Next** to continue to the next stage.
+
+![Document Chunking](screenshots/05-chunk.png)
+
+![Chunk Details](screenshots/06-chunk-details.png)
+
+### 2.4. Entity and Relationship Extraction
+
+At this stage, the application uses an LLM API to extract entities and
+relationships from the document chunks. Users need to configure an API
+key before starting the extraction process.
+
+Processing time depends on the internet connection, API provider, and
+selected model. Extraction is performed chunk by chunk, and users can
+monitor its progress. If an error interrupts the process, the extraction
+can be resumed.
+
+The extraction results include:
+
+-   Statistics about the extracted data.
+-   The list of extracted entities.
+-   Entity aliases identified in each chunk.
+-   Source information for the extracted data.
+-   The LLM's self-evaluation score for an extraction result.
+-   Search functionality for entities and relationships.
+
+![Extraction Overview](screenshots/07-extraction-review.png)
+
+![Extraction Details](screenshots/08-extraction-detail1.png)
+
+![Entity and Relationship
+Details](screenshots/09-extraction-detail2.png)
+
+### 2.5. Entity Resolution
+
+The Entity Resolution stage calculates and displays candidate entity
+pairs that may refer to the same real-world entity. The application
+classifies these candidate pairs to support the subsequent review
+process.
+
+Users can:
+
+-   View the candidate pairs and their classification results.
+-   Export an Excel report containing the candidate-pair results.
+-   Open a candidate pair to inspect its details.
+
+At this stage, users can inspect the candidate pairs, but cannot make
+merge or separation decisions yet. Those decisions are made in the Human
+Review stage.
+
+![Entity Resolution Overview](screenshots/10-entity-resolution.png)
+
+![Candidate Pairs](screenshots/11-view-candidates.png)
+
+![Candidate Pair Details](screenshots/12-view-candidates-detail.png)
+
+### 2.6. Human Review
+
+The Human Review stage displays statistics and candidate pairs
+classified into three categories:
+
+-   **Auto Merge:** Candidate pairs with very high final scores from
+    fuzzy matching and embedding similarity. These pairs are considered
+    highly confident matches based on textual similarity---including
+    entity aliases---and semantic similarity.
+-   **Review:** Candidate pairs with sufficiently high scores but
+    without enough confidence for automatic merging. Users should
+    inspect these pairs and make the final decision.
+-   **Reject:** Candidate pairs classified as unsuitable for merging.
+
+Users can process the Auto Merge group and review uncertain pairs
+manually. For each pair in the Review group, the available decisions
+are:
+
+-   **Merge:** Treat the two candidate entities as the same entity.
+-   **Keep Separate:** Keep the entities as separate entities.
+-   **Skip:** Skip the current pair without making a merge decision.
+
+Select a candidate pair to open its review panel and choose an action.
+
+![Human Review Overview](screenshots/13-human-review1.png)
+
+![Human Review Candidate List](screenshots/14-human-review2.png)
+
+![Human Review Decision](screenshots/15-human-choice.png)
+
+### 2.7. Finalization
+
+After the merge decisions have been completed, proceed to the Finalize
+stage. The application consolidates the entities and transfers their
+relationships to the resulting canonical entities.
+
+The page provides statistics about the graph data after extraction and
+entity consolidation. Users can:
+
+-   Review the resulting entities.
+-   Inspect the relationships associated with the canonical entities.
+-   Download a report of the finalized data.
+
+![Finalization Overview](screenshots/16-finalize.png)
+
+![Finalized Canonical
+Entities](screenshots/17-finalize-canonical-entities.png)
+
+### 2.8. Neo4j Synchronization
+
+The Neo4j Sync stage allows users to connect to a Neo4j database and
+generate the knowledge graph from the finalized data.
+
+Users can also export the corresponding Cypher queries instead of
+synchronizing directly with Neo4j.
+
+![Neo4j Synchronization](screenshots/18-neo4j-sync.png)
+
+### 2.9. Settings
+
+The Settings page allows users to configure:
+
+-   A primary LLM API key.
+-   An optional backup API key.
+-   The Neo4j database connection details.
+
+The application currently supports Gemini models. Support for additional
+LLM providers may be added in future updates.
+⋮⋮⋮⋮
+
+## 3. Key Features
+
+### 3.1. Document Ingestion and Extraction
+
+-   Upload and validate PDF documents.
+-   Extract document text and split it into overlapping chunks.
+-   Store document metadata, chunk content, and raw extraction records
+    in the application database.
+-   Use Gemini to extract structured entities, aliases, and
+    relationships from Vietnamese text.
+-   Preserve supporting evidence and source references to help trace
+    extracted information back to the original document.
+
+### 3.2. Hybrid Entity Resolution
+
+-   Generate candidate entity pairs using exact matching and fuzzy
+    string matching with RapidFuzz.
+-   Generate semantic candidates using BGE-M3 embeddings and FAISS
+    nearest-neighbor search.
+-   Combine available matching scores to classify candidate pairs into
+    **Auto Merge**, **Review**, and **Reject** groups.
+-   Scope entity resolution to individual documents; separate documents
+    maintain independent canonical entities.
+-   Preserve the original entity and relationship extraction records
+    rather than destructively modifying the raw extraction data.
+
+### 3.3. Human-in-the-Loop Review
+
+-   Review candidate entity pairs alongside their supporting evidence.
+-   Support three review decisions: `MERGE`, `KEEP_SEPARATE`, and
+    `SKIP`.
+-   Apply automatic merging to candidate pairs classified as eligible
+    for Auto Merge.
+-   Handle transitive merge cases, such as A--B and B--C, based on
+    current canonical-cluster membership.
+-   Prevent merges that would violate an existing `KEEP_SEPARATE`
+    decision.
+
+### 3.4. Canonical Graph and Neo4j
+
+-   Build canonical entities and maintain mappings from raw entity
+    records to their canonical clusters.
+-   Aggregate entity names and aliases within canonical entities.
+-   Project raw relationships onto the corresponding canonical entity
+    endpoints.
+-   Deduplicate equivalent relationships and exclude self-loops
+    introduced by entity merging from the graph view.
+-   Generate a final XLSX report and a Cypher artifact for graph
+    synchronization.
+-   Synchronize a document's graph without replacing graph data
+    belonging to other documents.
+
+### 3.5. Workflow and Operations
+
+-   Provide document-scoped API endpoints with pagination and filtering.
+-   Support runtime configuration for LLM and Neo4j connections, while
+    masking secrets in API responses.
+-   Manage database schema changes with Alembic migrations.
+-   Allow Entity Resolution to be reset and rerun while preserving the
+    original extraction data.
+-   Use Docker Compose to run the frontend, backend, and Neo4j with
+    persistent storag
 
 ## 4. Tech stack
 
