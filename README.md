@@ -185,7 +185,7 @@ entity consolidation. Users can:
 -   Inspect the relationships associated with the canonical entities.
 -   Download a report of the finalized data.
 
-![Finalization Overview](screenshots/16-finalize.png)
+![Finalization Overview](screenshots/16-Finalize.png)
 
 ![Finalized Canonical
 Entities](screenshots/17-finalize-canonical-entities.png)
@@ -198,7 +198,7 @@ generate the knowledge graph from the finalized data.
 Users can also export the corresponding Cypher queries instead of
 synchronizing directly with Neo4j.
 
-![Neo4j Synchronization](screenshots/18-neo4j-sync.png)
+![Neo4j Synchronization](screenshots/18-Neo4j-sync.png)
 
 ### 2.9. Settings
 
